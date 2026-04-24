@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>キーボードぼうけん</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #0A0E1A; }
+.screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+@keyframes idle-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes attack-lunge { 0%{transform:translateX(0)} 35%{transform:translateX(55px)} 100%{transform:translateX(0)} }
+@keyframes enemy-fall { 0%{transform:rotate(0deg) translateY(0);opacity:1} 100%{transform:rotate(85deg) translateY(30px);opacity:0} }
+@keyframes dmg-float { 0%{opacity:1;transform:translateY(0) scale(1)} 80%{opacity:1} 100%{opacity:0;transform:translateY(-70px) scale(1.4)} }
+@keyframes miss-flash { 0%,100%{background:rgba(255,82,82,0)} 50%{background:rgba(255,82,82,0.35)} }
+@keyframes confetti-fall { 0%{transform:translateY(-30px) rotate(0deg) scale(1);opacity:1} 100%{transform:translateY(740px) rotate(720deg) scale(0.5);opacity:0} }
+@keyframes stage-pulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(91,184,255,0.7)} 50%{transform:scale(1.1);box-shadow:0 0 0 12px rgba(91,184,255,0)} }
+@keyframes star-pop { 0%{transform:scale(0) rotate(-20deg);opacity:0} 70%{transform:scale(1.3) rotate(5deg);opacity:1} 100%{transform:scale(1) rotate(0deg);opacity:1} }
+@keyframes title-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+@keyframes cloud-drift { from{transform:translateX(-250px)} to{transform:translateX(1600px)} }
+@keyframes slide-up { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+@keyframes hp-pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+@keyframes coin-bounce { 0%{transform:scale(1)} 50%{transform:scale(1.4)} 100%{transform:scale(1)} }
+@keyframes btn-hover { from{transform:translateY(0)} to{transform:translateY(-3px)} }
+@keyframes glow-pulse { 0%,100%{box-shadow:0 0 10px #FFD700} 50%{box-shadow:0 0 25px #FFD700, 0 0 50px #FFD700} }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ═══════════════════════════════════════════════
+// GAME DATA
+// ═══════════════════════════════════════════════
+
+const ROMAJI_MAP = {
+  'あ':'a','い':'i','う':'u','え':'e','お':'o',
+  'か':'ka','き':'ki','く':'ku','け':'ke','こ':'ko',
+  'さ':'sa','し':'shi','す':'su','せ':'se','そ':'so',
+  'た':'ta','ち':'chi','つ':'tsu','て':'te','と':'to',
+  'な':'na','に':'ni','ぬ':'nu','ね':'ne','の':'no',
+  'は':'ha','ひ':'hi','ふ':'fu','へ':'he','ほ':'ho',
+  'ま':'ma','み':'mi','む':'mu','め':'me','も':'mo',
+  'や':'ya','ゆ':'yu','よ':'yo',
+  'ら':'ra','り':'ri','る':'ru','れ':'re','ろ':'ro',
+  'わ':'wa','を':'wo','ん':'n',
+  'が':'ga','ぎ':'gi','ぐ':'gu','げ':'ge','ご':'go',
+  'ざ':'za','じ':'ji','ず':'zu','ぜ':'ze','ぞ':'zo',
+  'だ':'da','ぢ':'di','づ':'du','で':'de','ど':'do',
+};
+
+function toRomaji(w) {
+  if (!/[\u3040-\u309f]/.test(w)) return w.toLowerCase();
+  let r = '';
+  for (const c of w) r += (ROMAJI_MAP[c] || c);
+  return r;
+}
+
+const STAGES = {
+  1:{id:1,world:1,label:'1',words:['f','j','d','k','s','l','a','g','h','f','j'],availableKeys:'ASDFGHJKL',enemyCount:6,enemyType:'slime',enemyMaxHP:3,coinReward:20},
+  2:{id:2,world:1,label:'2',words:['ff','jj','dd','kk','ss','ll','aa','gh','fl'],availableKeys:'ASDFGHJKL',enemyCount:6,enemyType:'slime',enemyMaxHP:5,coinReward:25},
+  3:{id:3,world:1,label:'3',words:['sad','lad','fall','hall','glad','dash','flag','half'],availableKeys:'ASDFGHJKL',enemyCount:8,enemyType:'mushroom',enemyMaxHP:6,coinReward:30},
+  4:{id:4,world:1,label:'4',words:['cat','hat','bat','cap','tap','map','can','rat'],availableKeys:'QWERTASDFGZXCVB',enemyCount:8,enemyType:'mushroom',enemyMaxHP:7,coinReward:35},
+  5:{id:5,world:1,label:'5',words:['dog','hot','cup','run','fun','bun','log','pot'],availableKeys:'QWERTYUIOPASDFGHJKLZXCVBNM',enemyCount:8,enemyType:'goblin',enemyMaxHP:8,coinReward:40},
+  6:{id:6,world:1,label:'6',words:['jump','ring','wolf','frog','club','grip','zinc'],availableKeys:'QWERTYUIOPASDFGHJKLZXCVBNM',enemyCount:8,enemyType:'goblin',enemyMaxHP:9,coinReward:45},
+  7:{id:7,world:2,label:'7',words:['black','frost','plant','drink','crimp'],availableKeys:'QWERTYUIOPASDFGHJKLZXCVBNM',enemyCount:8,enemyType:'bat',enemyMaxHP:12,coinReward:55},
+  8:{id:8,world:2,label:'8',words:['flame','stone','brook','crisp','glove'],availableKeys:'QWERTYUIOPASDFGHJKLZXCVBNM',enemyCount:8,enemyType:'bat',enemyMaxHP:14,coinReward:60},
+  9:{id:9,world:2,label:'9',words:['shrink','blizzard','sprint'],availableKeys:'QWERTYUIOPASDFGHJKLZXCVBNM',enemyCount:8,enemyType:'bat',enemyMaxHP:16,coinReward:65},
+  10:{id:10,world:2,label:'10',words:['strength','through','brought'],availableKeys:'QWERTYUIOPASDFGHJKLZXCVBNM',enemyCount:8,enemyType:'skeleton',enemyMaxHP:18,coinReward:70},
+  11:{id:11,world:2,label:'11',words:['psychology','rhythm','sphinx'],availableKeys:'QWERTYUIOPASDFGHJKLZXCVBNM',enemyCount:8,enemyType:'skeleton',enemyMaxHP:20,coinReward:75},
+  12:{id:12,world:2,label:'12',words:['knapsack','pneumatic','fjord'],availableKeys:'QWERTYUIOPASDFGHJKLZXCVBNM',enemyCount:8,enemyType:'skeleton',enemyMaxHP:22,coinReward:80},
+  13:{id:13,world:3,label:'13',words:['ねこ','いぬ','くも','かさ','つき','ほし'],availableKeys:'QWERTYUIOPASDFGHJKLZXCVBNM',enemyCount:8,enemyType:'skeleton',enemyMaxHP:15,coinReward:80},
+  14:{id:14,world:3,label:'14',words:['さかな','えんぴつ','りんご','かめ','なまえ'],availableKeys:'QWERTYUIOPASDFGHJKLZXCVBNM',enemyCount:8,enemyType:'golem',enemyMaxHP:18,coinReward:100},
+  15:{id:15,world:3,label:'15',words:['あおぞら','こうもり','とけい','きもち'],availableKeys:'QWERTYUIOPASDFGHJKLZXCVBNM',enemyCount:8,enemyType:'golem',enemyMaxHP:22,coinReward:120},
+  16:{id:16,world:3,label:'16',words:['まほうつかい','ゆうしゃ','かいぞく'],availableKeys:'QWERTYUIOPASDFGHJKLZXCVBNM',enemyCount:8,enemyType:'golem',enemyMaxHP:26,coinReward:150},
+  17:{id:17,world:3,label:'17',words:['にじのむこう','ふしぎなくすり'],availableKeys:'QWERTYUIOPASDFGHJKLZXCVBNM',enemyCount:8,enemyType:'golem',enemyMaxHP:30,coinReward:180},
+  18:{id:18,world:3,label:'18',words:['さいきょうのゆうしゃ','だいまおう'],availableKeys:'QWERTYUIOPASDFGHJKLZXCVBNM',enemyCount:10,enemyType:'golem',enemyMaxHP:35,coinReward:250},
+};
+
+const WORLDS = [
+  {id:1,name:'もりのみち 🌲',bg:'linear-gradient(160deg,#C8E6C9 0%,#A5D6A7 100%)',color:'#2E7D32',stages:[1,2,3,4,5,6]},
+  {id:2,name:'さばくのみち 🏜️',bg:'linear-gradient(160deg,#FFE0B2 0%,#FFCC80 100%)',color:'#E65100',stages:[7,8,9,10,11,12]},
+  {id:3,name:'そらのみち ☁️',bg:'linear-gradient(160deg,#E3F2FD 0%,#BBDEFB 100%)',color:'#1565C0',stages:[13,14,15,16,17,18]},
+];
+
+const WEAPONS = [
+  {id:'wooden',name:'木の剣',atk:1,cost:0,desc:'きほんのけん'},
+  {id:'iron',name:'鉄の剣',atk:2,cost:100,desc:'すこしつよい'},
+  {id:'flame',name:'炎の剣',atk:3,cost:300,desc:'ほのおがでる！'},
+];
+const ARMORS = [
+  {id:'hat',name:'ぼうし',bonus:0.1,cost:0,desc:'コイン +10%'},
+  {id:'helmet',name:'かぶと',bonus:0.2,cost:80,desc:'コイン +20%'},
+  {id:'cape',name:'マント',bonus:0.3,cost:250,desc:'コイン +30%'},
+];
+
+const KB_ROWS = [
+  ['Q','W','E','R','T','Y','U','I','O','P'],
+  ['A','S','D','F','G','H','J','K','L',';'],
+  ['Z','X','C','V','B','N','M',',','.'],
+];
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('kba-v2');
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return { coins:80, weapon:'wooden', armor:'hat', ownedWeapons:['wooden'], ownedArmors:['hat'], progress:{}, maxUnlocked:1 };
+}
+
+// ═══════════════════════════════════════════════
+// SVG: STICK FIGURE HERO
+// ═══════════════════════════════════════════════
+function StickFigure({ weapon='wooden', armor='hat', pose='idle', color='#1A237E', animStyle={} }) {
+  const lw = 3.8;
+  const cx = 58;
+  const headCy = 22;
+  const headR = 17;
+  const bodyTop = 40;
+  const bodyBot = 84;
+  const shY = 54;
+
+  const poseArms = {
+    idle:    { r:[cx+22, shY+24], l:[cx-22, shY+24] },
+    attack:  { r:[cx+42, shY-8],  l:[cx-16, shY+22] },
+    victory: { r:[cx+20, headCy-10], l:[cx-20, headCy-10] },
+    scratch: { r:[cx+14, headCy+6], l:[cx-24, shY+24] },
+  };
+  const {r:ra, l:la} = poseArms[pose] || poseArms.idle;
+  const llEnd = [cx-20, bodyBot+34];
+  const rlEnd = [cx+20, bodyBot+34];
+
+  const sLen = 30;
+  const sAngle = pose === 'attack' ? 0 : -0.35;
+  const sTip = [ra[0] + sLen * Math.cos(sAngle), ra[1] + sLen * Math.sin(sAngle)];
+  const s = { stroke: color, strokeWidth: lw, strokeLinecap: 'round', strokeLinejoin: 'round' };
+
+  return (
+    <g style={animStyle}>
+      {armor === 'cape' && (
+        <polygon points={`${cx-5},${bodyTop+8} ${cx-32},${bodyBot+8} ${cx+32},${bodyBot+8} ${cx+5},${bodyTop+8}`}
+          fill="#7B1FA2" opacity={0.82} />
+      )}
+      <circle cx={cx} cy={headCy} r={headR} fill="none" {...s} />
+      <line x1={cx} y1={bodyTop} x2={cx} y2={bodyBot} {...s} />
+      <line x1={cx} y1={shY} x2={la[0]} y2={la[1]} {...s} />
+      <line x1={cx} y1={shY} x2={ra[0]} y2={ra[1]} {...s} />
+      <line x1={cx} y1={bodyBot} x2={llEnd[0]} y2={llEnd[1]} {...s} />
+      <line x1={cx} y1={bodyBot} x2={rlEnd[0]} y2={rlEnd[1]} {...s} />
+      {weapon === 'wooden' && (
+        <line x1={ra[0]} y1={ra[1]} x2={sTip[0]} y2={sTip[1]} stroke="#8B6914" strokeWidth={lw*0.85} strokeLinecap="round" />
+      )}
+      {weapon === 'iron' && (<>
+        <line x1={ra[0]} y1={ra[1]} x2={sTip[0]} y2={sTip[1]} stroke="#9E9E9E" strokeWidth={lw*1.1} strokeLinecap="round" />
+        <line x1={ra[0]} y1={ra[1]} x2={sTip[0]} y2={sTip[1]} stroke="rgba(255,255,255,0.55)" strokeWidth={lw*0.3} strokeLinecap="round" />
+      </>)}
+      {weapon === 'flame' && (<>
+        <line x1={ra[0]} y1={ra[1]} x2={sTip[0]} y2={sTip[1]} stroke="#FF6B35" strokeWidth={lw*1.15} strokeLinecap="round" />
+        <circle cx={sTip[0]} cy={sTip[1]} r={8} fill="#FF9500" opacity={0.85} />
+        <circle cx={sTip[0]} cy={sTip[1]} r={4.5} fill="#FFE034" opacity={0.95} />
+      </>)}
+      {armor === 'helmet' && (
+        <path d={`M ${cx-headR-3} ${headCy+4} A ${headR+3} ${headR+3} 0 0 1 ${cx+headR+3} ${headCy+4} L ${cx+headR+5} ${headCy+12} L ${cx-headR-5} ${headCy+12} Z`}
+          fill="#9E9E9E" stroke="#616161" strokeWidth={2} />
+      )}
+      {armor === 'hat' && (
+        <polygon points={`${cx},${headCy-headR-18} ${cx-16},${headCy-headR+1} ${cx+16},${headCy-headR+1}`}
+          fill="#FFD700" stroke="#F9A825" strokeWidth={1.5} />
+      )}
+    </g>
+  );
+}
+
+// ═══════════════════════════════════════════════
+// SVG: ENEMY
+// ═══════════════════════════════════════════════
+function EnemySVG({ type, flash = false, falling = false }) {
+  const style = falling
+    ? { animation: 'enemy-fall 0.5s ease-in forwards', transformOrigin: '70px 130px' }
+    : flash
+    ? { filter: 'brightness(2.8) saturate(0) sepia(1) hue-rotate(310deg)' }
+    : {};
+
+  if (type === 'slime') return (
+    <g style={style}>
+      <ellipse cx={70} cy={98} rx={50} ry={42} fill="#5BB8FF" stroke="#1565C0" strokeWidth={3}/>
+      <ellipse cx={70} cy={80} rx={38} ry={30} fill="#90D4FF"/>
+      <circle cx={56} cy={90} r={8} fill="white"/><circle cx={84} cy={90} r={8} fill="white"/>
+      <circle cx={58} cy={91} r={4} fill="#1A237E"/><circle cx={86} cy={91} r={4} fill="#1A237E"/>
+      <circle cx={56} cy={88} r={2} fill="white"/><circle cx={84} cy={88} r={2} fill="white"/>
+      <ellipse cx={52} cy={74} rx={11} ry={7} fill="white" opacity={0.35}/>
+      <path d="M 58 106 Q 70 116 82 106" fill="none" stroke="#1565C0" strokeWidth={3} strokeLinecap="round"/>
+    </g>
+  );
+
+  if (type === 'mushroom') return (
+    <g style={style}>
+      <rect x={46} y={94} width={48} height={46} rx={10} fill="#F5E6C8" stroke="#8B6914" strokeWidth={3}/>
+      <ellipse cx={70} cy={90} rx={56} ry={38} fill="#F44336" stroke="#C62828" strokeWidth={3}/>
+      <circle cx={54} cy={73} r={12} fill="white"/><circle cx={76} cy={64} r={9} fill="white"/>
+      <circle cx={64} cy={87} r={7} fill="white"/><circle cx={90} cy={80} r={8} fill="white"/>
+      <circle cx={57} cy={105} r={6} fill="#4A2000"/><circle cx={83} cy={105} r={6} fill="#4A2000"/>
+      <circle cx={58} cy={103} r={2} fill="white"/><circle cx={84} cy={103} r={2} fill="white"/>
+      <path d="M 60 116 Q 70 124 80 116" fill="none" stroke="#4A2000" strokeWidth={2.5}/>
+    </g>
+  );
+
+  if (type === 'goblin') return (
+    <g style={style}>
+      <polygon points="55,44 46,18 65,40" fill="#388E3C" stroke="#1B5E20" strokeWidth={1.5}/>
+      <polygon points="85,44 94,18 75,40" fill="#388E3C" stroke="#1B5E20" strokeWidth={1.5}/>
+      <circle cx={70} cy={56} r={22} fill="#4CAF50" stroke="#2E7D32" strokeWidth={3}/>
+      <circle cx={62} cy={50} r={7} fill="white"/><circle cx={78} cy={50} r={7} fill="white"/>
+      <circle cx={63} cy={51} r={3.5} fill="#1B5E20"/><circle cx={79} cy={51} r={3.5} fill="#1B5E20"/>
+      <circle cx={63} cy={49} r={1.5} fill="white"/><circle cx={79} cy={49} r={1.5} fill="white"/>
+      <path d="M 61 66 Q 70 76 79 66" fill="none" stroke="#1B5E20" strokeWidth={3} strokeLinecap="round"/>
+      <line x1={70} y1={78} x2={70} y2={118} stroke="#2E7D32" strokeWidth={5} strokeLinecap="round"/>
+      <line x1={70} y1={88} x2={44} y2={108} stroke="#2E7D32" strokeWidth={4} strokeLinecap="round"/>
+      <line x1={70} y1={88} x2={96} y2={108} stroke="#2E7D32" strokeWidth={4} strokeLinecap="round"/>
+      <line x1={70} y1={118} x2={52} y2={146} stroke="#2E7D32" strokeWidth={4} strokeLinecap="round"/>
+      <line x1={70} y1={118} x2={88} y2={146} stroke="#2E7D32" strokeWidth={4} strokeLinecap="round"/>
+    </g>
+  );
+
+  if (type === 'bat') return (
+    <g style={style}>
+      <polygon points="70,78 4,44 20,88 70,82" fill="#37474F" stroke="#263238" strokeWidth={2}/>
+      <polygon points="70,78 136,44 120,88 70,82" fill="#37474F" stroke="#263238" strokeWidth={2}/>
+      <polygon points="64,72 44,80 48,95" fill="#455A64"/>
+      <polygon points="76,72 96,80 92,95" fill="#455A64"/>
+      <ellipse cx={70} cy={84} rx={24} ry={30} fill="#546E7A" stroke="#37474F" strokeWidth={2.5}/>
+      <circle cx={70} cy={58} r={20} fill="#455A64" stroke="#37474F" strokeWidth={2}/>
+      <polygon points="56,46 48,20 66,42" fill="#37474F"/>
+      <polygon points="84,46 92,20 74,42" fill="#37474F"/>
+      <circle cx={63} cy={56} r={6} fill="#FF5252"/><circle cx={77} cy={56} r={6} fill="#FF5252"/>
+      <circle cx={64} cy={56} r={2.8} fill="#B71C1C"/><circle cx={78} cy={56} r={2.8} fill="#B71C1C"/>
+      <path d="M 64 72 Q 70 78 76 72" fill="none" stroke="#37474F" strokeWidth={2} strokeLinecap="round"/>
+    </g>
+  );
+
+  if (type === 'skeleton') return (
+    <g style={style}>
+      <circle cx={70} cy={36} r={26} fill="white" stroke="#BDBDBD" strokeWidth={3}/>
+      <ellipse cx={62} cy={32} rx={8} ry={9} fill="#1A237E"/><ellipse cx={78} cy={32} rx={8} ry={9} fill="#1A237E"/>
+      <circle cx={62} cy={30} r={3} fill="white" opacity={0.4}/><circle cx={78} cy={30} r={3} fill="white" opacity={0.4}/>
+      <path d="M 65 50 L 70 56 L 75 50" fill="#BDBDBD"/>
+      <rect x={59} y={56} width={5} height={10} rx={2} fill="#BDBDBD"/>
+      <rect x={68} y={56} width={5} height={10} rx={2} fill="#BDBDBD"/>
+      <rect x={77} y={56} width={5} height={10} rx={2} fill="#BDBDBD"/>
+      <line x1={70} y1={62} x2={70} y2={108} stroke="#E0E0E0" strokeWidth={5} strokeLinecap="round"/>
+      <line x1={70} y1={74} x2={42} y2={96} stroke="#E0E0E0" strokeWidth={4.5} strokeLinecap="round"/>
+      <line x1={70} y1={74} x2={98} y2={96} stroke="#E0E0E0" strokeWidth={4.5} strokeLinecap="round"/>
+      <line x1={70} y1={108} x2={50} y2={138} stroke="#E0E0E0" strokeWidth={4.5} strokeLinecap="round"/>
+      <line x1={70} y1={108} x2={90} y2={138} stroke="#E0E0E0" strokeWidth={4.5} strokeLinecap="round"/>
+    </g>
+  );
+
+  // golem
+  return (
+    <g style={style}>
+      <rect x={44} y={8} width={52} height={46} rx={5} fill="#78909C" stroke="#546E7A" strokeWidth={3}/>
+      <rect x={51} y={20} width={14} height={12} rx={3} fill="#FF9500"/><rect x={75} y={20} width={14} height={12} rx={3} fill="#FF9500"/>
+      <rect x={52} y={40} width={36} height={7} rx={3} fill="#546E7A"/>
+      <rect x={33} y={57} width={74} height={60} rx={5} fill="#90A4AE" stroke="#546E7A" strokeWidth={3}/>
+      <rect x={7} y={60} width={24} height={50} rx={5} fill="#78909C" stroke="#546E7A" strokeWidth={2.5}/>
+      <rect x={109} y={60} width={24} height={50} rx={5} fill="#78909C" stroke="#546E7A" strokeWidth={2.5}/>
+      <rect x={38} y={119} width={28} height={24} rx={4} fill="#78909C" stroke="#546E7A" strokeWidth={2}/>
+      <rect x={74} y={119} width={28} height={24} rx={4} fill="#78909C" stroke="#546E7A" strokeWidth={2}/>
+      <line x1={70} y1={58} x2={68} y2={118} stroke="#546E7A" strokeWidth={2.5} opacity={0.5}/>
+    </g>
+  );
+}
+
+// ═══════════════════════════════════════════════
+// CONFETTI
+// ═══════════════════════════════════════════════
+function Confetti() {
+  const pieces = [];
+  const colors = ['#FFD700','#FF5252','#5BB8FF','#4CAF50','#FF9800','#E040FB','#00BCD4'];
+  for (let i = 0; i < 48; i++) {
+    const left = Math.random() * 100;
+    const delay = Math.random() * 1.5;
+    const dur = 2 + Math.random() * 1.5;
+    const size = 8 + Math.random() * 12;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const shape = Math.random() > 0.5 ? '50%' : '2px';
+    pieces.push(
+      <div key={i} style={{
+        position: 'absolute', left: `${left}%`, top: 0,
+        width: size, height: size, background: color, borderRadius: shape,
+        animation: `confetti-fall ${dur}s ease-in forwards`,
+        animationDelay: `${delay}s`, opacity: 0,
+      }} />
+    );
+  }
+  return <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>{pieces}</div>;
+}
+
+// ═══════════════════════════════════════════════
+// TITLE SCREEN
+// ═══════════════════════════════════════════════
+function TitleScreen({ onStart, hasSave, onContinue }) {
+  const [hoverStart, setHoverStart] = useState(false);
+  const [hoverCont, setHoverCont] = useState(false);
+  return (
+    <div className="screen" style={{ background: 'linear-gradient(to bottom, #42A5F5 0%, #90CAF9 52%, #81C784 52%, #4CAF50 100%)', overflow: 'hidden', position: 'relative' }}>
+      {/* Sun */}
+      <div style={{ position:'absolute', top:30, right:120, width:80, height:80, background:'#FFD700', borderRadius:'50%', boxShadow:'0 0 40px #FFD700' }} />
+      {/* Clouds */}
+      {[{l:50,t:55,w:220,s:0},{l:380,t:90,w:160,s:5},{l:680,t:45,w:200,s:9},{l:980,t:80,w:170,s:3}].map((c,i) => (
+        <div key={i} style={{ position:'absolute', left:c.l, top:c.t, animation:`cloud-drift 30s linear infinite`, animationDelay:`${-c.s}s` }}>
+          <div style={{ width:c.w, height:c.w*0.38, background:'white', borderRadius:'50%', opacity:0.92, position:'relative' }}>
+            <div style={{ position:'absolute', top:'-40%', left:'20%', width:'50%', height:'100%', background:'white', borderRadius:'50%' }}/>
+            <div style={{ position:'absolute', top:'-25%', left:'50%', width:'35%', height:'80%', background:'white', borderRadius:'50%' }}/>
+          </div>
+        </div>
+      ))}
+      {/* Trees */}
+      {[70,260,480,760,1020,1180].map((x,i) => (
+        <React.Fragment key={i}>
+          <div style={{ position:'absolute', left:x, bottom:58, width:0, height:0, borderLeft:'22px solid transparent', borderRight:'22px solid transparent', borderBottom:'55px solid #2E7D32' }}/>
+          <div style={{ position:'absolute', left:x+8, bottom:38, width:9, height:22, background:'#5D4037' }}/>
+        </React.Fragment>
+      ))}
+      {/* Grass strip */}
+      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:90, background:'linear-gradient(to bottom, #4CAF50, #2E7D32)' }}>
+        <div style={{ height:8, background:'#66BB6A', borderRadius:'4px 4px 0 0' }}/>
+      </div>
+
+      {/* Title */}
+      <div style={{ position:'absolute', top:70, left:0, right:0, textAlign:'center', animation:'title-float 3s ease-in-out infinite' }}>
+        <div style={{ fontSize:72, fontWeight:900, color:'#1A237E', fontFamily:"'Noto Sans JP',sans-serif", textShadow:'4px 4px 0 #FFD700, 7px 7px 0 rgba(0,0,0,0.12)', letterSpacing:2 }}>
+          ⚔️ キーボードぼうけん ⚔️
+        </div>
+        <div style={{ fontSize:22, color:'#1A237E', marginTop:10, fontFamily:"'Noto Sans JP',sans-serif", fontWeight:700, opacity:0.75 }}>
+          タイピングでモンスターをたおそう！
+        </div>
+      </div>
+
+      {/* Hero */}
+      <div style={{ position:'absolute', bottom:82, left:'50%', transform:'translateX(-50%)' }}>
+        <svg width={170} height={195} viewBox="0 0 120 160" style={{ overflow:'visible' }}>
+          <StickFigure weapon="wooden" armor="hat" pose="victory" animStyle={{ animation:'idle-bob 2.5s ease-in-out infinite' }} />
+        </svg>
+      </div>
+
+      {/* Buttons */}
+      <div style={{ position:'absolute', bottom:68, left:0, right:0, display:'flex', gap:28, justifyContent:'center' }}>
+        <button
+          onClick={onStart}
+          onMouseEnter={() => setHoverStart(true)}
+          onMouseLeave={() => setHoverStart(false)}
+          style={{ padding:'18px 56px', fontSize:28, fontWeight:900, fontFamily:"'Noto Sans JP',sans-serif",
+            background:'#FFD700', color:'#1A237E', border:'none', borderRadius:18, cursor:'pointer',
+            boxShadow: hoverStart ? '0 2px 0 #F9A825,0 6px 20px rgba(0,0,0,0.25)' : '0 6px 0 #F9A825,0 8px 24px rgba(0,0,0,0.2)',
+            transform: hoverStart ? 'translateY(4px)' : 'translateY(0)', transition:'all 0.12s' }}>
+          🌟 はじめる
+        </button>
+        <button
+          onClick={hasSave ? onContinue : undefined}
+          onMouseEnter={() => hasSave && setHoverCont(true)}
+          onMouseLeave={() => setHoverCont(false)}
+          style={{ padding:'18px 56px', fontSize:28, fontWeight:900, fontFamily:"'Noto Sans JP',sans-serif",
+            background: hasSave ? '#5BB8FF' : '#B0BEC5', color:'white', border:'none', borderRadius:18,
+            cursor: hasSave ? 'pointer' : 'default', opacity: hasSave ? 1 : 0.55,
+            boxShadow: hoverCont ? '0 2px 0 #1E88E5' : hasSave ? '0 6px 0 #1E88E5,0 8px 24px rgba(0,0,0,0.2)' : '0 6px 0 #90A4AE',
+            transform: hoverCont ? 'translateY(4px)' : 'translateY(0)', transition:'all 0.12s' }}>
+          📖 つづきから
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════
+// WORLD MAP SCREEN
+// ═══════════════════════════════════════════════
+function WorldMapScreen({ gameState, onSelectStage, onOpenShop }) {
+  const [selectedStage, setSelectedStage] = useState(null);
+  const [hoveredStage, setHoveredStage] = useState(null);
+
+  const weaponInfo = WEAPONS.find(w => w.id === gameState.weapon);
+  const armorInfo  = ARMORS.find(a => a.id === gameState.armor);
+
+  const stageStatus = (id) => {
+    if (id > gameState.maxUnlocked) return 'locked';
+    if (id === gameState.maxUnlocked && !gameState.progress[id]) return 'current';
+    if (gameState.progress[id]) return 'cleared';
+    return 'current';
+  };
+
+  const stageStars = (id) => gameState.progress[id] || 0;
+
+  return (
+    <div className="screen" style={{ background:'linear-gradient(170deg,#E8F5E9 0%,#C8E6C9 100%)', display:'flex', flexDirection:'column' }}>
+      {/* Header */}
+      <div style={{ height:68, background:'linear-gradient(90deg,#1A237E,#283593)', display:'flex', alignItems:'center', padding:'0 28px', gap:16, boxShadow:'0 3px 12px rgba(0,0,0,0.25)' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:12, flex:1 }}>
+          <div style={{ position:'relative', cursor:'pointer' }}>
+            <svg width={66} height={78} viewBox="0 0 120 160" style={{ overflow:'visible' }}>
+              <StickFigure weapon={gameState.weapon} armor={gameState.armor} pose="idle" />
+            </svg>
+          </div>
+          <div style={{ color:'white', fontFamily:"'Noto Sans JP',sans-serif" }}>
+            <div style={{ fontSize:13, opacity:0.7 }}>そうび</div>
+            <div style={{ fontSize:15, fontWeight:700 }}>{weaponInfo?.name} / {armorInfo?.name}</div>
+          </div>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:8, background:'rgba(255,255,255,0.12)', borderRadius:12, padding:'8px 20px' }}>
+          <span style={{ fontSize:24 }}>💰</span>
+          <span style={{ fontSize:26, fontWeight:900, color:'#FFD700', fontFamily:"'Noto Sans JP',sans-serif" }}>{gameState.coins}</span>
+        </div>
+        <button onClick={onOpenShop} style={{ marginLeft:8, padding:'10px 22px', fontSize:18, fontWeight:700,
+          background:'#FFD700', color:'#1A237E', border:'none', borderRadius:12, cursor:'pointer',
+          fontFamily:"'Noto Sans JP',sans-serif", boxShadow:'0 3px 0 #F9A825' }}>
+          🛒 ショップ
+        </button>
+      </div>
+
+      {/* Map area */}
+      <div style={{ flex:1, overflowY:'auto', padding:'24px 40px 20px' }}>
+        {WORLDS.map(world => (
+          <div key={world.id} style={{ marginBottom:28 }}>
+            <div style={{ fontSize:20, fontWeight:900, color:world.color, fontFamily:"'Noto Sans JP',sans-serif",
+              marginBottom:14, display:'flex', alignItems:'center', gap:10 }}>
+              <div style={{ flex:1, height:2, background:world.color, opacity:0.3, borderRadius:2 }}/>
+              <span style={{ padding:'4px 16px', background:world.color, color:'white', borderRadius:20, fontSize:16 }}>{world.name}</span>
+              <div style={{ flex:1, height:2, background:world.color, opacity:0.3, borderRadius:2 }}/>
+            </div>
+            <div style={{ display:'flex', alignItems:'center', gap:0, position:'relative' }}>
+              {/* Connecting path */}
+              <div style={{ position:'absolute', top:'50%', left:40, right:40, height:6,
+                background:`linear-gradient(90deg,${world.color}44,${world.color}88)`,
+                borderRadius:3, transform:'translateY(-50%)', zIndex:0 }}/>
+              {world.stages.map((sid, idx) => {
+                const status = stageStatus(sid);
+                const stars = stageStars(sid);
+                const stageData = STAGES[sid];
+                const isHovered = hoveredStage === sid;
+                return (
+                  <div key={sid} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', zIndex:1 }}>
+                    <button
+                      onClick={() => status !== 'locked' && setSelectedStage(sid)}
+                      onMouseEnter={() => status !== 'locked' && setHoveredStage(sid)}
+                      onMouseLeave={() => setHoveredStage(null)}
+                      style={{
+                        width:64, height:64, borderRadius:'50%', border:'none', cursor: status === 'locked' ? 'default' : 'pointer',
+                        background: status === 'locked' ? '#B0BEC5' : status === 'cleared' ? 'linear-gradient(135deg,#FFD700,#FFA000)' : '#5BB8FF',
+                        boxShadow: status === 'current' ? undefined : status === 'cleared' ? '0 4px 14px rgba(255,160,0,0.5)' : '0 2px 8px rgba(0,0,0,0.2)',
+                        animation: status === 'current' ? 'stage-pulse 1.8s ease-in-out infinite' : undefined,
+                        transform: isHovered ? 'scale(1.12)' : 'scale(1)', transition:'transform 0.15s',
+                        fontSize: status === 'locked' ? 24 : 16,
+                        display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column',
+                        color: status === 'locked' ? '#78909C' : status === 'cleared' ? '#5D4037' : '#1A237E',
+                        fontWeight:900, fontFamily:"'Noto Sans JP',sans-serif",
+                      }}>
+                      {status === 'locked' ? '🔒' : status === 'cleared' ? '✓' : sid}
+                    </button>
+                    {/* Stars */}
+                    <div style={{ display:'flex', gap:2, marginTop:5, height:14 }}>
+                      {[1,2,3].map(s => (
+                        <span key={s} style={{ fontSize:11, opacity: stars >= s ? 1 : 0.2 }}>⭐</span>
+                      ))}
+                    </div>
+                    <div style={{ fontSize:11, fontFamily:"'Noto Sans JP',sans-serif", color:'#546E7A', fontWeight:700, marginTop:2 }}>
+                      {stageData ? `S${sid}` : ''}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Stage popup */}
+      {selectedStage && (() => {
+        const st = STAGES[selectedStage];
+        if (!st) return null;
+        return (
+          <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100 }}
+            onClick={() => setSelectedStage(null)}>
+            <div onClick={e => e.stopPropagation()} style={{
+              background:'white', borderRadius:24, padding:'32px 40px', textAlign:'center',
+              boxShadow:'0 20px 60px rgba(0,0,0,0.3)', animation:'slide-up 0.25s ease-out',
+              fontFamily:"'Noto Sans JP',sans-serif", minWidth:320,
+            }}>
+              <div style={{ fontSize:28, fontWeight:900, color:'#1A237E', marginBottom:8 }}>ステージ {selectedStage}</div>
+              <div style={{ fontSize:15, color:'#546E7A', marginBottom:6 }}>
+                敵の数: {st.enemyCount}体 / {st.enemyType}
+              </div>
+              <div style={{ fontSize:15, color:'#F57F17', marginBottom:18 }}>
+                💰 {Math.round(st.coinReward * (1 + (ARMORS.find(a=>a.id===gameState.armor)?.bonus||0)))} コイン (予定)
+              </div>
+              {gameState.progress[selectedStage] > 0 && (
+                <div style={{ marginBottom:14, fontSize:20 }}>
+                  {'⭐'.repeat(gameState.progress[selectedStage])}{'☆'.repeat(3 - gameState.progress[selectedStage])}
+                </div>
+              )}
+              <div style={{ display:'flex', gap:14, justifyContent:'center' }}>
+                <button onClick={() => setSelectedStage(null)}
+                  style={{ padding:'12px 24px', fontSize:17, borderRadius:12, border:'2px solid #E0E0E0',
+                  background:'white', color:'#546E7A', cursor:'pointer', fontFamily:"'Noto Sans JP',sans-serif", fontWeight:700 }}>
+                  もどる
+                </button>
+                <button onClick={() => { setSelectedStage(null); onSelectStage(selectedStage); }}
+                  style={{ padding:'12px 28px', fontSize:18, borderRadius:12, border:'none',
+                  background:'#FFD700', color:'#1A237E', cursor:'pointer', fontWeight:900, fontFamily:"'Noto Sans JP',sans-serif",
+                  boxShadow:'0 4px 0 #F9A825' }}>
+                  ちょうせん！
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════
+// BATTLE SCREEN
+// ═══════════════════════════════════════════════
+function BattleScreen({ stageId, gameState, onComplete, onEscape }) {
+  const stage = STAGES[stageId];
+  const words = React.useMemo(() => {
+    const w = [...stage.words];
+    for (let i = w.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [w[i],w[j]]=[w[j],w[i]]; }
+    return w;
+  }, [stageId]);
+
+  const [wordIdx, setWordIdx] = useState(0);
+  const [input, setInput] = useState('');
+  const [missFlash, setMissFlash] = useState(false);
+  const [heroAnim, setHeroAnim] = useState('idle');
+  const [enemyFlash, setEnemyFlash] = useState(false);
+  const [dmgDisplay, setDmgDisplay] = useState(null);
+  const [enemyHP, setEnemyHP] = useState(stage.enemyMaxHP);
+  const [defeated, setDefeated] = useState(0);
+  const [enemyFalling, setEnemyFalling] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [correct, setCorrect] = useState(0);
+  const [showGuide, setShowGuide] = useState(true);
+  const [coinPops, setCoinPops] = useState([]);
+
+  const weaponAtk = WEAPONS.find(w => w.id === gameState.weapon)?.atk || 1;
+  const armorBonus = ARMORS.find(a => a.id === gameState.armor)?.bonus || 0;
+
+  const ref = useRef({});
+  ref.current = { wordIdx, input, total, correct, enemyHP, defeated, enemyFalling, heroAnim, words, missFlash };
+
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key.length !== 1) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const r = ref.current;
+      if (r.heroAnim === 'attack' || r.enemyFalling) return;
+
+      const w = r.words[r.wordIdx % r.words.length];
+      const romaji = toRomaji(w);
+      const expected = romaji[r.input.length];
+
+      setTotal(t => t + 1);
+
+      if (e.key.toLowerCase() === expected?.toLowerCase()) {
+        setCorrect(c => c + 1);
+        const newInput = r.input + e.key.toLowerCase();
+        setInput(newInput);
+
+        if (newInput.length >= romaji.length) {
+          setInput('');
+          setHeroAnim('attack');
+          const dmg = weaponAtk;
+
+          setTimeout(() => {
+            setEnemyFlash(true);
+            setDmgDisplay({ val: dmg, ts: Date.now() });
+
+            setTimeout(() => {
+              setEnemyFlash(false);
+              const r2 = ref.current;
+              const newHP = r2.enemyHP - dmg;
+
+              if (newHP <= 0) {
+                setEnemyHP(0);
+                setEnemyFalling(true);
+
+                // Coin pops
+                const pops = Array.from({length:4}, (_,i) => ({id:i,dx:(Math.random()-0.5)*80,dy:-40-Math.random()*40}));
+                setCoinPops(pops);
+                setTimeout(() => setCoinPops([]), 900);
+
+                setTimeout(() => {
+                  const nd = r2.defeated + 1;
+                  setDefeated(nd);
+                  setEnemyFalling(false);
+                  setEnemyHP(stage.enemyMaxHP);
+                  setHeroAnim('idle');
+                  setWordIdx(i => i + 1);
+
+                  if (nd >= stage.enemyCount) {
+                    const r3 = ref.current;
+                    const acc = r3.total > 0 ? Math.round(r3.correct / r3.total * 100) : 100;
+                    const coins = Math.round(stage.coinReward * (1 + armorBonus));
+                    onCompleteRef.current({ accuracy: acc, defeated: nd, coins, stageId });
+                  }
+                }, 620);
+              } else {
+                setEnemyHP(newHP);
+                setHeroAnim('idle');
+                setWordIdx(i => i + 1);
+              }
+            }, 240);
+          }, 140);
+        }
+      } else {
+        if (!r.missFlash) {
+          setMissFlash(true);
+          setTimeout(() => setMissFlash(false), 320);
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [weaponAtk, armorBonus, stageId, stage]);
+
+  const currentWord = words[wordIdx % words.length];
+  const romaji = toRomaji(currentWord);
+  const nextChar = romaji[input.length]?.toUpperCase();
+  const accuracy = total > 0 ? Math.round(correct / total * 100) : 100;
+  const isHira = /[\u3040-\u309f]/.test(currentWord);
+  const hpPct = (enemyHP / stage.enemyMaxHP) * 100;
+  const hpColor = hpPct > 60 ? '#4CAF50' : hpPct > 30 ? '#FF9800' : '#FF5252';
+
+  const availKeys = new Set(stage.availableKeys.toUpperCase().split(''));
+
+  return (
+    <div className="screen" style={{ background:'#FFF9E6', display:'flex', flexDirection:'column', fontFamily:"'Noto Sans JP',sans-serif" }}>
+      {/* Status bar */}
+      <div style={{ height:48, background:'linear-gradient(90deg,#1A237E,#283593)', display:'flex', alignItems:'center', padding:'0 24px', gap:20, color:'white', fontSize:15, fontWeight:700 }}>
+        <button onClick={onEscape} style={{ background:'rgba(255,255,255,0.15)', border:'none', color:'white', padding:'4px 14px', borderRadius:8, cursor:'pointer', fontSize:13, fontWeight:700 }}>← もどる</button>
+        <span>📍 ステージ {stageId}</span>
+        <span style={{ color: accuracy >= 85 ? '#69F0AE' : accuracy >= 70 ? '#FFD700' : '#FF5252' }}>
+          精度: {accuracy}%
+        </span>
+        <span>💥 撃破: {defeated}/{stage.enemyCount}</span>
+        <span style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6 }}>
+          <span style={{ fontSize:13, opacity:0.7 }}>💰</span>
+          <span style={{ color:'#FFD700' }}>{gameState.coins}</span>
+        </span>
+      </div>
+
+      {/* Battle zone */}
+      <div style={{ flex:'0 0 260px', display:'flex', position:'relative' }}>
+        {/* Divider */}
+        <div style={{ position:'absolute', left:'50%', top:10, bottom:10, width:2, background:'rgba(26,35,126,0.08)', borderRadius:2 }}/>
+
+        {/* Hero area */}
+        <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'flex-end', paddingBottom:18, position:'relative' }}>
+          <div style={{ position:'absolute', top:14, left:16, right:8, fontSize:13, color:'#546E7A', fontWeight:700 }}>
+            あなたのゆうしゃ ⚔️
+          </div>
+          <div style={{ animation: heroAnim === 'attack' ? 'attack-lunge 0.42s ease-out' : undefined }}>
+            <svg width={140} height={170} viewBox="0 0 120 160" style={{ overflow:'visible' }}>
+              <StickFigure weapon={gameState.weapon} armor={gameState.armor} pose={heroAnim === 'attack' ? 'attack' : 'idle'}
+                animStyle={ heroAnim !== 'attack' ? { animation:'idle-bob 2s ease-in-out infinite' } : {} } />
+            </svg>
+          </div>
+          {heroAnim === 'attack' && (
+            <div style={{ position:'absolute', top:90, right:30, fontSize:24, animation:'dmg-float 0.5s ease-out forwards', pointerEvents:'none' }}>⚡</div>
+          )}
+        </div>
+
+        {/* Enemy area */}
+        <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'flex-end', paddingBottom:18, position:'relative' }}>
+          <div style={{ position:'absolute', top:14, left:8, right:16, fontSize:13, color:'#546E7A', fontWeight:700, textAlign:'right' }}>
+            てき {defeated + 1}/{stage.enemyCount}
+          </div>
+          {/* HP bar */}
+          <div style={{ position:'absolute', top:34, left:20, right:20 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', fontSize:12, color:'#546E7A', fontWeight:700, marginBottom:4 }}>
+              <span>HP</span><span>{Math.max(0,enemyHP)}/{stage.enemyMaxHP}</span>
+            </div>
+            <div style={{ height:16, background:'#E0E0E0', borderRadius:8, overflow:'hidden', boxShadow:'inset 0 2px 4px rgba(0,0,0,0.12)' }}>
+              <div style={{ height:'100%', width:`${hpPct}%`, background:`linear-gradient(90deg,${hpColor},${hpColor}cc)`,
+                borderRadius:8, transition:'width 0.25s ease-out', boxShadow:`0 0 8px ${hpColor}66` }}/>
+            </div>
+          </div>
+
+          <div style={{ position:'relative' }}>
+            <svg width={160} height={175} viewBox="0 0 140 160" style={{ overflow:'visible' }}>
+              <EnemySVG type={stage.enemyType} flash={enemyFlash} falling={enemyFalling} />
+            </svg>
+            {/* Damage display */}
+            {dmgDisplay && (
+              <div key={dmgDisplay.ts} style={{
+                position:'absolute', top:20, right:-10, fontSize:32, fontWeight:900, color:'#FF5252',
+                textShadow:'2px 2px 0 rgba(0,0,0,0.2)', animation:'dmg-float 0.6s ease-out forwards',
+                pointerEvents:'none', fontFamily:"'Noto Sans JP',sans-serif",
+              }}>-{dmgDisplay.val}</div>
+            )}
+            {/* Coin pops */}
+            {coinPops.map(p => (
+              <div key={p.id} style={{
+                position:'absolute', top:'50%', left:'50%', fontSize:20,
+                animation:'dmg-float 0.8s ease-out forwards',
+                animationDelay:`${p.id*0.08}s`, opacity:0,
+                transform:`translate(${p.dx}px,${p.dy}px)`,
+                pointerEvents:'none',
+              }}>💰</div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Question area */}
+      <div style={{ flex:'0 0 148px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+        borderTop:'3px solid rgba(26,35,126,0.08)', position:'relative',
+        background: missFlash ? undefined : 'rgba(26,35,126,0.015)',
+        animation: missFlash ? 'miss-flash 0.32s ease-out' : undefined }}>
+
+        {/* Word display */}
+        {isHira ? (
+          <div style={{ textAlign:'center', marginBottom:8 }}>
+            <div style={{ fontSize:52, fontWeight:900, color:'#1A237E', letterSpacing:6, lineHeight:1 }}>{currentWord}</div>
+            <div style={{ fontSize:22, color:'#90A4AE', fontWeight:700, letterSpacing:3, marginTop:4 }}>{romaji}</div>
+          </div>
+        ) : (
+          <div style={{ fontSize:54, fontWeight:900, color:'#1A237E', letterSpacing:4, marginBottom:10, lineHeight:1 }}>
+            {currentWord}
+          </div>
+        )}
+
+        {/* Progress indicators */}
+        <div style={{ display:'flex', gap:8 }}>
+          {romaji.split('').map((ch, i) => (
+            <div key={i} style={{
+              width:38, height:38, borderRadius:8, border:'3px solid',
+              borderColor: i < input.length ? '#5BB8FF' : '#D0D0D0',
+              background: i < input.length ? '#5BB8FF' : 'white',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              fontSize:17, fontWeight:900, color: i < input.length ? 'white' : '#B0BEC5',
+              fontFamily:'Courier New, monospace', transition:'all 0.1s',
+              boxShadow: i < input.length ? '0 2px 8px rgba(91,184,255,0.4)' : 'none',
+            }}>
+              {i < input.length ? ch.toUpperCase() : ''}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Keyboard guide */}
+      <div style={{ flex:1, background:'linear-gradient(to bottom,#ECEFF1,#E0E3E8)', padding:'8px 24px 10px', borderTop:'2px solid rgba(26,35,126,0.1)' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+          <span style={{ fontSize:13, color:'#546E7A', fontWeight:700 }}>⌨️ キーボードガイド</span>
+          <button onClick={() => setShowGuide(g => !g)}
+            style={{ fontSize:12, padding:'3px 12px', borderRadius:6, border:'1.5px solid #B0BEC5', background:'white', cursor:'pointer', color:'#546E7A', fontWeight:700 }}>
+            {showGuide ? 'かくす' : 'みせる'}
+          </button>
+        </div>
+        {showGuide && (
+          <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
+            {KB_ROWS.map((row, ri) => (
+              <div key={ri} style={{ display:'flex', gap:5, justifyContent:'center', marginLeft:ri===1?20:ri===2?36:0 }}>
+                {row.map(k => {
+                  const isNext = nextChar === k;
+                  const isAvail = availKeys.has(k);
+                  return (
+                    <div key={k} style={{
+                      width:42, height:42, borderRadius:8,
+                      background: isNext ? '#FFD700' : isAvail ? '#5BB8FF' : '#CFD8DC',
+                      color: isNext ? '#1A237E' : isAvail ? 'white' : '#90A4AE',
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                      fontSize:14, fontWeight:900, fontFamily:'Courier New,monospace',
+                      boxShadow: isNext ? '0 3px 0 #F9A825, 0 0 12px rgba(255,215,0,0.5)' : isAvail ? '0 3px 0 #1976D2' : '0 2px 0 #B0BEC5',
+                      border: isNext ? '2px solid #F9A825' : '2px solid transparent',
+                      transition:'all 0.1s',
+                      animation: isNext ? 'glow-pulse 1s ease-in-out infinite' : undefined,
+                    }}>
+                      {k}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════
+// STAGE CLEAR SCREEN
+// ═══════════════════════════════════════════════
+function StageClearScreen({ result, gameState, onNext, onRetry, onWorldMap }) {
+  const { accuracy, defeated, coins, stageId } = result;
+  const stars = accuracy >= 95 ? 3 : accuracy >= 85 ? 2 : accuracy >= 70 ? 1 : 0;
+  const cleared = stars > 0;
+  const [displayCoins, setDisplayCoins] = useState(0);
+
+  useEffect(() => {
+    if (!cleared) return;
+    let n = 0;
+    const step = Math.ceil(coins / 30);
+    const iv = setInterval(() => {
+      n = Math.min(n + step, coins);
+      setDisplayCoins(n);
+      if (n >= coins) clearInterval(iv);
+    }, 40);
+    return () => clearInterval(iv);
+  }, [coins, cleared]);
+
+  if (!cleared) {
+    return (
+      <div className="screen" style={{ background:'linear-gradient(135deg,#FFF9E6,#FFF3CD)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', fontFamily:"'Noto Sans JP',sans-serif" }}>
+        <div style={{ fontSize:54, marginBottom:20 }}>😅</div>
+        <div style={{ fontSize:38, fontWeight:900, color:'#E65100', marginBottom:8, animation:'slide-up 0.4s ease-out' }}>
+          もうすこし！
+        </div>
+        <div style={{ fontSize:20, color:'#5D4037', marginBottom:32 }}>またれんしゅうしよう！</div>
+        <div style={{ background:'white', borderRadius:20, padding:'28px 48px', textAlign:'center', boxShadow:'0 8px 30px rgba(0,0,0,0.12)', marginBottom:32, animation:'slide-up 0.5s ease-out' }}>
+          <div style={{ fontSize:18, color:'#546E7A', marginBottom:6 }}>せいかくさ</div>
+          <div style={{ fontSize:48, fontWeight:900, color:'#FF5252' }}>{accuracy}%</div>
+          <div style={{ fontSize:15, color:'#78909C', marginTop:4 }}>70%以上でクリア！</div>
+        </div>
+        <div style={{ display:'flex', gap:20 }}>
+          <button onClick={onWorldMap} style={{ padding:'14px 28px', fontSize:17, borderRadius:14, border:'2px solid #E0E0E0', background:'white', color:'#546E7A', cursor:'pointer', fontWeight:700 }}>
+            マップにもどる
+          </button>
+          <button onClick={onRetry} style={{ padding:'16px 44px', fontSize:22, fontWeight:900, background:'#FFD700', color:'#1A237E', border:'none', borderRadius:16, cursor:'pointer', boxShadow:'0 5px 0 #F9A825' }}>
+            🔄 もう一度！
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="screen" style={{ background:'linear-gradient(135deg,#E8F5E9,#DCEDC8)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', fontFamily:"'Noto Sans JP',sans-serif", position:'relative', overflow:'hidden' }}>
+      <Confetti />
+
+      <div style={{ fontSize:58, marginBottom:8, animation:'slide-up 0.3s ease-out' }}>🎉</div>
+      <div style={{ fontSize:44, fontWeight:900, color:'#1A237E', marginBottom:6, animation:'slide-up 0.35s ease-out', textShadow:'3px 3px 0 rgba(255,255,255,0.6)' }}>
+        ステージクリア！
+      </div>
+
+      {/* Hero victory */}
+      <div style={{ animation:'idle-bob 2s ease-in-out infinite', marginBottom:8 }}>
+        <svg width={120} height={140} viewBox="0 0 120 160" style={{ overflow:'visible' }}>
+          <StickFigure weapon={gameState.weapon} armor={gameState.armor} pose="victory" />
+        </svg>
+      </div>
+
+      {/* Results */}
+      <div style={{ background:'white', borderRadius:24, padding:'26px 52px', textAlign:'center', boxShadow:'0 10px 40px rgba(0,0,0,0.15)', animation:'slide-up 0.45s ease-out', minWidth:380 }}>
+        {/* Stars */}
+        <div style={{ display:'flex', gap:10, justifyContent:'center', marginBottom:18 }}>
+          {[1,2,3].map(s => (
+            <span key={s} style={{ fontSize:44, filter: stars >= s ? 'none' : 'grayscale(1) opacity(0.25)',
+              animation: stars >= s ? `star-pop 0.4s ease-out forwards` : 'none',
+              animationDelay: `${(s-1)*0.15}s`, opacity: stars >= s ? 0 : 0.25 }}>⭐</span>
+          ))}
+        </div>
+        <div style={{ display:'flex', gap:32, justifyContent:'center', marginBottom:18 }}>
+          <div>
+            <div style={{ fontSize:13, color:'#78909C', marginBottom:2 }}>せいかくさ</div>
+            <div style={{ fontSize:36, fontWeight:900, color:'#1A237E' }}>{accuracy}%</div>
+          </div>
+          <div style={{ width:2, background:'#E0E0E0', borderRadius:2 }}/>
+          <div>
+            <div style={{ fontSize:13, color:'#78909C', marginBottom:2 }}>たおした</div>
+            <div style={{ fontSize:36, fontWeight:900, color:'#1A237E' }}>{defeated}/{STAGES[stageId]?.enemyCount}</div>
+          </div>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, fontSize:28, fontWeight:900, color:'#F57F17' }}>
+          <span style={{ fontSize:32 }}>💰</span>
+          <span style={{ animation: displayCoins < coins ? 'coin-bounce 0.2s ease-in-out infinite' : 'none' }}>+{displayCoins}</span>
+        </div>
+      </div>
+
+      <div style={{ display:'flex', gap:20, marginTop:28 }}>
+        <button onClick={onRetry}
+          style={{ padding:'12px 24px', fontSize:17, borderRadius:14, border:'2px solid #E0E0E0', background:'white', color:'#546E7A', cursor:'pointer', fontWeight:700 }}>
+          🔄 もう一度
+        </button>
+        <button onClick={onWorldMap}
+          style={{ padding:'12px 24px', fontSize:17, borderRadius:14, border:'2px solid #E0E0E0', background:'white', color:'#546E7A', cursor:'pointer', fontWeight:700 }}>
+          🗺️ マップ
+        </button>
+        <button onClick={onNext}
+          style={{ padding:'14px 44px', fontSize:22, fontWeight:900, background:'linear-gradient(135deg,#FFD700,#FFA000)', color:'#1A237E', border:'none', borderRadius:16, cursor:'pointer', boxShadow:'0 5px 0 #F9A825,0 8px 20px rgba(255,160,0,0.35)', transition:'transform 0.1s' }}>
+          つぎへ →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════
+// SHOP SCREEN
+// ═══════════════════════════════════════════════
+function ShopScreen({ gameState, setGameState, onClose }) {
+  const [msg, setMsg] = useState('');
+  const [msgKey, setMsgKey] = useState(0);
+
+  const showMsg = (text) => { setMsg(text); setMsgKey(k=>k+1); setTimeout(()=>setMsg(''),2000); };
+
+  const buy = (type, item) => {
+    if (gameState.coins < item.cost) { showMsg('コインがたりない…'); return; }
+    setGameState(gs => {
+      const ownedKey = type === 'weapon' ? 'ownedWeapons' : 'ownedArmors';
+      const equipped = type === 'weapon' ? item.id : gs.armor;
+      const newOwned = gs[ownedKey].includes(item.id) ? gs[ownedKey] : [...gs[ownedKey], item.id];
+      return {
+        ...gs, coins: gs.coins - item.cost, [ownedKey]: newOwned,
+        [type === 'weapon' ? 'weapon' : 'armor']: item.id,
+      };
+    });
+    showMsg(`${item.name} を そうび！`);
+  };
+
+  const equip = (type, item) => {
+    setGameState(gs => ({ ...gs, [type === 'weapon' ? 'weapon' : 'armor']: item.id }));
+    showMsg(`${item.name} に かえた！`);
+  };
+
+  const renderItem = (type, items, owned, equipped) => items.map(item => {
+    const isOwned = owned.includes(item.id);
+    const isEquipped = equipped === item.id;
+    return (
+      <div key={item.id} style={{
+        display:'flex', alignItems:'center', gap:14, padding:'14px 18px', borderRadius:14,
+        background: isEquipped ? 'linear-gradient(90deg,#E8F5E9,#F1F8E9)' : 'white',
+        border: isEquipped ? '2px solid #4CAF50' : '2px solid #EEEEEE',
+        marginBottom:10, transition:'all 0.15s',
+      }}>
+        <div style={{ flex:1 }}>
+          <div style={{ fontSize:17, fontWeight:900, color:'#1A237E' }}>
+            {type==='weapon' ? '⚔️' : '🛡️'} {item.name}
+          </div>
+          <div style={{ fontSize:13, color:'#78909C', marginTop:2 }}>{item.desc}</div>
+        </div>
+        {isEquipped ? (
+          <div style={{ padding:'6px 16px', borderRadius:20, background:'#4CAF50', color:'white', fontSize:13, fontWeight:900 }}>そうびちゅう</div>
+        ) : isOwned ? (
+          <button onClick={() => equip(type, item)}
+            style={{ padding:'8px 18px', borderRadius:10, border:'none', background:'#5BB8FF', color:'white', cursor:'pointer', fontSize:14, fontWeight:700 }}>
+            そうびする
+          </button>
+        ) : (
+          <button onClick={() => buy(type, item)}
+            disabled={gameState.coins < item.cost}
+            style={{ padding:'8px 18px', borderRadius:10, border:'none',
+              background: gameState.coins >= item.cost ? '#FFD700' : '#E0E0E0',
+              color: gameState.coins >= item.cost ? '#1A237E' : '#9E9E9E',
+              cursor: gameState.coins >= item.cost ? 'pointer' : 'default', fontSize:14, fontWeight:900 }}>
+            💰{item.cost} かう
+          </button>
+        )}
+      </div>
+    );
+  });
+
+  return (
+    <div className="screen" style={{ background:'#FFF9E6', display:'flex', flexDirection:'column', fontFamily:"'Noto Sans JP',sans-serif" }}>
+      {/* Header */}
+      <div style={{ height:64, background:'linear-gradient(90deg,#1A237E,#283593)', display:'flex', alignItems:'center', padding:'0 28px', gap:16, boxShadow:'0 3px 12px rgba(0,0,0,0.25)' }}>
+        <div style={{ fontSize:24, fontWeight:900, color:'white', flex:1 }}>🛒 ショップ</div>
+        <div style={{ display:'flex', alignItems:'center', gap:8, background:'rgba(255,255,255,0.12)', borderRadius:12, padding:'8px 20px' }}>
+          <span style={{ fontSize:22 }}>💰</span>
+          <span style={{ fontSize:24, fontWeight:900, color:'#FFD700' }}>{gameState.coins}</span>
+        </div>
+        <button onClick={onClose} style={{ padding:'10px 22px', fontSize:16, fontWeight:700, background:'rgba(255,255,255,0.15)', color:'white', border:'none', borderRadius:12, cursor:'pointer' }}>
+          ✕ とじる
+        </button>
+      </div>
+
+      {/* Content */}
+      <div style={{ flex:1, display:'flex', gap:0, overflow:'hidden' }}>
+        {/* Character preview */}
+        <div style={{ width:220, background:'linear-gradient(to bottom,#E8EAF6,#C5CAE9)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'flex-end', padding:'20px 20px 30px', borderRight:'3px solid rgba(26,35,126,0.08)' }}>
+          <div style={{ fontSize:14, color:'#5C6BC0', fontWeight:700, marginBottom:10 }}>プレビュー</div>
+          <svg width={170} height={200} viewBox="0 0 120 160" style={{ overflow:'visible' }}>
+            <StickFigure weapon={gameState.weapon} armor={gameState.armor} pose="idle"
+              animStyle={{ animation:'idle-bob 2.5s ease-in-out infinite' }} />
+          </svg>
+        </div>
+
+        {/* Items */}
+        <div style={{ flex:1, padding:'24px 32px', overflowY:'auto' }}>
+          <div style={{ fontSize:20, fontWeight:900, color:'#1A237E', marginBottom:16, display:'flex', alignItems:'center', gap:8 }}>
+            <span>⚔️ こうげきそうび</span>
+          </div>
+          {renderItem('weapon', WEAPONS, gameState.ownedWeapons, gameState.weapon)}
+
+          <div style={{ fontSize:20, fontWeight:900, color:'#1A237E', margin:'24px 0 16px', display:'flex', alignItems:'center', gap:8 }}>
+            <span>🛡️ ぼうぎょそうび</span>
+          </div>
+          {renderItem('armor', ARMORS, gameState.ownedArmors, gameState.armor)}
+        </div>
+      </div>
+
+      {/* Toast msg */}
+      {msg && (
+        <div key={msgKey} style={{ position:'absolute', bottom:30, left:'50%', transform:'translateX(-50%)',
+          background:'#1A237E', color:'white', padding:'12px 28px', borderRadius:12, fontSize:18, fontWeight:700,
+          boxShadow:'0 6px 20px rgba(0,0,0,0.3)', animation:'slide-up 0.25s ease-out' }}>
+          {msg}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════
+// APP
+// ═══════════════════════════════════════════════
+function App() {
+  const [scale, setScale] = useState(1);
+  const [gameState, setGameState] = useState(loadState());
+  const [screen, setScreen] = useState('title');
+  const [currentStageId, setCurrentStageId] = useState(null);
+  const [battleResult, setBattleResult] = useState(null);
+
+  useEffect(() => {
+    const update = () => setScale(Math.min(window.innerWidth / 1280, window.innerHeight / 720));
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem('kba-v2', JSON.stringify(gameState)); } catch(e) {}
+  }, [gameState]);
+
+  const hasSave = gameState.maxUnlocked > 1 || Object.keys(gameState.progress).length > 0;
+
+  const startGame = () => setScreen('worldmap');
+
+  const selectStage = (id) => {
+    setCurrentStageId(id);
+    setScreen('battle');
+  };
+
+  const completeBattle = (result) => {
+    const { accuracy, coins } = result;
+    const starsGained = accuracy >= 95 ? 3 : accuracy >= 85 ? 2 : accuracy >= 70 ? 1 : 0;
+
+    if (starsGained > 0) {
+      setGameState(gs => {
+        const prevStars = gs.progress[result.stageId] || 0;
+        const newMax = Math.max(gs.maxUnlocked, result.stageId + 1);
+        return {
+          ...gs,
+          coins: gs.coins + coins,
+          progress: { ...gs.progress, [result.stageId]: Math.max(prevStars, starsGained) },
+          maxUnlocked: Math.min(newMax, 18),
+        };
+      });
+    }
+
+    setBattleResult(result);
+    setScreen('stageclear');
+  };
+
+  const goNext = () => {
+    const nextId = currentStageId + 1;
+    if (STAGES[nextId]) {
+      setCurrentStageId(nextId);
+      setScreen('battle');
+    } else {
+      setScreen('worldmap');
+    }
+  };
+
+  const retryStage = () => {
+    setScreen('battle');
+  };
+
+  const renderScreen = () => {
+    switch (screen) {
+      case 'title':
+        return <TitleScreen onStart={startGame} onContinue={startGame} hasSave={hasSave} />;
+      case 'worldmap':
+        return <WorldMapScreen gameState={gameState} onSelectStage={selectStage} onOpenShop={() => setScreen('shop')} />;
+      case 'battle':
+        return currentStageId && STAGES[currentStageId]
+          ? <BattleScreen stageId={currentStageId} gameState={gameState} onComplete={completeBattle} onEscape={() => setScreen('worldmap')} />
+          : <WorldMapScreen gameState={gameState} onSelectStage={selectStage} onOpenShop={() => setScreen('shop')} />;
+      case 'stageclear':
+        return <StageClearScreen result={battleResult} gameState={gameState} onNext={goNext} onRetry={retryStage} onWorldMap={() => setScreen('worldmap')} />;
+      case 'shop':
+        return <ShopScreen gameState={gameState} setGameState={setGameState} onClose={() => setScreen('worldmap')} />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div style={{ width:'100vw', height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#0A0E1A' }}>
+      <div style={{ width:1280, height:720, transform:`scale(${scale})`, transformOrigin:'center center', position:'relative', overflow:'hidden', borderRadius:4, boxShadow:'0 30px 80px rgba(0,0,0,0.6)' }}>
+        {renderScreen()}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
