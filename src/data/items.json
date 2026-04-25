@@ -1,0 +1,12 @@
+{
+  "weapons": [
+    {"id":"wooden", "name":"木の剣",  "atk":1, "cost":0,   "desc":"きほんのけん"},
+    {"id":"iron",   "name":"鉄の剣",  "atk":2, "cost":100, "desc":"すこしつよい"},
+    {"id":"flame",  "name":"炎の剣",  "atk":3, "cost":300, "desc":"ほのおがでる！"}
+  ],
+  "armors": [
+    {"id":"hat",    "name":"ぼうし",  "coinBonus":0.1, "cost":0,   "desc":"コイン +10%"},
+    {"id":"helmet", "name":"かぶと",  "coinBonus":0.2, "cost":80,  "desc":"コイン +20%"},
+    {"id":"cape",   "name":"マント",  "coinBonus":0.3, "cost":250, "desc":"コイン +30%"}
+  ]
+}
