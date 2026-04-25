@@ -11,6 +11,8 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0A0E1A; }
 
 @keyframes idle-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
 @keyframes attack-lunge { 0%{transform:translateX(0)} 35%{transform:translateX(55px)} 100%{transform:translateX(0)} }
+@keyframes attack-spin { 0%{transform:translateX(0) rotate(0deg) scale(1)} 30%{transform:translateX(28px) rotate(200deg) scale(1.15)} 65%{transform:translateX(50px) rotate(360deg) scale(1)} 100%{transform:translateX(0) rotate(360deg) scale(1)} }
+@keyframes attack-jump { 0%{transform:translateY(0) rotate(0deg)} 30%{transform:translateY(-52px) rotate(-18deg) scale(1.1)} 60%{transform:translateY(-30px) rotate(10deg) translateX(20px)} 80%{transform:translateY(6px) rotate(-4deg)} 100%{transform:translateY(0) rotate(0deg)} }
 @keyframes enemy-fall { 0%{transform:rotate(0deg) translateY(0);opacity:1} 100%{transform:rotate(85deg) translateY(30px);opacity:0} }
 @keyframes dmg-float { 0%{opacity:1;transform:translateY(0) scale(1)} 80%{opacity:1} 100%{opacity:0;transform:translateY(-70px) scale(1.4)} }
 @keyframes miss-flash { 0%,100%{background:rgba(255,82,82,0)} 50%{background:rgba(255,82,82,0.35)} }
@@ -405,7 +407,7 @@ function WorldMapScreen({ gameState, onSelectStage, onOpenShop }) {
         <div style={{ display:'flex', alignItems:'center', gap:12, flex:1 }}>
           <div style={{ position:'relative', cursor:'pointer' }}>
             <svg width={66} height={78} viewBox="0 0 120 160" style={{ overflow:'visible' }}>
-              <StickFigure weapon={gameState.weapon} armor={gameState.armor} pose="idle" />
+              <StickFigure weapon={gameState.weapon} armor={gameState.armor} pose="idle" color="white" />
             </svg>
           </div>
           <div style={{ color:'white', fontFamily:"'Noto Sans JP',sans-serif" }}>
@@ -564,7 +566,7 @@ function BattleScreen({ stageId, gameState, onComplete, onEscape }) {
       if (e.key.length !== 1) return;
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       const r = ref.current;
-      if (r.heroAnim === 'attack' || r.enemyFalling) return;
+      if (r.heroAnim.startsWith('attack') || r.enemyFalling) return;
 
       const w = r.words[r.wordIdx % r.words.length];
       const romaji = toRomaji(w);
@@ -578,8 +580,9 @@ function BattleScreen({ stageId, gameState, onComplete, onEscape }) {
         setInput(newInput);
 
         if (newInput.length >= romaji.length) {
-          setInput('');
-          setHeroAnim('attack');
+          // 最後の文字を表示したまま少し待ってから次へ進む
+          const patterns = ['attack1','attack2','attack3'];
+          setHeroAnim(patterns[Math.floor(Math.random()*3)]);
           const dmg = weaponAtk;
 
           setTimeout(() => {
@@ -606,6 +609,8 @@ function BattleScreen({ stageId, gameState, onComplete, onEscape }) {
                   setEnemyFalling(false);
                   setEnemyHP(stage.enemyMaxHP);
                   setHeroAnim('idle');
+                  // 入力クリア＆次の単語へ
+                  setInput('');
                   setWordIdx(i => i + 1);
 
                   if (nd >= stage.enemyCount) {
@@ -618,7 +623,11 @@ function BattleScreen({ stageId, gameState, onComplete, onEscape }) {
               } else {
                 setEnemyHP(newHP);
                 setHeroAnim('idle');
-                setWordIdx(i => i + 1);
+                // 入力クリア＆次の単語へ（少し遅らせて最後の文字を見せる）
+                setTimeout(() => {
+                  setInput('');
+                  setWordIdx(i => i + 1);
+                }, 180);
               }
             }, 240);
           }, 140);
@@ -670,13 +679,20 @@ function BattleScreen({ stageId, gameState, onComplete, onEscape }) {
           <div style={{ position:'absolute', top:14, left:16, right:8, fontSize:13, color:'#546E7A', fontWeight:700 }}>
             あなたのゆうしゃ ⚔️
           </div>
-          <div style={{ animation: heroAnim === 'attack' ? 'attack-lunge 0.42s ease-out' : undefined }}>
-            <svg width={140} height={170} viewBox="0 0 120 160" style={{ overflow:'visible' }}>
-              <StickFigure weapon={gameState.weapon} armor={gameState.armor} pose={heroAnim === 'attack' ? 'attack' : 'idle'}
-                animStyle={ heroAnim !== 'attack' ? { animation:'idle-bob 2s ease-in-out infinite' } : {} } />
-            </svg>
-          </div>
-          {heroAnim === 'attack' && (
+          {(() => {
+            const attackCSS = { attack1:'attack-lunge 0.42s ease-out', attack2:'attack-spin 0.5s ease-out', attack3:'attack-jump 0.52s ease-out' };
+            const isAttacking = heroAnim.startsWith('attack');
+            const heroPose = heroAnim === 'attack3' ? 'victory' : isAttacking ? 'attack' : 'idle';
+            return (
+              <div style={{ animation: isAttacking ? attackCSS[heroAnim] : undefined }}>
+                <svg width={140} height={170} viewBox="0 0 120 160" style={{ overflow:'visible' }}>
+                  <StickFigure weapon={gameState.weapon} armor={gameState.armor} pose={heroPose}
+                    animStyle={ !isAttacking ? { animation:'idle-bob 2s ease-in-out infinite' } : {} } />
+                </svg>
+              </div>
+            );
+          })()}
+          {heroAnim.startsWith('attack') && (
             <div style={{ position:'absolute', top:90, right:30, fontSize:24, animation:'dmg-float 0.5s ease-out forwards', pointerEvents:'none' }}>⚡</div>
           )}
         </div>
@@ -809,6 +825,20 @@ function StageClearScreen({ result, gameState, onNext, onRetry, onWorldMap }) {
   const cleared = stars > 0;
   const [displayCoins, setDisplayCoins] = useState(0);
 
+  const onNextRef = useRef(onNext); onNextRef.current = onNext;
+  const onRetryRef = useRef(onRetry); onRetryRef.current = onRetry;
+  const onWorldMapRef = useRef(onWorldMap); onWorldMapRef.current = onWorldMap;
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key === 'a') onRetryRef.current();
+      if (e.key === 'm') onWorldMapRef.current();
+      if (e.key === 'n' && cleared) onNextRef.current();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [cleared]);
+
   useEffect(() => {
     if (!cleared) return;
     let n = 0;
@@ -836,10 +866,10 @@ function StageClearScreen({ result, gameState, onNext, onRetry, onWorldMap }) {
         </div>
         <div style={{ display:'flex', gap:20 }}>
           <button onClick={onWorldMap} style={{ padding:'14px 28px', fontSize:17, borderRadius:14, border:'2px solid #E0E0E0', background:'white', color:'#546E7A', cursor:'pointer', fontWeight:700 }}>
-            マップにもどる
+            マップにもどる <kbd style={{fontSize:12,background:'#F0F0F0',border:'1px solid #CCC',borderRadius:4,padding:'1px 6px'}}>M</kbd>
           </button>
           <button onClick={onRetry} style={{ padding:'16px 44px', fontSize:22, fontWeight:900, background:'#FFD700', color:'#1A237E', border:'none', borderRadius:16, cursor:'pointer', boxShadow:'0 5px 0 #F9A825' }}>
-            🔄 もう一度！
+            🔄 もう一度！ <kbd style={{fontSize:13,background:'rgba(0,0,0,0.12)',border:'1px solid rgba(0,0,0,0.15)',borderRadius:4,padding:'1px 6px',marginLeft:2}}>A</kbd>
           </button>
         </div>
       </div>
@@ -892,15 +922,15 @@ function StageClearScreen({ result, gameState, onNext, onRetry, onWorldMap }) {
       <div style={{ display:'flex', gap:20, marginTop:28 }}>
         <button onClick={onRetry}
           style={{ padding:'12px 24px', fontSize:17, borderRadius:14, border:'2px solid #E0E0E0', background:'white', color:'#546E7A', cursor:'pointer', fontWeight:700 }}>
-          🔄 もう一度
+          🔄 もう一度 <kbd style={{fontSize:12,background:'#F0F0F0',border:'1px solid #CCC',borderRadius:4,padding:'1px 6px'}}>A</kbd>
         </button>
         <button onClick={onWorldMap}
           style={{ padding:'12px 24px', fontSize:17, borderRadius:14, border:'2px solid #E0E0E0', background:'white', color:'#546E7A', cursor:'pointer', fontWeight:700 }}>
-          🗺️ マップ
+          🗺️ マップ <kbd style={{fontSize:12,background:'#F0F0F0',border:'1px solid #CCC',borderRadius:4,padding:'1px 6px'}}>M</kbd>
         </button>
         <button onClick={onNext}
           style={{ padding:'14px 44px', fontSize:22, fontWeight:900, background:'linear-gradient(135deg,#FFD700,#FFA000)', color:'#1A237E', border:'none', borderRadius:16, cursor:'pointer', boxShadow:'0 5px 0 #F9A825,0 8px 20px rgba(255,160,0,0.35)', transition:'transform 0.1s' }}>
-          つぎへ →
+          つぎへ → <kbd style={{fontSize:13,background:'rgba(0,0,0,0.12)',border:'1px solid rgba(0,0,0,0.15)',borderRadius:4,padding:'1px 6px',marginLeft:4}}>N</kbd>
         </button>
       </div>
     </div>
