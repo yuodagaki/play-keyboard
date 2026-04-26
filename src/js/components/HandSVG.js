@@ -15,7 +15,7 @@ export const KEY_FINGER = {
   'Y':'R_INDEX','H':'R_INDEX','N':'R_INDEX','U':'R_INDEX','J':'R_INDEX','M':'R_INDEX',
   'I':'R_MIDDLE','K':'R_MIDDLE',',':'R_MIDDLE',
   'O':'R_RING','L':'R_RING','.':'R_RING',
-  'P':'R_PINKY',';':'R_PINKY','/':'R_PINKY',
+  'P':'R_PINKY',';':'R_PINKY','/':'R_PINKY','-':'R_PINKY',
 };
 
 function getFingerColor(fingerId) {

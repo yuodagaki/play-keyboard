@@ -3,10 +3,11 @@ import { useState } from 'https://esm.sh/react';
 import { HandSVG, KEY_FINGER, FINGER_COLOR } from './HandSVG.js';
 
 const KB_ROWS = [
-  ['Q','W','E','R','T','Y','U','I','O','P'],
+  ['Q','W','E','R','T','Y','U','I','O','P','-'],
   ['A','S','D','F','G','H','J','K','L',';'],
   ['Z','X','C','V','B','N','M',',','.'],
 ];
+const KEY_LABELS = { '-': 'ー' };
 const HOME_KEYS = new Set(['F','J']);
 
 function keyColor(key, nextChar, availKeys) {
@@ -86,7 +87,7 @@ export function KeyboardGuide({ nextChar, availableKeys, flashError }) {
                       boxShadow: shadow,
                       border: '2px solid transparent',
                     }}
-                  >${k}</div>
+                  >${KEY_LABELS[k] ?? k}</div>
                 `;
               })}
             </div>
