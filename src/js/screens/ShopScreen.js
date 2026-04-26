@@ -80,7 +80,7 @@ export function ShopScreen({ slot, onBuy, onEquip, onClose }) {
     <div class="screen shop-screen">
       <!-- ヘッダー -->
       <div class="header">
-        <button class="btn-ghost" style=${{ color:'white', borderColor:'rgba(255,255,255,0.4)' }} onClick=${onClose}>
+        <button class="btn-ghost" style=${{ background:'white', color:'var(--color-text)', borderColor:'white', fontWeight:'900' }} onClick=${onClose}>
           ← もどる <span class="kbd">Esc</span>
         </button>
         <span style=${{ fontSize:'22px', fontWeight:'900', color:'white', marginLeft:'16px' }}>🛒 ショップ</span>

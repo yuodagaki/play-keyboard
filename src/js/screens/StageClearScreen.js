@@ -3,7 +3,7 @@ import { useState, useEffect } from 'https://esm.sh/react';
 import { StickFigure } from '../components/StickFigure.js';
 import { Confetti } from '../components/Confetti.js';
 
-const ARMOR_BONUS_PCT = { hat: 10, helmet: 20, cape: 30 };
+const ARMOR_BONUS_PCT = { hat:10, helmet:20, cape:30, armor:40, robe:50, shield:60, divine:70 };
 
 function StarRow({ stars }) {
   return html`

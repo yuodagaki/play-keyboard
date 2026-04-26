@@ -3,6 +3,7 @@ import { useState, useEffect } from 'https://esm.sh/react';
 import { StickFigure } from '../components/StickFigure.js';
 import { EnemySVG } from '../components/EnemySVG.js';
 import { KeyboardGuide } from '../components/KeyboardGuide.js';
+import { TutorialOverlay } from '../components/TutorialOverlay.js';
 import { toRomaji } from '../utils/romaji.js';
 import { getStage, getWords } from '../data/loader.js';
 
@@ -10,8 +11,8 @@ const ENEMY_NAMES = {
   slime: 'スライム', mushroom: 'キノコ', goblin: 'ゴブリン',
   bat: 'コウモリ', skeleton: 'ガイコツ', golem: 'ゴーレム',
 };
-const WEAPON_ATK  = { wooden: 1, iron: 2, flame: 3 };
-const ARMOR_BONUS = { hat: 0.1, helmet: 0.2, cape: 0.3 };
+const WEAPON_ATK  = { wooden:1, iron:2, flame:3, thunder:4, ice:5, dragon:6, legendary:7 };
+const ARMOR_BONUS = { hat:0.1, helmet:0.2, cape:0.3, armor:0.4, robe:0.5, shield:0.6, divine:0.7 };
 
 const ATTACK_ANIMS = [
   { css: 'attack-lunge 0.40s ease-out',  dur: 400 },
@@ -53,7 +54,7 @@ function pickQuestion(stage, words) {
   return { text: word, romaji: toRomaji(word) };
 }
 
-export function BattleScreen({ stageId, slot, onClear, onBack }) {
+export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onTutorialNext }) {
   const [stage, setStage] = useState(null);
   const [words, setWords] = useState(null);
   const [enemies, setEnemies] = useState([]);
@@ -103,6 +104,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack }) {
     if (!stage || !question || fallingEnemy || done || enemies.length === 0) return;
 
     const handler = (e) => {
+      if (tutorialStep > 0) return;
       if (showHomeGuide) { setShowHomeGuide(false); }
       if (e.key === 'Escape') { onBack(); return; }
 
@@ -188,7 +190,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack }) {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [stage, question, typed, fallingEnemy, done, enemies, enemyIdx,
-      correctKeys, totalKeys, showHomeGuide, atk, words]);
+      correctKeys, totalKeys, showHomeGuide, atk, words, tutorialStep]);
 
   if (!stage || !question || enemies.length === 0) {
     return html`
@@ -273,7 +275,12 @@ export function BattleScreen({ stageId, slot, onClear, onBack }) {
           <div class="battle-question__hira">${question.text}</div>
           <div class="battle-question__hint">
             ${question.romaji.split('').map((ch, i) => html`
-              <span key=${i} style=${{ color: i < typed.length ? '#5BB8FF' : '#90A4AE' }}>
+              <span key=${i} style=${{
+                color: i < typed.length ? '#5BB8FF'
+                     : i === typed.length ? '#455A64'
+                     : '#90A4AE',
+                fontWeight: i === typed.length ? '900' : '700',
+              }}>
                 ${ch.toUpperCase()}
               </span>
             `)}
@@ -315,6 +322,11 @@ export function BattleScreen({ stageId, slot, onClear, onBack }) {
         availableKeys=${isPhaseA ? stage.availableKeys : ''}
         flashError=${flashError}
       />
+
+      <!-- チュートリアル（ステップ3-4はバトル画面） -->
+      ${(tutorialStep === 3 || tutorialStep === 4) && html`
+        <${TutorialOverlay} step=${tutorialStep} onNext=${onTutorialNext} />
+      `}
     </div>
   `;
 }

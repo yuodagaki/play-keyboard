@@ -727,6 +727,69 @@
   white-space: nowrap;
 }
 
+/* ════════════════════════════════════
+   チュートリアルオーバーレイ
+════════════════════════════════════ */
+.tutorial-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.48);
+  z-index: 200;
+  pointer-events: none;
+}
+
+.tutorial-bubble {
+  position: absolute;
+  background: white;
+  border-radius: 16px;
+  padding: 22px 26px;
+  max-width: 300px;
+  min-width: 230px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  z-index: 202;
+  pointer-events: all;
+}
+
+.tutorial-bubble::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 11px solid transparent;
+}
+
+.tutorial-bubble--top::after {
+  border-bottom-color: white;
+  top: -22px;
+  left: 28px;
+}
+
+.tutorial-bubble--bottom::after {
+  border-top-color: white;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tutorial-bubble__text {
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0 0 18px;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.tutorial-bubble__btn {
+  width: 100%;
+}
+
+.tutorial-highlight {
+  position: relative;
+  z-index: 201;
+  border-radius: 10px;
+  animation: tutorial-glow 1.4s ease-in-out infinite;
+}
+
 /* ダメージ数値 */
 .dmg-float {
   position: absolute;

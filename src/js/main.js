@@ -28,6 +28,9 @@ function App() {
   const [slot, setSlot] = useState(null);
   const [selectedStageId, setSelectedStageId] = useState(null);
   const [clearResult, setClearResult] = useState(null);
+  const [tutorialStep, setTutorialStep] = useState(() =>
+    localStorage.getItem('kba-tutorial-done') ? 0 : 1
+  );
 
   // Preload JSON data on mount
   useEffect(() => { preloadAll(); }, []);
@@ -122,6 +125,17 @@ function App() {
 
   const handleShopClose = () => setScreen('worldmap');
 
+  const handleTutorialNext = () => {
+    setTutorialStep(prev => {
+      const next = prev + 1;
+      if (next > 4) {
+        localStorage.setItem('kba-tutorial-done', '1');
+        return 0;
+      }
+      return next;
+    });
+  };
+
   // ─── レンダリング ─────────────────────────────────────────
 
   const renderScreen = () => {
@@ -134,6 +148,8 @@ function App() {
           slot=${slot}
           onSelectStage=${handleSelectStage}
           onOpenShop=${handleOpenShop}
+          tutorialStep=${tutorialStep}
+          onTutorialNext=${handleTutorialNext}
         />
       `;
     }
@@ -144,6 +160,8 @@ function App() {
           slot=${slot}
           onClear=${handleBattleClear}
           onBack=${handleBattleBack}
+          tutorialStep=${tutorialStep}
+          onTutorialNext=${handleTutorialNext}
         />
       `;
     }

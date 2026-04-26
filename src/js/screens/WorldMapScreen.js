@@ -1,6 +1,7 @@
 import { html } from 'https://esm.sh/htm/react';
 import { useState, useEffect } from 'https://esm.sh/react';
 import { StickFigure } from '../components/StickFigure.js';
+import { TutorialOverlay } from '../components/TutorialOverlay.js';
 import { getWorlds, getStages } from '../data/loader.js';
 
 function StageNode({ stage, status, stars, onClick }) {
@@ -93,7 +94,7 @@ function StagePopup({ stage, world, slot, onChallenge, onClose }) {
   `;
 }
 
-export function WorldMapScreen({ slot, onSelectStage, onOpenShop }) {
+export function WorldMapScreen({ slot, onSelectStage, onOpenShop, tutorialStep, onTutorialNext }) {
   const [worlds, setWorlds] = useState([]);
   const [stages, setStages] = useState([]);
   const [selectedStage, setSelectedStage] = useState(null);
@@ -137,13 +138,13 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop }) {
       <div class="header">
         <div style=${{ display:'flex', alignItems:'center', gap:'12px' }}>
           <svg width="44" height="52" viewBox="0 0 120 160" style=${{ overflow:'visible' }}>
-            <${StickFigure} weapon=${slot.weapon} armor=${slot.armor} pose="idle" />
+            <${StickFigure} weapon=${slot.weapon} armor=${slot.armor} pose="idle" color="white" />
           </svg>
           <div>
             <div style=${{ fontSize:'13px', color:'rgba(255,255,255,0.65)', fontWeight:'700' }}>${slot.name}</div>
             <div style=${{ fontSize:'15px', color:'white', fontWeight:'900' }}>
-              ⚔️ ${slot.weapon === 'wooden' ? '木の剣' : slot.weapon === 'iron' ? '鉄の剣' : '炎の剣'}
-              🛡️ ${slot.armor === 'hat' ? 'ぼうし' : slot.armor === 'helmet' ? 'かぶと' : 'マント'}
+              ⚔️ ${{ wooden:'木の剣', iron:'鉄の剣', flame:'炎の剣', thunder:'かみなりの剣', ice:'こおりの剣', dragon:'りゅうの剣', legendary:'でんせつの剣' }[slot.weapon] ?? slot.weapon}
+              🛡️ ${{ hat:'ぼうし', helmet:'かぶと', cape:'マント', armor:'よろい', robe:'まほうのローブ', shield:'せいなるたて', divine:'しんせいのよろい' }[slot.armor] ?? slot.armor}
             </div>
           </div>
         </div>
@@ -180,6 +181,11 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop }) {
           onChallenge=${handleChallenge}
           onClose=${() => { setSelectedStage(null); setSelectedWorld(null); }}
         />
+      `}
+
+      <!-- チュートリアル（ステップ1-2はワールドマップ） -->
+      ${(tutorialStep === 1 || tutorialStep === 2) && html`
+        <${TutorialOverlay} step=${tutorialStep} onNext=${onTutorialNext} />
       `}
     </div>
   `;

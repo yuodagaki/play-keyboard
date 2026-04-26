@@ -125,6 +125,12 @@
   50%       { filter: brightness(1.5) sepia(1) hue-rotate(310deg) saturate(3); }
 }
 
+/* ── チュートリアル ── */
+@keyframes tutorial-glow {
+  0%, 100% { box-shadow: 0 0 0 3px #FFD700, 0 0 12px rgba(255,215,0,0.45); }
+  50%       { box-shadow: 0 0 0 5px #FFD700, 0 0 22px rgba(255,215,0,0.75); }
+}
+
 /* ── ホームポジション吹き出し ── */
 @keyframes tooltip-pop {
   0%   { transform: translateX(-50%) scale(0.8); opacity: 0; }

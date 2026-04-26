@@ -1,12 +1,20 @@
 {
   "weapons": [
-    {"id":"wooden", "name":"木の剣",  "atk":1, "cost":0,   "desc":"きほんのけん"},
-    {"id":"iron",   "name":"鉄の剣",  "atk":2, "cost":100, "desc":"すこしつよい"},
-    {"id":"flame",  "name":"炎の剣",  "atk":3, "cost":300, "desc":"ほのおがでる！"}
+    {"id":"wooden",    "name":"木の剣",         "atk":1, "cost":0,    "desc":"きほんのけん。こうげき +1"},
+    {"id":"iron",      "name":"鉄の剣",         "atk":2, "cost":100,  "desc":"すこしつよい。こうげき +2"},
+    {"id":"flame",     "name":"炎の剣",         "atk":3, "cost":280,  "desc":"ほのおがでる！こうげき +3"},
+    {"id":"thunder",   "name":"かみなりの剣",   "atk":4, "cost":550,  "desc":"いなずまがはしる！こうげき +4"},
+    {"id":"ice",       "name":"こおりの剣",     "atk":5, "cost":900,  "desc":"ひえひえ！こうげき +5"},
+    {"id":"dragon",    "name":"りゅうの剣",     "atk":6, "cost":1500, "desc":"りゅうのちからを宿す。こうげき +6"},
+    {"id":"legendary", "name":"でんせつの剣",   "atk":7, "cost":2500, "desc":"つよさのきわみ！こうげき +7"}
   ],
   "armors": [
-    {"id":"hat",    "name":"ぼうし",  "coinBonus":0.1, "cost":0,   "desc":"コイン +10%"},
-    {"id":"helmet", "name":"かぶと",  "coinBonus":0.2, "cost":80,  "desc":"コイン +20%"},
-    {"id":"cape",   "name":"マント",  "coinBonus":0.3, "cost":250, "desc":"コイン +30%"}
+    {"id":"hat",    "name":"ぼうし",           "coinBonus":0.10, "cost":0,    "desc":"コイン +10%"},
+    {"id":"helmet", "name":"かぶと",           "coinBonus":0.20, "cost":80,   "desc":"コイン +20%"},
+    {"id":"cape",   "name":"マント",           "coinBonus":0.30, "cost":220,  "desc":"コイン +30%"},
+    {"id":"armor",  "name":"よろい",           "coinBonus":0.40, "cost":450,  "desc":"コイン +40%"},
+    {"id":"robe",   "name":"まほうのローブ",   "coinBonus":0.50, "cost":800,  "desc":"コイン +50%"},
+    {"id":"shield", "name":"せいなるたて",     "coinBonus":0.60, "cost":1300, "desc":"コイン +60%"},
+    {"id":"divine", "name":"しんせいのよろい", "coinBonus":0.70, "cost":2200, "desc":"コイン +70%"}
   ]
 }
