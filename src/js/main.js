@@ -5,11 +5,13 @@ import { createRoot } from 'https://esm.sh/react-dom/client';
 import { saveSlot } from './utils/save.js';
 import { preloadAll } from './data/loader.js';
 
-import { TitleScreen }      from './screens/TitleScreen.js';
-import { WorldMapScreen }   from './screens/WorldMapScreen.js';
-import { BattleScreen }     from './screens/BattleScreen.js';
-import { StageClearScreen } from './screens/StageClearScreen.js';
-import { ShopScreen }       from './screens/ShopScreen.js';
+import { TitleScreen }            from './screens/TitleScreen.js';
+import { WorldMapScreen }         from './screens/WorldMapScreen.js';
+import { BattleScreen }           from './screens/BattleScreen.js';
+import { StageClearScreen }       from './screens/StageClearScreen.js';
+import { ShopScreen }             from './screens/ShopScreen.js';
+import { EndlessScreen }          from './screens/EndlessScreen.js';
+import { EndlessGameOverScreen }  from './screens/EndlessGameOverScreen.js';
 
 function useViewportScale() {
   const calc = () => Math.min(window.innerWidth / 1280, window.innerHeight / 720);
@@ -28,6 +30,7 @@ function App() {
   const [slot, setSlot] = useState(null);
   const [selectedStageId, setSelectedStageId] = useState(null);
   const [clearResult, setClearResult] = useState(null);
+  const [endlessResult, setEndlessResult] = useState(null);
   const [tutorialStep, setTutorialStep] = useState(() =>
     localStorage.getItem('kba-tutorial-done') ? 0 : 1
   );
@@ -95,7 +98,28 @@ function App() {
     setScreen('battle');
   };
 
-  const handleOpenShop = () => setScreen('shop');
+  const handleOpenShop    = () => setScreen('shop');
+  const handleOpenEndless = () => setScreen('endless');
+
+  const handleEndlessGameOver = (result) => {
+    const { loop, sessionMobs, sessionBosses, heroLevel } = result;
+    const prev = slot.endlessRecord;
+    const newRecord = {
+      maxLoop:     Math.max(prev?.maxLoop    ?? 0, loop),
+      maxLevel:    Math.max(prev?.maxLevel   ?? 0, heroLevel),
+      totalMobs:   (prev?.totalMobs   ?? 0) + sessionMobs,
+      totalBosses: (prev?.totalBosses ?? 0) + sessionBosses,
+    };
+    const isBest = newRecord.maxLoop > (prev?.maxLoop ?? 0) || newRecord.maxLevel > (prev?.maxLevel ?? 0);
+    const newSlot = { ...slot, endlessRecord: newRecord };
+    setSlot(newSlot);
+    saveSlot(newSlot);
+    setEndlessResult({ ...result, isBest });
+    setScreen('endlessgameover');
+  };
+
+  const handleEndlessRetry    = () => setScreen('endless');
+  const handleEndlessWorldMap = () => setScreen('worldmap');
 
   const handleBuy = (type, item) => {
     const newSlot = type === 'weapon'
@@ -119,6 +143,16 @@ function App() {
     const newSlot = type === 'weapon'
       ? { ...slot, weapon: item.id }
       : { ...slot, armor: item.id };
+    setSlot(newSlot);
+    saveSlot(newSlot);
+  };
+
+  const handleBuySpecial = (item) => {
+    const newSlot = {
+      ...slot,
+      coins: slot.coins - item.cost,
+      ownedSpecials: [...(slot.ownedSpecials ?? []), item.id],
+    };
     setSlot(newSlot);
     saveSlot(newSlot);
   };
@@ -148,6 +182,7 @@ function App() {
           slot=${slot}
           onSelectStage=${handleSelectStage}
           onOpenShop=${handleOpenShop}
+          onOpenEndless=${handleOpenEndless}
           tutorialStep=${tutorialStep}
           onTutorialNext=${handleTutorialNext}
         />
@@ -182,7 +217,27 @@ function App() {
           slot=${slot}
           onBuy=${handleBuy}
           onEquip=${handleEquip}
+          onBuySpecial=${handleBuySpecial}
           onClose=${handleShopClose}
+        />
+      `;
+    }
+    if (screen === 'endless' && slot) {
+      return html`
+        <${EndlessScreen}
+          slot=${slot}
+          onGameOver=${handleEndlessGameOver}
+          onBack=${handleEndlessWorldMap}
+        />
+      `;
+    }
+    if (screen === 'endlessgameover' && endlessResult && slot) {
+      return html`
+        <${EndlessGameOverScreen}
+          result=${endlessResult}
+          slot=${slot}
+          onRetry=${handleEndlessRetry}
+          onWorldMap=${handleEndlessWorldMap}
         />
       `;
     }

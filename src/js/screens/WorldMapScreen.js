@@ -94,7 +94,7 @@ function StagePopup({ stage, world, slot, onChallenge, onClose }) {
   `;
 }
 
-export function WorldMapScreen({ slot, onSelectStage, onOpenShop, tutorialStep, onTutorialNext }) {
+export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless, tutorialStep, onTutorialNext }) {
   const [worlds, setWorlds] = useState([]);
   const [stages, setStages] = useState([]);
   const [selectedStage, setSelectedStage] = useState(null);
@@ -149,13 +149,22 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop, tutorialStep, 
           </div>
         </div>
 
-        <div style=${{ display:'flex', alignItems:'center', gap:'20px', marginLeft:'auto' }}>
+        <div style=${{ display:'flex', alignItems:'center', gap:'12px', marginLeft:'auto' }}>
           <div style=${{ fontSize:'20px', fontWeight:'900', color:'#FFD700' }}>
             💰 ${slot.coins}
           </div>
           <button class="btn-secondary" onClick=${onOpenShop}>
             🛒 ショップ <span class="kbd">S</span>
           </button>
+          ${slot.ownedSpecials?.includes('endless') ? html`
+            <button class="btn-secondary" style=${{ background:'#1A237E', borderColor:'#5C6BC0' }} onClick=${onOpenEndless}>
+              ⚔️ エンドレス
+            </button>
+          ` : html`
+            <button class="btn-ghost" style=${{ opacity:0.5, cursor:'default' }} title="ショップで購入できるよ！">
+              🔒 エンドレス
+            </button>
+          `}
         </div>
       </div>
 
@@ -170,6 +179,22 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop, tutorialStep, 
             onStageClick=${handleStageClick}
           />
         `)}
+
+        <!-- エンドレス記録バッジ -->
+        ${slot.ownedSpecials?.includes('endless') && slot.endlessRecord && html`
+          <div class="endless-record-badge">
+            <div style=${{ fontSize:'32px' }}>🏆</div>
+            <div>
+              <div class="endless-record-badge__title">エンドレス さいこうきろく</div>
+              <div class="endless-record-badge__stats">
+                <span>ループ ${slot.endlessRecord.maxLoop}</span>
+                <span>Lv.${slot.endlessRecord.maxLevel}</span>
+                <span>雑魚 ${slot.endlessRecord.totalMobs}たい</span>
+                <span>ボス ${slot.endlessRecord.totalBosses}たい</span>
+              </div>
+            </div>
+          </div>
+        `}
       </div>
 
       <!-- ステージポップアップ -->

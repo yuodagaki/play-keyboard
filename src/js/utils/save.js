@@ -8,8 +8,10 @@ function defaultGameState() {
     armor: 'hat',
     ownedWeapons: ['wooden'],
     ownedArmors: ['hat'],
+    ownedSpecials: [],
     progress: {},
     maxUnlocked: 1,
+    endlessRecord: null,
   };
 }
 

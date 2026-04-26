@@ -31,7 +31,7 @@ function ItemRow({ item, owned, equipped, canAfford, onBuy, onEquip }) {
   `;
 }
 
-export function ShopScreen({ slot, onBuy, onEquip, onClose }) {
+export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
   const [items, setItems] = useState(null);
   const [previewWeapon, setPreviewWeapon] = useState(slot.weapon);
   const [previewArmor, setPreviewArmor] = useState(slot.armor);
@@ -133,6 +133,34 @@ export function ShopScreen({ slot, onBuy, onEquip, onClose }) {
                 onEquip=${() => handleEquipArmor(item)}
               />
             `)}
+
+            ${items.specials?.length > 0 && html`
+              <div class="shop-items__section-title" style=${{ marginTop:'24px' }}>✨ とくべつ</div>
+              ${items.specials.map(item => {
+                const owned = slot.ownedSpecials?.includes(item.id);
+                return html`
+                  <div key=${item.id} class=${'shop-item' + (owned ? ' shop-item--equipped' : '')}>
+                    <div class="shop-item__info">
+                      <div class="shop-item__name">${item.emoji} ${item.name}</div>
+                      <div class="shop-item__desc">${item.desc}</div>
+                    </div>
+                    ${owned ? html`
+                      <div class="shop-item__badge-equipped">かいほうずみ</div>
+                    ` : html`
+                      <button
+                        class=${'shop-item__btn-buy shop-item__btn-buy--' + (slot.coins >= item.cost ? 'available' : 'disabled')}
+                        onClick=${slot.coins >= item.cost ? () => {
+                          onBuySpecial(item);
+                          showToast(`${item.name} をかった！`);
+                        } : undefined}
+                      >
+                        💰 ${item.cost}
+                      </button>
+                    `}
+                  </div>
+                `;
+              })}
+            `}
           `}
         </div>
       </div>

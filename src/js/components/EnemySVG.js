@@ -99,11 +99,12 @@ function Golem({ style }) {
 
 const RENDERERS = { slime: Slime, mushroom: Mushroom, goblin: Goblin, bat: Bat, skeleton: Skeleton, golem: Golem };
 
-export function EnemySVG({ type, flash = false, falling = false }) {
+export function EnemySVG({ type, flash = false, falling = false, boss = false }) {
   const style = damageStyle(flash, falling);
   const Renderer = RENDERERS[type] ?? Slime;
+  const bossStyle = boss ? { transform: `scale(${1.7})`, transformOrigin: '70px 100px' } : {};
   return html`
-    <svg width="160" height="175" viewBox="0 0 140 160" style=${{ overflow:'visible' }}>
+    <svg width="160" height="175" viewBox="0 0 140 160" style=${{ overflow:'visible', ...bossStyle }}>
       <${Renderer} style=${style} />
     </svg>
   `;
