@@ -181,11 +181,10 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
           setTyped(newTyped);
         }
       } else {
-        // Miss
+        // Miss — keep typed as-is (retry from the wrong character)
         const newTK = totalKeys + 1;
         setTotalKeys(newTK);
         setAccuracy(correctKeys === 0 ? 0 : Math.round(correctKeys / newTK * 100));
-        setTyped('');
         setFlashError(true);
         setMissPulse(true);
         setTimeout(() => { setFlashError(false); setMissPulse(false); }, 350);

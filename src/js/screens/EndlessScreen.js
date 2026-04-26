@@ -8,6 +8,7 @@ import { getWords } from '../data/loader.js';
 import { ENDLESS } from '../data/endlessConstants.js';
 
 const WEAPON_ATK  = { wooden:1, iron:2, flame:3, thunder:4, ice:5, dragon:6, legendary:7 };
+const ARMOR_XP_MULT = { hat:1.0, helmet:1.1, cape:1.2, armor:1.3, robe:1.5, shield:1.6, divine:1.7 };
 const ENEMY_TYPES = ['slime', 'mushroom', 'goblin', 'bat', 'skeleton', 'golem'];
 const ENEMY_NAMES = { slime:'スライム', mushroom:'キノコ', goblin:'ゴブリン', bat:'コウモリ', skeleton:'ガイコツ', golem:'ゴーレム' };
 const ATTACK_ANIMS = [
@@ -177,7 +178,8 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
           setEnemyHP(newEnemyHP);
 
           if (newEnemyHP <= 0) {
-            const xpGain = isBoss ? ENDLESS.XP_BOSS : ENDLESS.XP_MOB;
+            const baseXP = isBoss ? ENDLESS.XP_BOSS : ENDLESS.XP_MOB;
+            const xpGain = Math.ceil(baseXP * (ARMOR_XP_MULT[slot.armor] ?? 1.0));
             handleEnemyDeath(xpGain, newCharCount);
             return;
           }
@@ -193,8 +195,7 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
           setTyped(newTyped);
         }
       } else {
-        // Typo → enemy attacks
-        setTyped('');
+        // Typo → enemy attacks (keep typed as-is, retry from wrong character)
         setFlashError(true);
         setTimeout(() => setFlashError(false), 350);
 
@@ -241,19 +242,23 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
 
     if (rawNewXP >= ENDLESS.XP_PER_LEVEL && heroLevel < ENDLESS.MAX_LEVEL) {
       newLevel = heroLevel + 1;
-      const roll = Math.floor(Math.random() * 3);
-      if (roll === 0) {
-        newHeroAtkBonus = Math.min(ENDLESS.MAX_STAT, heroAtkBonus + ENDLESS.LEVELUP_ATK);
-        lvlMsg = `Lv.${newLevel} ▲ こうげきりょく +${ENDLESS.LEVELUP_ATK}`;
-      } else if (roll === 1) {
-        newHeroDef = Math.min(ENDLESS.MAX_STAT, heroDef + ENDLESS.LEVELUP_DEF);
-        heroDefRef.current = newHeroDef;
-        lvlMsg = `Lv.${newLevel} ▲ まもりのちから +${ENDLESS.LEVELUP_DEF}`;
-      } else {
-        newHeroMaxHP = Math.min(ENDLESS.MAX_STAT, heroMaxHP + ENDLESS.LEVELUP_HP);
-        newHeroHP = Math.min(newHeroMaxHP, heroHP + ENDLESS.LEVELUP_HP);
-        lvlMsg = `Lv.${newLevel} ▲ HP +${ENDLESS.LEVELUP_HP}`;
+      const [rollA, rollB] = [0, 1, 2].sort(() => Math.random() - 0.5);
+      const lvlParts = [];
+      for (const roll of [rollA, rollB]) {
+        if (roll === 0) {
+          newHeroAtkBonus = Math.min(ENDLESS.MAX_STAT, newHeroAtkBonus + ENDLESS.LEVELUP_ATK);
+          lvlParts.push(`こうげき +${ENDLESS.LEVELUP_ATK}`);
+        } else if (roll === 1) {
+          newHeroDef = Math.min(ENDLESS.MAX_STAT, newHeroDef + ENDLESS.LEVELUP_DEF);
+          heroDefRef.current = newHeroDef;
+          lvlParts.push(`まもり +${ENDLESS.LEVELUP_DEF}`);
+        } else {
+          newHeroMaxHP = Math.min(ENDLESS.MAX_STAT, newHeroMaxHP + ENDLESS.LEVELUP_HP);
+          newHeroHP = Math.min(newHeroMaxHP, newHeroHP + ENDLESS.LEVELUP_HP);
+          lvlParts.push(`HP +${ENDLESS.LEVELUP_HP}`);
+        }
       }
+      lvlMsg = `Lv.${newLevel} ▲ ${lvlParts.join(' / ')}`;
     }
     const newXP = rawNewXP % ENDLESS.XP_PER_LEVEL;
 
