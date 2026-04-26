@@ -114,7 +114,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
       if (e.key === 'Escape') { onBack(); return; }
 
       const key = e.key.toLowerCase();
-      if (key.length !== 1 || !/[a-z;,./]/.test(key)) return;
+      if (key.length !== 1 || !/[a-z;,./\-]/.test(key)) return;
 
       // 単語完了後の遷移待機中は入力を無視
       if (typed.length >= question.romaji.length) return;

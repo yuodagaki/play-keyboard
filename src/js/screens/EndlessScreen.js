@@ -148,7 +148,7 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
     const handler = (e) => {
       if (e.key === 'Escape') { onBack(); return; }
       const key = e.key.toLowerCase();
-      if (key.length !== 1 || !/[a-z;,./]/.test(key)) return;
+      if (key.length !== 1 || !/[a-z;,./\-]/.test(key)) return;
       if (typed.length >= question.romaji.length) return;
 
       const targetChar = question.romaji[typed.length];

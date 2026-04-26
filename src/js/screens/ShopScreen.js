@@ -14,7 +14,7 @@ function ItemRow({ item, owned, equipped, canAfford, onBuy, onEquip }) {
         <div class="shop-item__desc">${item.desc}</div>
       </div>
       ${isEquipped ? html`
-        <div class="shop-item__badge-equipped">そうちゅう</div>
+        <div class="shop-item__badge-equipped">そうびちゅう</div>
       ` : isOwned ? html`
         <button class="shop-item__btn-equip" onClick=${onEquip}>
           そうびする
