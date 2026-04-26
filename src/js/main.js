@@ -60,7 +60,7 @@ function App() {
         [stageId]: { stars: Math.max(existingStars, stars) },
       };
       const newMaxUnlocked = stageId === slot.maxUnlocked
-        ? Math.min(slot.maxUnlocked + 1, 46)
+        ? Math.min(slot.maxUnlocked + 1, 56)
         : slot.maxUnlocked;
 
       newSlot = {
@@ -81,7 +81,7 @@ function App() {
 
   const handleClearNext = () => {
     const nextId = clearResult.stageId + 1;
-    if (nextId <= 46) {
+    if (nextId <= 56) {
       handleSelectStage(nextId);
     } else {
       setScreen('worldmap');

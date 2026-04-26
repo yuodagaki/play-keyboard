@@ -49,6 +49,11 @@ function pickQuestion(stage, words) {
     const ch = set[Math.floor(Math.random() * set.length)];
     return { text: ch, romaji: toRomaji(ch) };
   }
+  if (stage.phase === 'G') {
+    const list = words?.sentences?.[stage.wordDifficulty] ?? ['ねこがいる'];
+    const sentence = list[Math.floor(Math.random() * list.length)];
+    return { text: sentence, romaji: toRomaji(sentence) };
+  }
   const list = words?.[String(stage.wordLength)]?.[stage.wordDifficulty] ?? ['ねこ'];
   const word = list[Math.floor(Math.random() * list.length)];
   return { text: word, romaji: toRomaji(word) };
@@ -79,7 +84,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
   useEffect(() => {
     getStage(stageId).then(s => {
       setStage(s);
-      if (s && ['C', 'D', 'E', 'F'].includes(s.phase)) {
+      if (s && ['C', 'D', 'E', 'F', 'G'].includes(s.phase)) {
         getWords().then(setWords);
       }
     });
@@ -88,7 +93,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
   // Init enemies + first question
   useEffect(() => {
     if (!stage) return;
-    if (['C', 'D', 'E', 'F'].includes(stage.phase) && !words) return;
+    if (['C', 'D', 'E', 'F', 'G'].includes(stage.phase) && !words) return;
     setEnemies(Array.from({ length: stage.enemyCount }, () => ({ hp: stage.enemyMaxHP })));
     setEnemyIdx(0);
     setQuestion(pickQuestion(stage, words));

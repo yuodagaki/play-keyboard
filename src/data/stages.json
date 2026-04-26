@@ -592,5 +592,105 @@
     "enemyCount": 10,
     "enemyMaxHP": 20,
     "coinReward": 180
+  },
+  {
+    "id": 47,
+    "world": 9,
+    "phase": "G",
+    "wordDifficulty": "easy",
+    "enemyType": "slime",
+    "enemyCount": 10,
+    "enemyMaxHP": 20,
+    "coinReward": 180
+  },
+  {
+    "id": 48,
+    "world": 9,
+    "phase": "G",
+    "wordDifficulty": "easy",
+    "enemyType": "mushroom",
+    "enemyCount": 10,
+    "enemyMaxHP": 20,
+    "coinReward": 180
+  },
+  {
+    "id": 49,
+    "world": 9,
+    "phase": "G",
+    "wordDifficulty": "normal",
+    "enemyType": "bat",
+    "enemyCount": 10,
+    "enemyMaxHP": 20,
+    "coinReward": 190
+  },
+  {
+    "id": 50,
+    "world": 9,
+    "phase": "G",
+    "wordDifficulty": "normal",
+    "enemyType": "bat",
+    "enemyCount": 10,
+    "enemyMaxHP": 20,
+    "coinReward": 190
+  },
+  {
+    "id": 51,
+    "world": 9,
+    "phase": "G",
+    "wordDifficulty": "hard",
+    "enemyType": "goblin",
+    "enemyCount": 10,
+    "enemyMaxHP": 20,
+    "coinReward": 200
+  },
+  {
+    "id": 52,
+    "world": 10,
+    "phase": "G",
+    "wordDifficulty": "easy",
+    "enemyType": "skeleton",
+    "enemyCount": 10,
+    "enemyMaxHP": 20,
+    "coinReward": 190
+  },
+  {
+    "id": 53,
+    "world": 10,
+    "phase": "G",
+    "wordDifficulty": "easy",
+    "enemyType": "mushroom",
+    "enemyCount": 10,
+    "enemyMaxHP": 20,
+    "coinReward": 190
+  },
+  {
+    "id": 54,
+    "world": 10,
+    "phase": "G",
+    "wordDifficulty": "normal",
+    "enemyType": "skeleton",
+    "enemyCount": 10,
+    "enemyMaxHP": 20,
+    "coinReward": 200
+  },
+  {
+    "id": 55,
+    "world": 10,
+    "phase": "G",
+    "wordDifficulty": "normal",
+    "enemyType": "golem",
+    "enemyCount": 10,
+    "enemyMaxHP": 20,
+    "coinReward": 200
+  },
+  {
+    "id": 56,
+    "world": 10,
+    "phase": "G",
+    "wordDifficulty": "hard",
+    "enemyType": "golem",
+    "enemyCount": 10,
+    "enemyMaxHP": 20,
+    "coinReward": 220
   }
 ]
