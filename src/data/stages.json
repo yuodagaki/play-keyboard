@@ -1,48 +1,596 @@
 [
-  {"id":1,  "world":1, "phase":"A", "availableKeys":"JF",                          "enemyType":"slime",    "enemyCount":5,  "enemyMaxHP":3,  "coinReward":15},
-  {"id":2,  "world":1, "phase":"A", "availableKeys":"JFKD",                        "enemyType":"slime",    "enemyCount":5,  "enemyMaxHP":3,  "coinReward":18},
-  {"id":3,  "world":1, "phase":"A", "availableKeys":"JFKDLS",                      "enemyType":"slime",    "enemyCount":5,  "enemyMaxHP":4,  "coinReward":20},
-  {"id":4,  "world":1, "phase":"A", "availableKeys":"JFKDLSA;",                    "enemyType":"mushroom", "enemyCount":5,  "enemyMaxHP":4,  "coinReward":22},
-  {"id":5,  "world":1, "phase":"A", "availableKeys":"JFKDLSA;GH",                  "enemyType":"mushroom", "enemyCount":8,  "enemyMaxHP":5,  "coinReward":25},
-  {"id":6,  "world":1, "phase":"A", "availableKeys":"JFKDLSA;GHEI",                "enemyType":"mushroom", "enemyCount":8,  "enemyMaxHP":5,  "coinReward":28},
-  {"id":7,  "world":2, "phase":"A", "availableKeys":"JFKDLSA;GHEIRO",              "enemyType":"bat",      "enemyCount":8,  "enemyMaxHP":6,  "coinReward":32},
-  {"id":8,  "world":2, "phase":"A", "availableKeys":"JFKDLSA;GHEIRUTY",            "enemyType":"bat",      "enemyCount":8,  "enemyMaxHP":7,  "coinReward":36},
-  {"id":9,  "world":2, "phase":"A", "availableKeys":"JFKDLSA;GHEIRUWOTY",          "enemyType":"bat",      "enemyCount":8,  "enemyMaxHP":8,  "coinReward":40},
-  {"id":10, "world":2, "phase":"A", "availableKeys":"JFKDLSA;GHEIRUWOTYP",         "enemyType":"skeleton", "enemyCount":8,  "enemyMaxHP":9,  "coinReward":45},
-  {"id":11, "world":2, "phase":"A", "availableKeys":"JFKDLSA;GHEIRUWOTYPQZXCV",   "enemyType":"skeleton", "enemyCount":8,  "enemyMaxHP":10, "coinReward":50},
-  {"id":12, "world":2, "phase":"A", "availableKeys":"QWERTYUIOPASDFGHJKL;ZXCVBNM,.", "enemyType":"skeleton","enemyCount":8,"enemyMaxHP":12, "coinReward":55},
-  {"id":13, "world":3, "phase":"B",  "hiraganaSet":["あ","い","う","え","お"],                              "enemyType":"slime",    "enemyCount":5,  "enemyMaxHP":3,  "coinReward":20},
-  {"id":14, "world":3, "phase":"B",  "hiraganaSet":["か","き","く","け","こ"],                              "enemyType":"slime",    "enemyCount":5,  "enemyMaxHP":3,  "coinReward":22},
-  {"id":15, "world":3, "phase":"B",  "hiraganaSet":["さ","し","す","せ","そ"],                              "enemyType":"mushroom", "enemyCount":5,  "enemyMaxHP":4,  "coinReward":24},
-  {"id":16, "world":3, "phase":"B",  "hiraganaSet":["た","ち","つ","て","と"],                              "enemyType":"mushroom", "enemyCount":5,  "enemyMaxHP":4,  "coinReward":26},
-  {"id":17, "world":3, "phase":"B",  "hiraganaSet":["な","に","ぬ","ね","の"],                              "enemyType":"mushroom", "enemyCount":8,  "enemyMaxHP":5,  "coinReward":28},
-  {"id":18, "world":3, "phase":"B",  "hiraganaSet":["は","ひ","ふ","へ","ほ"],                              "enemyType":"goblin",   "enemyCount":8,  "enemyMaxHP":5,  "coinReward":30},
-  {"id":19, "world":3, "phase":"B",  "hiraganaSet":["ま","み","む","め","も"],                              "enemyType":"goblin",   "enemyCount":8,  "enemyMaxHP":5,  "coinReward":32},
-  {"id":20, "world":3, "phase":"B",  "hiraganaSet":["ら","り","る","れ","ろ"],                              "enemyType":"goblin",   "enemyCount":8,  "enemyMaxHP":6,  "coinReward":34},
-  {"id":21, "world":3, "phase":"B",  "hiraganaSet":["や","ゆ","よ","わ"],                                   "enemyType":"bat",      "enemyCount":8,  "enemyMaxHP":6,  "coinReward":36},
-  {"id":22, "world":4, "phase":"B2", "hiraganaSet":["が","ぎ","ぐ","げ","ご"],                              "enemyType":"bat",      "enemyCount":8,  "enemyMaxHP":7,  "coinReward":38},
-  {"id":23, "world":4, "phase":"B2", "hiraganaSet":["ざ","じ","ず","ぜ","ぞ"],                              "enemyType":"bat",      "enemyCount":8,  "enemyMaxHP":7,  "coinReward":40},
-  {"id":24, "world":4, "phase":"B2", "hiraganaSet":["だ","で","ど","ば","び","ぶ","べ","ぼ"],               "enemyType":"skeleton", "enemyCount":8,  "enemyMaxHP":8,  "coinReward":42},
-  {"id":25, "world":4, "phase":"B2", "hiraganaSet":["ぱ","ぴ","ぷ","ぺ","ぽ"],                              "enemyType":"skeleton", "enemyCount":8,  "enemyMaxHP":8,  "coinReward":45},
-  {"id":26, "world":5, "phase":"B3", "hiraganaSet":["きゃ","きゅ","きょ","にゃ","にゅ","にょ"],             "enemyType":"skeleton", "enemyCount":8,  "enemyMaxHP":9,  "coinReward":48},
-  {"id":27, "world":5, "phase":"B3", "hiraganaSet":["しゃ","しゅ","しょ","ちゃ","ちゅ","ちょ"],             "enemyType":"golem",    "enemyCount":8,  "enemyMaxHP":10, "coinReward":52},
-  {"id":28, "world":5, "phase":"B3", "hiraganaSet":["ひゃ","ひゅ","ひょ","みゃ","みゅ","みょ"],             "enemyType":"golem",    "enemyCount":8,  "enemyMaxHP":10, "coinReward":55},
-  {"id":29, "world":5, "phase":"B3", "hiraganaSet":["りゃ","りゅ","りょ","ぎゃ","ぎゅ","ぎょ"],             "enemyType":"golem",    "enemyCount":8,  "enemyMaxHP":12, "coinReward":58},
-  {"id":30, "world":5, "phase":"B3", "hiraganaSet":["じゃ","じゅ","じょ","びゃ","びゅ","びょ","ぴゃ","ぴゅ","ぴょ"], "enemyType":"golem","enemyCount":8,"enemyMaxHP":12,"coinReward":62},
-  {"id":31, "world":6, "phase":"C",  "wordDifficulty":"easy",   "wordLength":2,    "enemyType":"slime",    "enemyCount":8,  "enemyMaxHP":5,  "coinReward":50},
-  {"id":32, "world":6, "phase":"C",  "wordDifficulty":"easy",   "wordLength":2,    "enemyType":"slime",    "enemyCount":8,  "enemyMaxHP":5,  "coinReward":55},
-  {"id":33, "world":6, "phase":"C",  "wordDifficulty":"normal", "wordLength":2,    "enemyType":"mushroom", "enemyCount":8,  "enemyMaxHP":6,  "coinReward":60},
-  {"id":34, "world":6, "phase":"C",  "wordDifficulty":"normal", "wordLength":2,    "enemyType":"mushroom", "enemyCount":8,  "enemyMaxHP":6,  "coinReward":65},
-  {"id":35, "world":6, "phase":"D",  "wordDifficulty":"easy",   "wordLength":3,    "enemyType":"goblin",   "enemyCount":8,  "enemyMaxHP":8,  "coinReward":70},
-  {"id":36, "world":6, "phase":"D",  "wordDifficulty":"easy",   "wordLength":3,    "enemyType":"goblin",   "enemyCount":8,  "enemyMaxHP":8,  "coinReward":75},
-  {"id":37, "world":7, "phase":"D",  "wordDifficulty":"normal", "wordLength":3,    "enemyType":"bat",      "enemyCount":8,  "enemyMaxHP":10, "coinReward":80},
-  {"id":38, "world":7, "phase":"D",  "wordDifficulty":"hard",   "wordLength":3,    "enemyType":"bat",      "enemyCount":8,  "enemyMaxHP":10, "coinReward":85},
-  {"id":39, "world":7, "phase":"E",  "wordDifficulty":"easy",   "wordLength":4,    "enemyType":"skeleton", "enemyCount":8,  "enemyMaxHP":12, "coinReward":90},
-  {"id":40, "world":7, "phase":"E",  "wordDifficulty":"easy",   "wordLength":4,    "enemyType":"skeleton", "enemyCount":8,  "enemyMaxHP":12, "coinReward":95},
-  {"id":41, "world":7, "phase":"E",  "wordDifficulty":"normal", "wordLength":4,    "enemyType":"golem",    "enemyCount":8,  "enemyMaxHP":14, "coinReward":100},
-  {"id":42, "world":7, "phase":"E",  "wordDifficulty":"hard",   "wordLength":4,    "enemyType":"golem",    "enemyCount":8,  "enemyMaxHP":14, "coinReward":110},
-  {"id":43, "world":8, "phase":"F",  "wordDifficulty":"easy",   "wordLength":5,    "enemyType":"golem",    "enemyCount":8,  "enemyMaxHP":16, "coinReward":120},
-  {"id":44, "world":8, "phase":"F",  "wordDifficulty":"easy",   "wordLength":5,    "enemyType":"golem",    "enemyCount":8,  "enemyMaxHP":16, "coinReward":130},
-  {"id":45, "world":8, "phase":"F",  "wordDifficulty":"normal", "wordLength":5,    "enemyType":"golem",    "enemyCount":10, "enemyMaxHP":18, "coinReward":150},
-  {"id":46, "world":8, "phase":"F",  "wordDifficulty":"hard",   "wordLength":5,    "enemyType":"golem",    "enemyCount":10, "enemyMaxHP":20, "coinReward":180}
+  {
+    "id": 1,
+    "world": 1,
+    "phase": "A",
+    "availableKeys": "JF",
+    "enemyType": "slime",
+    "enemyCount": 5,
+    "enemyMaxHP": 3,
+    "coinReward": 15
+  },
+  {
+    "id": 2,
+    "world": 1,
+    "phase": "A",
+    "availableKeys": "JFKD",
+    "enemyType": "slime",
+    "enemyCount": 5,
+    "enemyMaxHP": 3,
+    "coinReward": 18
+  },
+  {
+    "id": 3,
+    "world": 1,
+    "phase": "A",
+    "availableKeys": "JFKDLS",
+    "enemyType": "slime",
+    "enemyCount": 5,
+    "enemyMaxHP": 4,
+    "coinReward": 20
+  },
+  {
+    "id": 4,
+    "world": 1,
+    "phase": "A",
+    "availableKeys": "JFKDLSA;",
+    "enemyType": "mushroom",
+    "enemyCount": 5,
+    "enemyMaxHP": 4,
+    "coinReward": 22
+  },
+  {
+    "id": 5,
+    "world": 1,
+    "phase": "A",
+    "availableKeys": "JFKDLSA;GH",
+    "enemyType": "mushroom",
+    "enemyCount": 8,
+    "enemyMaxHP": 5,
+    "coinReward": 25
+  },
+  {
+    "id": 6,
+    "world": 1,
+    "phase": "A",
+    "availableKeys": "JFKDLSA;GHEI",
+    "enemyType": "mushroom",
+    "enemyCount": 8,
+    "enemyMaxHP": 5,
+    "coinReward": 28
+  },
+  {
+    "id": 7,
+    "world": 2,
+    "phase": "A",
+    "availableKeys": "JFKDLSA;GHEIRO",
+    "enemyType": "bat",
+    "enemyCount": 8,
+    "enemyMaxHP": 6,
+    "coinReward": 32
+  },
+  {
+    "id": 8,
+    "world": 2,
+    "phase": "A",
+    "availableKeys": "JFKDLSA;GHEIRUTY",
+    "enemyType": "bat",
+    "enemyCount": 8,
+    "enemyMaxHP": 7,
+    "coinReward": 36
+  },
+  {
+    "id": 9,
+    "world": 2,
+    "phase": "A",
+    "availableKeys": "JFKDLSA;GHEIRUWOTY",
+    "enemyType": "bat",
+    "enemyCount": 8,
+    "enemyMaxHP": 8,
+    "coinReward": 40
+  },
+  {
+    "id": 10,
+    "world": 2,
+    "phase": "A",
+    "availableKeys": "JFKDLSA;GHEIRUWOTYP",
+    "enemyType": "skeleton",
+    "enemyCount": 8,
+    "enemyMaxHP": 9,
+    "coinReward": 45
+  },
+  {
+    "id": 11,
+    "world": 2,
+    "phase": "A",
+    "availableKeys": "JFKDLSA;GHEIRUWOTYPQZXCV",
+    "enemyType": "skeleton",
+    "enemyCount": 8,
+    "enemyMaxHP": 10,
+    "coinReward": 50
+  },
+  {
+    "id": 12,
+    "world": 2,
+    "phase": "A",
+    "availableKeys": "QWERTYUIOPASDFGHJKL;ZXCVBNM,.",
+    "enemyType": "skeleton",
+    "enemyCount": 8,
+    "enemyMaxHP": 12,
+    "coinReward": 55
+  },
+  {
+    "id": 13,
+    "world": 3,
+    "phase": "B",
+    "hiraganaSet": [
+      "あ",
+      "い",
+      "う",
+      "え",
+      "お"
+    ],
+    "enemyType": "slime",
+    "enemyCount": 5,
+    "enemyMaxHP": 3,
+    "coinReward": 20
+  },
+  {
+    "id": 14,
+    "world": 3,
+    "phase": "B",
+    "hiraganaSet": [
+      "か",
+      "き",
+      "く",
+      "け",
+      "こ"
+    ],
+    "enemyType": "slime",
+    "enemyCount": 5,
+    "enemyMaxHP": 3,
+    "coinReward": 22
+  },
+  {
+    "id": 15,
+    "world": 3,
+    "phase": "B",
+    "hiraganaSet": [
+      "さ",
+      "し",
+      "す",
+      "せ",
+      "そ"
+    ],
+    "enemyType": "mushroom",
+    "enemyCount": 5,
+    "enemyMaxHP": 4,
+    "coinReward": 24
+  },
+  {
+    "id": 16,
+    "world": 3,
+    "phase": "B",
+    "hiraganaSet": [
+      "た",
+      "ち",
+      "つ",
+      "て",
+      "と"
+    ],
+    "enemyType": "mushroom",
+    "enemyCount": 5,
+    "enemyMaxHP": 4,
+    "coinReward": 26
+  },
+  {
+    "id": 17,
+    "world": 3,
+    "phase": "B",
+    "hiraganaSet": [
+      "な",
+      "に",
+      "ぬ",
+      "ね",
+      "の"
+    ],
+    "enemyType": "mushroom",
+    "enemyCount": 8,
+    "enemyMaxHP": 5,
+    "coinReward": 28
+  },
+  {
+    "id": 18,
+    "world": 3,
+    "phase": "B",
+    "hiraganaSet": [
+      "は",
+      "ひ",
+      "ふ",
+      "へ",
+      "ほ"
+    ],
+    "enemyType": "goblin",
+    "enemyCount": 8,
+    "enemyMaxHP": 5,
+    "coinReward": 30
+  },
+  {
+    "id": 19,
+    "world": 3,
+    "phase": "B",
+    "hiraganaSet": [
+      "ま",
+      "み",
+      "む",
+      "め",
+      "も"
+    ],
+    "enemyType": "goblin",
+    "enemyCount": 8,
+    "enemyMaxHP": 5,
+    "coinReward": 32
+  },
+  {
+    "id": 20,
+    "world": 3,
+    "phase": "B",
+    "hiraganaSet": [
+      "ら",
+      "り",
+      "る",
+      "れ",
+      "ろ"
+    ],
+    "enemyType": "goblin",
+    "enemyCount": 8,
+    "enemyMaxHP": 6,
+    "coinReward": 34
+  },
+  {
+    "id": 21,
+    "world": 3,
+    "phase": "B",
+    "hiraganaSet": [
+      "や",
+      "ゆ",
+      "よ",
+      "わ"
+    ],
+    "enemyType": "bat",
+    "enemyCount": 8,
+    "enemyMaxHP": 6,
+    "coinReward": 36
+  },
+  {
+    "id": 22,
+    "world": 4,
+    "phase": "B2",
+    "hiraganaSet": [
+      "が",
+      "ぎ",
+      "ぐ",
+      "げ",
+      "ご"
+    ],
+    "enemyType": "bat",
+    "enemyCount": 8,
+    "enemyMaxHP": 7,
+    "coinReward": 38
+  },
+  {
+    "id": 23,
+    "world": 4,
+    "phase": "B2",
+    "hiraganaSet": [
+      "ざ",
+      "じ",
+      "ず",
+      "ぜ",
+      "ぞ"
+    ],
+    "enemyType": "bat",
+    "enemyCount": 8,
+    "enemyMaxHP": 7,
+    "coinReward": 40
+  },
+  {
+    "id": 24,
+    "world": 4,
+    "phase": "B2",
+    "hiraganaSet": [
+      "だ",
+      "で",
+      "ど",
+      "ば",
+      "び",
+      "ぶ",
+      "べ",
+      "ぼ"
+    ],
+    "enemyType": "skeleton",
+    "enemyCount": 8,
+    "enemyMaxHP": 8,
+    "coinReward": 42
+  },
+  {
+    "id": 25,
+    "world": 4,
+    "phase": "B2",
+    "hiraganaSet": [
+      "ぱ",
+      "ぴ",
+      "ぷ",
+      "ぺ",
+      "ぽ"
+    ],
+    "enemyType": "skeleton",
+    "enemyCount": 8,
+    "enemyMaxHP": 8,
+    "coinReward": 45
+  },
+  {
+    "id": 26,
+    "world": 5,
+    "phase": "B3",
+    "hiraganaSet": [
+      "きゃ",
+      "きゅ",
+      "きょ",
+      "にゃ",
+      "にゅ",
+      "にょ"
+    ],
+    "enemyType": "skeleton",
+    "enemyCount": 8,
+    "enemyMaxHP": 9,
+    "coinReward": 48
+  },
+  {
+    "id": 27,
+    "world": 5,
+    "phase": "B3",
+    "hiraganaSet": [
+      "しゃ",
+      "しゅ",
+      "しょ",
+      "ちゃ",
+      "ちゅ",
+      "ちょ"
+    ],
+    "enemyType": "golem",
+    "enemyCount": 8,
+    "enemyMaxHP": 10,
+    "coinReward": 52
+  },
+  {
+    "id": 28,
+    "world": 5,
+    "phase": "B3",
+    "hiraganaSet": [
+      "ひゃ",
+      "ひゅ",
+      "ひょ",
+      "みゃ",
+      "みゅ",
+      "みょ"
+    ],
+    "enemyType": "golem",
+    "enemyCount": 8,
+    "enemyMaxHP": 10,
+    "coinReward": 55
+  },
+  {
+    "id": 29,
+    "world": 5,
+    "phase": "B3",
+    "hiraganaSet": [
+      "りゃ",
+      "りゅ",
+      "りょ",
+      "ぎゃ",
+      "ぎゅ",
+      "ぎょ"
+    ],
+    "enemyType": "golem",
+    "enemyCount": 8,
+    "enemyMaxHP": 12,
+    "coinReward": 58
+  },
+  {
+    "id": 30,
+    "world": 5,
+    "phase": "B3",
+    "hiraganaSet": [
+      "じゃ",
+      "じゅ",
+      "じょ",
+      "びゃ",
+      "びゅ",
+      "びょ",
+      "ぴゃ",
+      "ぴゅ",
+      "ぴょ"
+    ],
+    "enemyType": "golem",
+    "enemyCount": 8,
+    "enemyMaxHP": 12,
+    "coinReward": 62
+  },
+  {
+    "id": 31,
+    "world": 6,
+    "phase": "C",
+    "wordDifficulty": "easy",
+    "wordLength": 2,
+    "enemyType": "slime",
+    "enemyCount": 8,
+    "enemyMaxHP": 5,
+    "coinReward": 50
+  },
+  {
+    "id": 32,
+    "world": 6,
+    "phase": "C",
+    "wordDifficulty": "easy",
+    "wordLength": 2,
+    "enemyType": "slime",
+    "enemyCount": 8,
+    "enemyMaxHP": 5,
+    "coinReward": 55
+  },
+  {
+    "id": 33,
+    "world": 6,
+    "phase": "C",
+    "wordDifficulty": "normal",
+    "wordLength": 2,
+    "enemyType": "mushroom",
+    "enemyCount": 8,
+    "enemyMaxHP": 6,
+    "coinReward": 60
+  },
+  {
+    "id": 34,
+    "world": 6,
+    "phase": "C",
+    "wordDifficulty": "normal",
+    "wordLength": 2,
+    "enemyType": "mushroom",
+    "enemyCount": 8,
+    "enemyMaxHP": 6,
+    "coinReward": 65
+  },
+  {
+    "id": 35,
+    "world": 6,
+    "phase": "D",
+    "wordDifficulty": "easy",
+    "wordLength": 3,
+    "enemyType": "goblin",
+    "enemyCount": 8,
+    "enemyMaxHP": 8,
+    "coinReward": 70
+  },
+  {
+    "id": 36,
+    "world": 6,
+    "phase": "D",
+    "wordDifficulty": "easy",
+    "wordLength": 3,
+    "enemyType": "goblin",
+    "enemyCount": 8,
+    "enemyMaxHP": 8,
+    "coinReward": 75
+  },
+  {
+    "id": 37,
+    "world": 7,
+    "phase": "D",
+    "wordDifficulty": "normal",
+    "wordLength": 3,
+    "enemyType": "bat",
+    "enemyCount": 8,
+    "enemyMaxHP": 10,
+    "coinReward": 80
+  },
+  {
+    "id": 38,
+    "world": 7,
+    "phase": "D",
+    "wordDifficulty": "hard",
+    "wordLength": 3,
+    "enemyType": "bat",
+    "enemyCount": 8,
+    "enemyMaxHP": 10,
+    "coinReward": 85
+  },
+  {
+    "id": 39,
+    "world": 7,
+    "phase": "E",
+    "wordDifficulty": "easy",
+    "wordLength": 4,
+    "enemyType": "skeleton",
+    "enemyCount": 8,
+    "enemyMaxHP": 12,
+    "coinReward": 90
+  },
+  {
+    "id": 40,
+    "world": 7,
+    "phase": "E",
+    "wordDifficulty": "easy",
+    "wordLength": 4,
+    "enemyType": "skeleton",
+    "enemyCount": 8,
+    "enemyMaxHP": 12,
+    "coinReward": 95
+  },
+  {
+    "id": 41,
+    "world": 7,
+    "phase": "E",
+    "wordDifficulty": "normal",
+    "wordLength": 4,
+    "enemyType": "golem",
+    "enemyCount": 8,
+    "enemyMaxHP": 14,
+    "coinReward": 100
+  },
+  {
+    "id": 42,
+    "world": 7,
+    "phase": "E",
+    "wordDifficulty": "hard",
+    "wordLength": 4,
+    "enemyType": "golem",
+    "enemyCount": 8,
+    "enemyMaxHP": 14,
+    "coinReward": 110
+  },
+  {
+    "id": 43,
+    "world": 8,
+    "phase": "F",
+    "wordDifficulty": "easy",
+    "wordLength": 5,
+    "enemyType": "golem",
+    "enemyCount": 8,
+    "enemyMaxHP": 16,
+    "coinReward": 120
+  },
+  {
+    "id": 44,
+    "world": 8,
+    "phase": "F",
+    "wordDifficulty": "easy",
+    "wordLength": 5,
+    "enemyType": "golem",
+    "enemyCount": 8,
+    "enemyMaxHP": 16,
+    "coinReward": 130
+  },
+  {
+    "id": 45,
+    "world": 8,
+    "phase": "F",
+    "wordDifficulty": "normal",
+    "wordLength": 5,
+    "enemyType": "golem",
+    "enemyCount": 10,
+    "enemyMaxHP": 18,
+    "coinReward": 150
+  },
+  {
+    "id": 46,
+    "world": 8,
+    "phase": "F",
+    "wordDifficulty": "hard",
+    "wordLength": 5,
+    "enemyType": "golem",
+    "enemyCount": 10,
+    "enemyMaxHP": 20,
+    "coinReward": 180
+  }
 ]
