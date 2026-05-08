@@ -1090,7 +1090,7 @@
 ════════════════════════════════════ */
 .btn-mute {
   position: fixed;
-  top: 12px;
+  bottom: 12px;
   right: 16px;
   z-index: 100;
   background: rgba(255,255,255,0.85);
