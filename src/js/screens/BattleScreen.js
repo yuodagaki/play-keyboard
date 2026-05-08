@@ -80,7 +80,8 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
   const [accuracy, setAccuracy] = useState(100);
   const [flashEnemy, setFlashEnemy] = useState(false);
   const [fallingEnemy, setFallingEnemy] = useState(false);
-  const [heroAnim, setHeroAnim] = useState('idle');
+  const [heroPose, setHeroPose] = useState('idle');
+  const [heroAnim, setHeroAnim] = useState('idle-bob 2.5s ease-in-out infinite');
   const [flashError, setFlashError] = useState(false);
   const [missPulse, setMissPulse] = useState(false);
   const [dmgFloats, setDmgFloats] = useState([]);
@@ -90,6 +91,11 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
   const battleStartRef = useRef(null);
 
   const atk = WEAPON_ATK[slot.weapon] ?? 1;
+
+  function resetHero() {
+    setHeroPose('idle');
+    setHeroAnim('idle-bob 2.5s ease-in-out infinite');
+  }
 
   // Load stage (and words if needed)
   useEffect(() => {
@@ -156,8 +162,9 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
           // 完了状態を一時表示してから遷移（複数文字のみ遅延）
           setTyped(newTyped);
           const atk_anim = pickAttack();
+          setHeroPose('attack');
           setHeroAnim(atk_anim.css);
-          setTimeout(() => setHeroAnim('idle'), atk_anim.dur);
+          setTimeout(() => resetHero(), atk_anim.dur);
 
           const newEnemies = enemies.map((en, i) =>
             i === enemyIdx ? { hp: Math.max(0, en.hp - atk) } : en
@@ -178,8 +185,11 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
               setFlashEnemy(false);
               setFallingEnemy(true);
               setTyped('');
+              setHeroPose('happy');
+              setHeroAnim('hero-happy 0.6s ease-out');
               setTimeout(() => {
                 setFallingEnemy(false);
+                resetHero();
                 const nextIdx = enemyIdx + 1;
                 if (nextIdx >= enemies.length) {
                   setDone(true);
@@ -214,7 +224,13 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
         setAccuracy(correctKeys === 0 ? 0 : Math.round(correctKeys / newTK * 100));
         setFlashError(true);
         setMissPulse(true);
-        setTimeout(() => { setFlashError(false); setMissPulse(false); }, 350);
+        setHeroPose('sad');
+        setHeroAnim('hero-sad 0.35s ease-out');
+        setTimeout(() => {
+          setFlashError(false);
+          setMissPulse(false);
+          resetHero();
+        }, 350);
       }
     };
 
@@ -265,10 +281,8 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
             <${StickFigure}
               weapon=${slot.weapon}
               armor=${slot.armor}
-              pose=${heroAnim !== 'idle' ? 'attack' : 'idle'}
-              animStyle=${{
-                animation: heroAnim === 'idle' ? 'idle-bob 2.5s ease-in-out infinite' : heroAnim,
-              }}
+              pose=${heroPose}
+              animStyle=${{ animation: heroAnim }}
             />
           </svg>
         </div>

@@ -5,6 +5,17 @@ const POSE_ARMS = {
   attack:  { r:[100,46], l:[44, 76] },
   victory: { r:[78, 32], l:[42, 32] },
   scratch: { r:[72, 40], l:[36, 78] },
+  happy:   { r:[96, 30], l:[20, 30] },
+  sad:     { r:[74, 94], l:[42, 94] },
+};
+
+const FACE_TYPE = {
+  idle:    'neutral',
+  attack:  'neutral',
+  victory: 'smile',
+  scratch: 'frown',
+  happy:   'smile',
+  sad:     'frown',
 };
 
 export function StickFigure({ weapon = 'wooden', armor = 'hat', pose = 'idle', color = '#1A237E', animStyle = {} }) {
@@ -13,6 +24,7 @@ export function StickFigure({ weapon = 'wooden', armor = 'hat', pose = 'idle', c
   const bodyTop = 40, bodyBot = 84, shY = 54;
 
   const { r: ra, l: la } = POSE_ARMS[pose] ?? POSE_ARMS.idle;
+  const mouthType = FACE_TYPE[pose] ?? 'neutral';
   const llEnd = [cx - 20, bodyBot + 34];
   const rlEnd = [cx + 20, bodyBot + 34];
 
@@ -47,6 +59,28 @@ export function StickFigure({ weapon = 'wooden', armor = 'hat', pose = 'idle', c
 
       <!-- 体・骨格 -->
       <circle cx=${cx} cy=${headCy} r=${headR} fill="none" ...${s} />
+      <!-- 表情 -->
+      <circle cx=${cx - 7} cy=${headCy - 4} r="2.5" fill=${color} />
+      <circle cx=${cx + 7} cy=${headCy - 4} r="2.5" fill=${color} />
+      ${mouthType === 'neutral' && html`
+        <line
+          x1=${cx - 6} y1=${headCy + 7}
+          x2=${cx + 6} y2=${headCy + 7}
+          stroke=${color} strokeWidth="2.5" strokeLinecap="round"
+        />
+      `}
+      ${mouthType === 'smile' && html`
+        <path
+          d="M ${cx - 7} ${headCy + 5} Q ${cx} ${headCy + 12} ${cx + 7} ${headCy + 5}"
+          fill="none" stroke=${color} strokeWidth="2.5" strokeLinecap="round"
+        />
+      `}
+      ${mouthType === 'frown' && html`
+        <path
+          d="M ${cx - 7} ${headCy + 10} Q ${cx} ${headCy + 4} ${cx + 7} ${headCy + 10}"
+          fill="none" stroke=${color} strokeWidth="2.5" strokeLinecap="round"
+        />
+      `}
       <line x1=${cx} y1=${bodyTop} x2=${cx} y2=${bodyBot} ...${s} />
       <line x1=${cx} y1=${shY} x2=${la[0]} y2=${la[1]} ...${s} />
       <line x1=${cx} y1=${shY} x2=${ra[0]} y2=${ra[1]} ...${s} />
