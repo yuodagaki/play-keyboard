@@ -58,16 +58,22 @@ function App() {
   };
 
   const handleBattleClear = (result) => {
-    const { stageId, stars, coinReward, bonusCoins } = result;
+    const { stageId, stars, coinReward, bonusCoins, cpm = 0 } = result;
     const isFail = stars === 0;
+
+    const prevBestCpm = slot.progress?.[stageId]?.bestCpm ?? 0;
 
     let newSlot = slot;
     if (!isFail) {
       const totalCoins = coinReward + bonusCoins;
       const existingStars = slot.progress?.[stageId]?.stars ?? 0;
+      const existingBestCpm = slot.progress?.[stageId]?.bestCpm ?? 0;
       const newProgress = {
         ...slot.progress,
-        [stageId]: { stars: Math.max(existingStars, stars) },
+        [stageId]: {
+          stars: Math.max(existingStars, stars),
+          bestCpm: Math.max(existingBestCpm, cpm),
+        },
       };
       const newMaxUnlocked = stageId === slot.maxUnlocked
         ? Math.min(slot.maxUnlocked + 1, 56)
@@ -83,7 +89,7 @@ function App() {
       saveSlot(newSlot);
     }
 
-    setClearResult(result);
+    setClearResult({ ...result, prevBestCpm });
     setScreen('stageclear');
   };
 

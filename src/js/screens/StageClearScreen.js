@@ -6,6 +6,14 @@ import { playSound } from '../utils/sound.js';
 
 const ARMOR_BONUS_PCT = { hat:10, helmet:20, cape:30, armor:40, robe:50, shield:60, divine:70 };
 
+function cpmRank(cpm) {
+  if (cpm >= 150) return { rank: 'S', label: 'チャンピオン！⚡⚡⚡', color: '#E53935' };
+  if (cpm >= 100) return { rank: 'A', label: 'すごい！⚡⚡',        color: '#FF8F00' };
+  if (cpm >= 60)  return { rank: 'B', label: 'はやい！⚡',          color: '#4CAF50' };
+  if (cpm >= 30)  return { rank: 'C', label: 'ふつう',              color: '#546E7A' };
+  return           { rank: 'D', label: 'ゆっくり',                  color: '#90A4AE' };
+}
+
 function StarRow({ stars }) {
   return html`
     <div style=${{ display:'flex', gap:'12px', justifyContent:'center', margin:'16px 0' }}>
@@ -21,9 +29,11 @@ function StarRow({ stars }) {
 }
 
 export function StageClearScreen({ result, slot, onNext, onWorldMap, onRetry }) {
-  const { stageId, stars, coinReward, bonusCoins, accuracy } = result;
+  const { stageId, stars, coinReward, bonusCoins, accuracy, cpm = 0, prevBestCpm = 0 } = result;
   const totalCoins = coinReward + bonusCoins;
   const isFail = stars === 0;
+  const isNewCpmRecord = cpm > 0 && cpm > prevBestCpm;
+  const rankInfo = cpm > 0 ? cpmRank(cpm) : null;
 
   const [displayCoins, setDisplayCoins] = useState(0);
 
@@ -110,24 +120,50 @@ export function StageClearScreen({ result, slot, onNext, onWorldMap, onRetry }) 
           せいかく: ${accuracy}%
         </div>
 
-        <!-- コイン獲得 -->
-        <div style=${{
-          background: 'white',
-          borderRadius: '20px',
-          padding: '20px 40px',
-          display: 'inline-block',
-          boxShadow: '0 6px 24px rgba(0,0,0,0.12)',
-          marginBottom: '24px',
-        }}>
-          <div style=${{ fontSize:'14px', color:'var(--color-muted)', fontWeight:'700', marginBottom:'4px' }}>
-            コイン獲得
+        <!-- コイン獲得・CPMカード -->
+        <div style=${{ display:'flex', gap:'16px', justifyContent:'center', marginBottom:'24px', flexWrap:'wrap' }}>
+          <div style=${{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '20px 40px',
+            boxShadow: '0 6px 24px rgba(0,0,0,0.12)',
+            textAlign: 'center',
+          }}>
+            <div style=${{ fontSize:'14px', color:'var(--color-muted)', fontWeight:'700', marginBottom:'4px' }}>
+              コイン獲得
+            </div>
+            <div style=${{ fontSize:'42px', fontWeight:'900', color:'#F57F17', animation:'coin-bounce 0.5s ease-out' }}>
+              +${displayCoins} 💰
+            </div>
+            ${bonusCoins > 0 && html`
+              <div style=${{ fontSize:'13px', color:'var(--color-success)', fontWeight:'700', marginTop:'4px' }}>
+                ボーナス +${bonusCoins}（${ARMOR_BONUS_PCT[slot.armor]}%）
+              </div>
+            `}
           </div>
-          <div style=${{ fontSize:'42px', fontWeight:'900', color:'#F57F17', animation:'coin-bounce 0.5s ease-out' }}>
-            +${displayCoins} 💰
-          </div>
-          ${bonusCoins > 0 && html`
-            <div style=${{ fontSize:'13px', color:'var(--color-success)', fontWeight:'700', marginTop:'4px' }}>
-              ボーナス +${bonusCoins}（${ARMOR_BONUS_PCT[slot.armor]}%）
+
+          ${rankInfo && html`
+            <div style=${{
+              background: 'white',
+              borderRadius: '20px',
+              padding: '20px 40px',
+              boxShadow: '0 6px 24px rgba(0,0,0,0.12)',
+              textAlign: 'center',
+            }}>
+              <div style=${{ fontSize:'14px', color:'var(--color-muted)', fontWeight:'700', marginBottom:'4px' }}>
+                タイピング速度
+              </div>
+              <div style=${{ fontSize:'36px', fontWeight:'900', color: rankInfo.color }}>
+                ⚡ ${cpm} CPM
+              </div>
+              <div style=${{ fontSize:'16px', fontWeight:'700', color: rankInfo.color, marginTop:'4px' }}>
+                ${rankInfo.label}
+              </div>
+              ${isNewCpmRecord && html`
+                <div style=${{ fontSize:'13px', color:'var(--color-primary)', fontWeight:'700', marginTop:'4px' }}>
+                  🏆 じこベスト！
+                </div>
+              `}
             </div>
           `}
         </div>

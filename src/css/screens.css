@@ -296,6 +296,13 @@
 .battle-status__accuracy--ok     { color: var(--color-primary); }
 .battle-status__accuracy--bad    { color: var(--color-error); }
 
+.battle-status__cpm {
+  font-weight: 700;
+  color: var(--color-secondary-dark);
+  min-width: 60px;
+  text-align: right;
+}
+
 .battle-zone {
   flex: 0 0 260px;
   display: flex;

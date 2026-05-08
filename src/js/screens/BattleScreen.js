@@ -1,5 +1,5 @@
 import { html } from 'https://esm.sh/htm/react';
-import { useState, useEffect } from 'https://esm.sh/react';
+import { useState, useEffect, useRef } from 'https://esm.sh/react';
 import { StickFigure } from '../components/StickFigure.js';
 import { EnemySVG } from '../components/EnemySVG.js';
 import { KeyboardGuide } from '../components/KeyboardGuide.js';
@@ -31,6 +31,14 @@ function hpColor(hp, max) {
   if (r > 0.6) return '#4CAF50';
   if (r > 0.3) return '#FFD700';
   return '#FF5252';
+}
+
+function calcCpm(correctKeys, startMs) {
+  if (!startMs) return null;
+  if (correctKeys < 5) return null;
+  const elapsedMin = (Date.now() - startMs) / 60000;
+  if (elapsedMin < 2 / 60) return null;
+  return Math.round(correctKeys / elapsedMin);
 }
 
 function calcStars(acc) {
@@ -78,6 +86,8 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
   const [dmgFloats, setDmgFloats] = useState([]);
   const [done, setDone] = useState(false);
   const [showHomeGuide, setShowHomeGuide] = useState(slot.maxUnlocked === 1);
+  const [cpm, setCpm] = useState(null);
+  const battleStartRef = useRef(null);
 
   const atk = WEAPON_ATK[slot.weapon] ?? 1;
 
@@ -136,6 +146,11 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
         setTotalKeys(newTK);
         setAccuracy(Math.round(newCK / newTK * 100));
 
+        if (stage.phase !== 'A') {
+          if (battleStartRef.current === null) battleStartRef.current = Date.now();
+          setCpm(calcCpm(newCK, battleStartRef.current));
+        }
+
         const newTyped = typed + key;
         if (newTyped.length >= question.romaji.length) {
           // 完了状態を一時表示してから遷移（複数文字のみ遅延）
@@ -171,7 +186,8 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
                   const finalAcc = Math.round(newCK / newTK * 100);
                   const stars = calcStars(finalAcc);
                   const bonusCoins = Math.floor(stage.coinReward * ARMOR_BONUS[slot.armor]);
-                  onClear({ stageId, stars, coinReward: stage.coinReward, bonusCoins, accuracy: finalAcc });
+                  const finalCpm = calcCpm(newCK, battleStartRef.current) ?? 0;
+                  onClear({ stageId, stars, coinReward: stage.coinReward, bonusCoins, accuracy: finalAcc, cpm: finalCpm });
                 } else {
                   setEnemyIdx(nextIdx);
                   setQuestion(pickQuestion(stage, words));
@@ -219,6 +235,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
   const hpRatio = Math.max(0, currentEnemy.hp / stage.enemyMaxHP);
   const accClass = accuracy >= 90 ? 'good' : accuracy >= 70 ? 'ok' : 'bad';
   const isPhaseA = stage.phase === 'A';
+  const showCpm = !isPhaseA;
   const nextChar = question.romaji[typed.length]?.toUpperCase() ?? '';
   const enemyName = ENEMY_NAMES[stage.enemyType] ?? 'モンスター';
 
@@ -231,6 +248,11 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
         <span class=${'battle-status__accuracy--' + accClass}>
           せいかく: ${accuracy}%
         </span>
+        ${showCpm && html`
+          <span class="battle-status__cpm">
+            ⚡ ${cpm !== null ? cpm : '--'}
+          </span>
+        `}
         <span style=${{ marginLeft:'auto' }}>💰 ${slot.coins}</span>
       </div>
 
