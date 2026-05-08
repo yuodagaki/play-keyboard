@@ -15,7 +15,7 @@ export const ENDLESS = {
 
   ATTACK_EVERY_N:    10,
   ENEMY_TIMER_MS:    2500,
-  MOB_COUNT:         20,
+  MOB_COUNT:         10,
 
   MOB_HP_BASE:       15,
   MOB_HP_SCALE:      1.3,
