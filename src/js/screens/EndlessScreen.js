@@ -262,7 +262,8 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
           lvlParts.push(`HP +${ENDLESS.LEVELUP_HP}`);
         }
       }
-      lvlMsg = `Lv.${newLevel} ▲ ${lvlParts.join(' / ')}`;
+      newHeroHP = newHeroMaxHP; // レベルアップ時はHP全回復
+      lvlMsg = `Lv.${newLevel} ▲ ${lvlParts.join(' / ')} / HP全回復！`;
     }
     const newXP = rawNewXP % ENDLESS.XP_PER_LEVEL;
 
