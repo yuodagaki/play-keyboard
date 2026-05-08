@@ -27,7 +27,7 @@ function playCorrect() {
   osc.connect(gain); gain.connect(c.destination);
   osc.type = 'triangle';
   osc.frequency.value = 880;
-  gain.gain.setValueAtTime(0.18, c.currentTime);
+  gain.gain.setValueAtTime(0.32, c.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.09);
   osc.start(c.currentTime);
   osc.stop(c.currentTime + 0.09);
@@ -40,7 +40,7 @@ function playMiss() {
   osc.connect(gain); gain.connect(c.destination);
   osc.type = 'sawtooth';
   osc.frequency.value = 180;
-  gain.gain.setValueAtTime(0.12, c.currentTime);
+  gain.gain.setValueAtTime(0.22, c.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.15);
   osc.start(c.currentTime);
   osc.stop(c.currentTime + 0.16);
@@ -197,8 +197,8 @@ function scheduleBgm(notes, bpm, startTime) {
       osc.connect(gain); gain.connect(c.destination);
       osc.type = 'square';
       osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.04, t);
-      gain.gain.setValueAtTime(0.04, t + dur * 0.8);
+      gain.gain.setValueAtTime(0.02, t);
+      gain.gain.setValueAtTime(0.02, t + dur * 0.8);
       gain.gain.linearRampToValueAtTime(0, t + dur);
       osc.start(t);
       osc.stop(t + dur);
