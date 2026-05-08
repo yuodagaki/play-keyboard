@@ -326,12 +326,14 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
           <div class="battle-question__hira">${question.text}</div>
           <div class="battle-question__hint">
             ${question.romaji.split('').map((ch, i) => html`
-              <span key=${i} style=${{
-                color: i < typed.length ? '#5BB8FF'
-                     : i === typed.length ? '#455A64'
-                     : '#90A4AE',
-                fontWeight: i === typed.length ? '900' : '700',
-              }}>
+              <span
+                key=${i}
+                class=${'battle-hint__char ' + (
+                  i < typed.length   ? 'battle-hint__char--done'
+                : i === typed.length ? 'battle-hint__char--next'
+                :                      'battle-hint__char--pending'
+                )}
+              >
                 ${ch.toUpperCase()}
               </span>
             `)}

@@ -89,7 +89,7 @@
 .save-slot-card--empty:hover { border-color: var(--color-primary); }
 
 .save-slot-card__label {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--color-muted);
   font-weight: 700;
   margin-bottom: 6px;
@@ -102,7 +102,7 @@
 }
 
 .save-slot-card__meta {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--color-muted);
   margin-top: 6px;
 }
@@ -228,7 +228,7 @@
 }
 
 .stage-node__id {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--color-muted);
   font-weight: 700;
   margin-top: 2px;
@@ -304,7 +304,7 @@
 }
 
 .battle-zone {
-  flex: 0 0 260px;
+  flex: 0 0 240px;
   display: flex;
   position: relative;
 }
@@ -334,7 +334,7 @@
   top: 14px;
   left: 16px;
   right: 8px;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--color-muted);
   font-weight: 700;
 }
@@ -354,7 +354,7 @@
   top: 14px;
   left: 8px;
   right: 16px;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--color-muted);
   font-weight: 700;
   text-align: right;
@@ -370,7 +370,7 @@
 .battle-enemy__hp-header {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--color-muted);
   font-weight: 700;
   margin-bottom: 4px;
@@ -392,7 +392,7 @@
 
 /* 出題エリア */
 .battle-question {
-  flex: 0 0 148px;
+  flex: 0 0 168px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -405,46 +405,70 @@
 .battle-question--miss { animation: miss-flash 0.32s ease-out; }
 
 .battle-question__hira {
-  font-size: 52px;
+  font-size: 64px;
   font-weight: 900;
   color: var(--color-text);
-  letter-spacing: 6px;
+  letter-spacing: 8px;
   line-height: 1;
 }
 
 .battle-question__hint {
-  font-size: 22px;
+  font-size: 30px;
   color: #90A4AE;
   font-weight: 700;
-  letter-spacing: 3px;
-  margin-top: 4px;
+  letter-spacing: 5px;
+  margin-top: 6px;
 }
 
 .battle-question__alpha {
-  font-size: 54px;
+  font-size: 72px;
   font-weight: 900;
   color: var(--color-text);
-  letter-spacing: 4px;
+  letter-spacing: 6px;
   line-height: 1;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.battle-hint__char {
+  display: inline-block;
+  transition: color 0.05s;
+}
+
+.battle-hint__char--done {
+  color: var(--color-secondary);
+}
+
+.battle-hint__char--next {
+  color: var(--color-text);
+  font-size: 120%;
+  border-bottom: 3px solid var(--color-text);
+  padding-bottom: 1px;
+  line-height: 1;
+}
+
+.battle-hint__char--pending {
+  color: #B0BEC5;
 }
 
 .battle-progress {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 8px;
   margin-top: 10px;
+  max-width: 560px;
 }
 
 .battle-progress__cell {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-sm);
   border: 3px solid #D0D0D0;
   background: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 900;
   color: #B0BEC5;
   font-family: var(--font-mono);
@@ -676,7 +700,7 @@
 
 .shop-item__info { flex: 1; }
 .shop-item__name { font-size: 17px; font-weight: 900; color: var(--color-text); }
-.shop-item__desc { font-size: 13px; color: var(--color-muted); margin-top: 2px; }
+.shop-item__desc { font-size: 15px; color: var(--color-muted); margin-top: 2px; }
 
 .shop-item__badge-equipped {
   padding: 6px 16px;
@@ -850,7 +874,7 @@
 .endless-hero-hp__header {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--color-muted);
   font-weight: 700;
   margin-bottom: 3px;
@@ -881,7 +905,7 @@
 }
 
 .endless-timer-label {
-  font-size: 10px;
+  font-size: 13px;
   color: #FF7043;
   font-weight: 700;
   margin-bottom: 2px;
