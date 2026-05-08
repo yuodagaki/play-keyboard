@@ -2,6 +2,7 @@ import { html } from 'https://esm.sh/htm/react';
 import { useState, useEffect } from 'https://esm.sh/react';
 import { StickFigure } from '../components/StickFigure.js';
 import { loadAllSlots, createSlot, deleteSlot } from '../utils/save.js';
+import { startBgm, stopBgm, playSound } from '../utils/sound.js';
 
 function formatDate(iso) {
   if (!iso) return '';
@@ -40,7 +41,13 @@ export function TitleScreen({ onSelectSlot }) {
 
   const refreshSlots = () => setSlots(loadAllSlots());
 
+  useEffect(() => {
+    startBgm('title');
+    return () => stopBgm();
+  }, []);
+
   const handleSelect = (slot, idx) => {
+    playSound('uiClick');
     if (slot) {
       onSelectSlot(slot);
     } else {

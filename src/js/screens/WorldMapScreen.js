@@ -3,6 +3,7 @@ import { useState, useEffect } from 'https://esm.sh/react';
 import { StickFigure } from '../components/StickFigure.js';
 import { TutorialOverlay } from '../components/TutorialOverlay.js';
 import { getWorlds, getStages } from '../data/loader.js';
+import { startBgm, playSound } from '../utils/sound.js';
 
 function StageNode({ stage, status, stars, onClick }) {
   const btnClass = `stage-node__btn stage-node__btn--${status}`;
@@ -107,6 +108,8 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless,
     });
   }, []);
 
+  useEffect(() => { startBgm('title'); }, []);
+
   useEffect(() => {
     const handler = (e) => {
       const key = e.key;
@@ -124,12 +127,13 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless,
   const stagesFor = (world) => stages.filter(s => world.stages.includes(s.id));
 
   const handleStageClick = (stage, world) => {
+    playSound('uiClick');
     setSelectedStage(stage);
     setSelectedWorld(world);
   };
 
   const handleChallenge = () => {
-    if (selectedStage) onSelectStage(selectedStage.id);
+    if (selectedStage) { playSound('uiClick'); onSelectStage(selectedStage.id); }
   };
 
   return html`

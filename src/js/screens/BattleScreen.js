@@ -6,6 +6,7 @@ import { KeyboardGuide } from '../components/KeyboardGuide.js';
 import { TutorialOverlay } from '../components/TutorialOverlay.js';
 import { toRomaji } from '../utils/romaji.js';
 import { getStage, getWords } from '../data/loader.js';
+import { playSound, startBgm, stopBgm } from '../utils/sound.js';
 
 const ENEMY_NAMES = {
   slime: 'スライム', mushroom: 'キノコ', goblin: 'ゴブリン',
@@ -90,6 +91,12 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
     });
   }, [stageId]);
 
+  // BGM
+  useEffect(() => {
+    startBgm('battle');
+    return () => stopBgm();
+  }, []);
+
   // Init enemies + first question
   useEffect(() => {
     if (!stage) return;
@@ -122,6 +129,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
       const targetChar = question.romaji[typed.length];
 
       if (key === targetChar) {
+        playSound('correct');
         const newCK = correctKeys + 1;
         const newTK = totalKeys + 1;
         setCorrectKeys(newCK);
@@ -148,6 +156,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
           const completionDelay = question.romaji.length > 1 ? 220 : 0;
 
           if (newEnemies[enemyIdx].hp <= 0) {
+            playSound('enemyDefeat');
             // Enemy defeated
             setFlashEnemy(true);
             setTimeout(() => {
@@ -170,6 +179,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
               }, 520);
             }, 150);
           } else {
+            playSound('wordComplete');
             setFlashEnemy(true);
             setTimeout(() => setFlashEnemy(false), 180);
             setTimeout(() => {
@@ -181,6 +191,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
           setTyped(newTyped);
         }
       } else {
+        playSound('miss');
         // Miss — keep typed as-is (retry from the wrong character)
         const newTK = totalKeys + 1;
         setTotalKeys(newTK);

@@ -2,6 +2,7 @@ import { html } from 'https://esm.sh/htm/react';
 import { useState, useEffect } from 'https://esm.sh/react';
 import { StickFigure } from '../components/StickFigure.js';
 import { Confetti } from '../components/Confetti.js';
+import { playSound } from '../utils/sound.js';
 
 const ARMOR_BONUS_PCT = { hat:10, helmet:20, cape:30, armor:40, robe:50, shield:60, divine:70 };
 
@@ -27,6 +28,10 @@ export function StageClearScreen({ result, slot, onNext, onWorldMap, onRetry }) 
   const [displayCoins, setDisplayCoins] = useState(0);
 
   useEffect(() => {
+    playSound(isFail ? 'stageFail' : 'stageClear');
+  }, []);
+
+  useEffect(() => {
     const handler = (e) => {
       const key = e.key.toLowerCase();
       if (key === 'm') { onWorldMap(); return; }
@@ -40,11 +45,17 @@ export function StageClearScreen({ result, slot, onNext, onWorldMap, onRetry }) 
   useEffect(() => {
     if (isFail) return;
     let start = null;
+    let prevCoins = 0;
     const duration = 1200;
     const step = (ts) => {
       if (!start) start = ts;
       const progress = Math.min((ts - start) / duration, 1);
-      setDisplayCoins(Math.floor(totalCoins * progress));
+      const newCoins = Math.floor(totalCoins * progress);
+      if (Math.floor(newCoins / 50) > Math.floor(prevCoins / 50)) {
+        playSound('coinCount');
+      }
+      prevCoins = newCoins;
+      setDisplayCoins(newCoins);
       if (progress < 1) requestAnimationFrame(step);
     };
     const raf = requestAnimationFrame(step);

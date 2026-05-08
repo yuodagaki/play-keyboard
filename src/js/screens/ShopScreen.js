@@ -2,6 +2,7 @@ import { html } from 'https://esm.sh/htm/react';
 import { useState, useEffect } from 'https://esm.sh/react';
 import { StickFigure } from '../components/StickFigure.js';
 import { getItems } from '../data/loader.js';
+import { playSound } from '../utils/sound.js';
 
 function ItemRow({ item, owned, equipped, canAfford, onBuy, onEquip }) {
   const isEquipped = equipped === item.id;
@@ -55,23 +56,27 @@ export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
   };
 
   const handleBuyWeapon = (item) => {
+    playSound('uiClick');
     onBuy('weapon', item);
     showToast(`${item.name} をかった！`);
     setPreviewWeapon(item.id);
   };
 
   const handleBuyArmor = (item) => {
+    playSound('uiClick');
     onBuy('armor', item);
     showToast(`${item.name} をかった！`);
     setPreviewArmor(item.id);
   };
 
   const handleEquipWeapon = (item) => {
+    playSound('uiClick');
     onEquip('weapon', item);
     setPreviewWeapon(item.id);
   };
 
   const handleEquipArmor = (item) => {
+    playSound('uiClick');
     onEquip('armor', item);
     setPreviewArmor(item.id);
   };

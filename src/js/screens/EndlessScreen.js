@@ -6,6 +6,7 @@ import { KeyboardGuide } from '../components/KeyboardGuide.js';
 import { toRomaji } from '../utils/romaji.js';
 import { getWords } from '../data/loader.js';
 import { ENDLESS } from '../data/endlessConstants.js';
+import { playSound, startBgm, stopBgm } from '../utils/sound.js';
 
 const WEAPON_ATK  = { wooden:1, iron:2, flame:3, thunder:4, ice:5, dragon:6, legendary:7 };
 const ARMOR_XP_MULT = { hat:1.0, helmet:1.1, cape:1.2, armor:1.3, robe:1.5, shield:1.6, divine:1.7 };
@@ -103,7 +104,8 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
       setWords(w);
       setQuestion(pickQuestion(w, 1));
     });
-    return () => { gameDoneRef.current = true; clearTimer(); };
+    startBgm('battle');
+    return () => { gameDoneRef.current = true; clearTimer(); stopBgm(); };
   }, []);
 
   // Game over when HP hits 0
@@ -155,6 +157,7 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
       const targetChar = question.romaji[typed.length];
 
       if (key === targetChar) {
+        playSound('correct');
         const newTyped    = typed + key;
         const newCharCount = charCount + 1;
         setCharCount(newCharCount);
@@ -195,6 +198,7 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
           setTyped(newTyped);
         }
       } else {
+        playSound('miss');
         // Typo → enemy attacks (keep typed as-is, retry from wrong character)
         setFlashError(true);
         setTimeout(() => setFlashError(false), 350);

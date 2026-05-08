@@ -4,6 +4,7 @@ import { createRoot } from 'https://esm.sh/react-dom/client';
 
 import { saveSlot } from './utils/save.js';
 import { preloadAll } from './data/loader.js';
+import { isMuted, toggleMute } from './utils/sound.js';
 
 import { TitleScreen }            from './screens/TitleScreen.js';
 import { WorldMapScreen }         from './screens/WorldMapScreen.js';
@@ -27,6 +28,12 @@ function useViewportScale() {
 function App() {
   const scale = useViewportScale();
   const [screen, setScreen] = useState('title');
+  const [muted, setMuted] = useState(isMuted());
+
+  const handleToggleMute = () => {
+    const next = toggleMute();
+    setMuted(next);
+  };
   const [slot, setSlot] = useState(null);
   const [selectedStageId, setSelectedStageId] = useState(null);
   const [clearResult, setClearResult] = useState(null);
@@ -250,6 +257,12 @@ function App() {
       transformOrigin: 'center center',
     }}>
       ${renderScreen()}
+      <button
+        class="btn-mute"
+        onClick=${handleToggleMute}
+        title=${muted ? '音をオンにする' : '音をオフにする'}
+        aria-label=${muted ? '音をオンにする' : '音をオフにする'}
+      >${muted ? '🔇' : '🔊'}</button>
     </div>
   `;
 }
