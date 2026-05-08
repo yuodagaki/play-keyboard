@@ -21,6 +21,7 @@
 | `.claude/rules/svg-policy.md` | キャラクター・敵・SVGグラフィックの追加・修正時 |
 | `.claude/rules/typing-progression.md` | ステージ出題内容・フェーズ構成・単語データに関わる実装時 |
 | `.claude/rules/finger-guide.md` | 手SVG・指色分け・キーボードガイドの指示表示に関わる実装時 |
+| `.claude/rules/design.md` | 新しい UI 要素・画面・スタイルの追加・変更時 |
 
 ## Skills
 
