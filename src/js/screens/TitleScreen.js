@@ -1,6 +1,6 @@
 import { html } from 'https://esm.sh/htm/react';
 import { useState, useEffect } from 'https://esm.sh/react';
-import { StickFigure } from '../components/StickFigure.js';
+import { LittleKnight } from '../components/LittleKnight.js';
 import { loadAllSlots, createSlot, deleteSlot } from '../utils/save.js';
 import { startBgm, stopBgm, playSound } from '../utils/sound.js';
 
@@ -26,8 +26,8 @@ function SlotCard({ slot, index, onSelect, onDelete }) {
       <div class="save-slot-card__label">ファイル ${index + 1}</div>
       <div class="save-slot-card__stage">ステージ ${slot.maxUnlocked}</div>
       <div class="save-slot-card__meta">
-        <div>💰 ${slot.coins} コイン</div>
-        <div>🕐 ${formatDate(slot.lastPlayedAt)}</div>
+        <div><img class="pixel-icon" src="art/shop/coin.png" alt="" /> ${slot.coins} コイン</div>
+        <div>さいごにあそんだ日　${formatDate(slot.lastPlayedAt)}</div>
       </div>
       <button class="save-slot-card__delete" onClick=${(e) => { e.stopPropagation(); onDelete(); }}>✕</button>
     </div>
@@ -88,50 +88,18 @@ export function TitleScreen({ onSelectSlot }) {
 
   return html`
     <div class="screen title-screen">
-      <!-- 太陽 -->
-      <div style=${{ position:'absolute', top:'30px', right:'120px', width:'80px', height:'80px', background:'#FFD700', borderRadius:'50%', boxShadow:'0 0 40px #FFD700' }} />
-
-      <!-- 雲 -->
-      ${[{l:50,t:55,s:0},{l:380,t:90,s:5},{l:680,t:45,s:9},{l:980,t:80,s:3}].map((c,i) => html`
-        <div key=${i} style=${{ position:'absolute', left:c.l, top:c.t, animation:'cloud-drift 30s linear infinite', animationDelay:`-${c.s}s` }}>
-          <div style=${{ width:'200px', height:'76px', background:'white', borderRadius:'50%', opacity:0.92, position:'relative' }}>
-            <div style=${{ position:'absolute', top:'-40%', left:'20%', width:'50%', height:'100%', background:'white', borderRadius:'50%' }} />
-            <div style=${{ position:'absolute', top:'-25%', left:'50%', width:'35%', height:'80%', background:'white', borderRadius:'50%' }} />
-          </div>
-        </div>
-      `)}
-
-      <!-- 木 -->
-      ${[70,260,480,760,1020,1180].map((x,i) => html`
-        <div key=${i}>
-          <div style=${{ position:'absolute', left:x, bottom:58, width:0, height:0, borderLeft:'22px solid transparent', borderRight:'22px solid transparent', borderBottom:'55px solid #2E7D32' }} />
-          <div style=${{ position:'absolute', left:x+8, bottom:38, width:9, height:22, background:'#5D4037' }} />
-        </div>
-      `)}
-
-      <!-- 地面 -->
-      <div style=${{ position:'absolute', bottom:0, left:0, right:0, height:'90px', background:'linear-gradient(to bottom,#4CAF50,#2E7D32)' }}>
-        <div style=${{ height:'8px', background:'#66BB6A', borderRadius:'4px 4px 0 0' }} />
-      </div>
-
-      <!-- タイトル -->
       <div class="title-logo">
-        <div class="title-logo__text">⚔️ キーボードぼうけん ⚔️</div>
+        <h1 class="title-logo__text"><img src="art/title/logo.png" alt="リトルナイトのキーボードぼうけん" /></h1>
         <div class="title-logo__sub">タイピングでモンスターをたおそう！</div>
       </div>
 
-      <!-- ヒーロー -->
       <div class="title-hero">
-        <svg width="170" height="195" viewBox="0 0 120 160" style=${{ overflow:'visible' }}>
-          <${StickFigure} weapon="wooden" armor="hat" pose="victory"
-            animStyle=${{ animation:'idle-bob 2.5s ease-in-out infinite' }} />
-        </svg>
+        <${LittleKnight} weapon="wooden" armor="hat" />
       </div>
 
-      <!-- ボタン -->
       <div class="title-buttons">
-        <button class="btn-primary" onClick=${() => setShowSlots(true)}>
-          🌟 はじめる <span class="kbd">Enter</span>
+        <button class="pixel-button" onClick=${() => setShowSlots(true)}>
+          <img src="art/shop/star.png" alt="" /> はじめる <span class="kbd">Enter</span>
         </button>
       </div>
 
@@ -150,8 +118,8 @@ export function TitleScreen({ onSelectSlot }) {
               />
             `)}
           </div>
-          <button class="save-slots__back" onClick=${() => setShowSlots(false)}>
-            ← もどる <span class="kbd">Esc</span>
+          <button class="pixel-button" onClick=${() => setShowSlots(false)}>
+            <img src="art/ui/back.png" alt="" /> もどる <span class="kbd">Esc</span>
           </button>
         </div>
       `}

@@ -1,3 +1,6 @@
+import { PixelText } from '../components/PixelText.js';
+import { ResultButton } from '../components/ResultButton.js';
+import { LittleKnight } from '../components/LittleKnight.js';
 import { html } from 'https://esm.sh/htm/react';
 import { useEffect } from 'https://esm.sh/react';
 
@@ -13,36 +16,27 @@ export function EndlessGameOverScreen({ result, slot, onRetry, onWorldMap }) {
     return () => window.removeEventListener('keydown', handler);
   }, [onRetry, onWorldMap]);
 
+  const stats = [
+    ['とうたつループ', loop + ' ループ'],
+    ['さいこうレベル', 'Lv.' + heroLevel],
+    ['たおした雑魚', sessionMobs + ' たい'],
+    ['たおしたボス', sessionBosses + ' たい'],
+  ];
   return html`
-    <div class="screen endless-gameover-screen">
-      <div class="endless-gameover-card">
-        <div class="endless-gameover-title">ゲームオーバー</div>
-
-        <div class="endless-gameover-stats">
-          <div class="endless-gameover-stat__label">とうたつループ</div>
-          <div class="endless-gameover-stat__value">${loop} ループ</div>
-
-          <div class="endless-gameover-stat__label">さいこうレベル</div>
-          <div class="endless-gameover-stat__value">Lv.${heroLevel}</div>
-
-          <div class="endless-gameover-stat__label">たおした雑魚</div>
-          <div class="endless-gameover-stat__value">${sessionMobs} たい</div>
-
-          <div class="endless-gameover-stat__label">たおしたボス</div>
-          <div class="endless-gameover-stat__value">${sessionBosses} たい</div>
-        </div>
-
-        ${isBest && html`
-          <div class="endless-gameover-best">🎉 ベスト記録こうしん！</div>
-        `}
-
-        <div class="endless-gameover-btns">
-          <button class="btn-ghost" onClick=${onWorldMap}>
-            ワールドマップへ <span class="kbd">Esc</span>
-          </button>
-          <button class="btn-primary" onClick=${onRetry}>
-            もういちど！ <span class="kbd">Enter</span>
-          </button>
+    <div class="screen endless-gameover-screen result-screen">
+      <div class="result-panel">
+        <h1><${PixelText} scale=${3}>ゲームオーバー<//></h1>
+        <${LittleKnight} weapon=${slot.weapon} armor=${slot.armor} pose="sad" />
+        <dl class="endless-gameover-stats">
+          ${stats.map(([label, value]) => html`<div key=${label}>
+            <dt><${PixelText}>${label}<//></dt>
+            <dd><${PixelText}>${value}<//></dd>
+          </div>`)}
+        </dl>
+        ${isBest && html`<p><img class="result-coin" src="art/ui/trophy.png" alt="" /> <${PixelText}>ベスト記録こうしん！<//></p>`}
+        <div class="result-actions">
+          <${ResultButton} label="ワールドマップへ" icon="back" shortcut="Esc" onClick=${onWorldMap} />
+          <${ResultButton} label="もういちど！" shortcut="Enter" primary onClick=${onRetry} />
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@
   {
     "id": 1,
     "name": "もりのみち",
-    "emoji": "🌲",
+    "icon": "art/worlds/forest.png",
     "color": "#2E7D32",
     "bg": "linear-gradient(160deg,#C8E6C9 0%,#A5D6A7 100%)",
     "stages": [
@@ -22,7 +22,7 @@
   {
     "id": 2,
     "name": "あんこくのどうくつ",
-    "emoji": "🏔️",
+    "icon": "art/worlds/cave.png",
     "color": "#4E342E",
     "bg": "linear-gradient(160deg,#BCAAA4 0%,#795548 100%)",
     "stages": [
@@ -34,15 +34,15 @@
       12
     ],
     "enemies": [
-      "コウモリ",
-      "ガイコツ",
-      "石ゴーレム"
+      "ランタンコウモリ",
+      "つるはしモグラ",
+      "親方モグラ"
     ]
   },
   {
     "id": 3,
     "name": "ひらがなのしま",
-    "emoji": "🌸",
+    "icon": "art/worlds/island.png",
     "color": "#AD1457",
     "bg": "linear-gradient(160deg,#FCE4EC 0%,#F48FB1 100%)",
     "stages": [
@@ -57,15 +57,15 @@
       21
     ],
     "enemies": [
-      "花の精",
-      "タヌキ",
-      "キツネ"
+      "花がさタヌキ",
+      "つばき剣士キツネ",
+      "横綱タヌキと剣豪キツネ"
     ]
   },
   {
     "id": 4,
     "name": "にごりのもり",
-    "emoji": "🌿",
+    "icon": "art/worlds/mist.png",
     "color": "#1B5E20",
     "bg": "linear-gradient(160deg,#DCEDC8 0%,#8BC34A 100%)",
     "stages": [
@@ -75,15 +75,15 @@
       25
     ],
     "enemies": [
-      "濃霧の魔物",
-      "ダークスライム",
-      "影の騎士"
+      "ごろごろガエル",
+      "どろはねカワウソ",
+      "シカのおおぬし"
     ]
   },
   {
     "id": 5,
     "name": "ようせいのほし",
-    "emoji": "✨",
+    "icon": "art/worlds/fairy.png",
     "color": "#1A237E",
     "bg": "linear-gradient(160deg,#E8EAF6 0%,#3F51B5 100%)",
     "stages": [
@@ -94,15 +94,15 @@
       30
     ],
     "enemies": [
-      "星のせいれい",
-      "月のモンスター",
-      "宇宙人"
+      "ほしみみウサギ",
+      "ほしくずモモンガ",
+      "つきかげフクロウ"
     ]
   },
   {
     "id": 6,
     "name": "たんごのせかい",
-    "emoji": "📖",
+    "icon": "art/worlds/book.png",
     "color": "#E65100",
     "bg": "linear-gradient(160deg,#FFF3E0 0%,#FF9800 100%)",
     "stages": [
@@ -114,15 +114,15 @@
       36
     ],
     "enemies": [
-      "本の悪魔",
-      "インクのモンスター",
-      "図書館の番人"
+      "しおりヤマネ",
+      "インクペンギン",
+      "大じてんガメ"
     ]
   },
   {
     "id": 7,
     "name": "しろのだいぼうけん",
-    "emoji": "🏰",
+    "icon": "art/worlds/castle.png",
     "color": "#37474F",
     "bg": "linear-gradient(160deg,#ECEFF1 0%,#607D8B 100%)",
     "stages": [
@@ -134,15 +134,15 @@
       42
     ],
     "enemies": [
-      "兵士",
-      "魔法使い",
-      "ドラゴンの子"
+      "やりもちハリネズミ",
+      "まほうつかいネコ",
+      "たてがみ騎士団長"
     ]
   },
   {
     "id": 8,
     "name": "ことばのおう",
-    "emoji": "👑",
+    "icon": "art/worlds/crown.png",
     "color": "#880E4F",
     "bg": "linear-gradient(160deg,#FCE4EC 0%,#880E4F 100%)",
     "stages": [
@@ -152,15 +152,15 @@
       46
     ],
     "enemies": [
-      "言葉の悪魔",
-      "ことばの大魔王",
-      "ことばの王"
+      "はんこのサイ",
+      "まきものヘビ",
+      "クジャクのことば王"
     ]
   },
   {
     "id": 9,
     "name": "ぼうけんのそら",
-    "emoji": "🌤️",
+    "icon": "art/worlds/sky.png",
     "color": "#0277BD",
     "bg": "linear-gradient(160deg,#B3E5FC 0%,#4FC3F7 100%)",
     "stages": [
@@ -171,15 +171,15 @@
       51
     ],
     "enemies": [
-      "スライム",
-      "コウモリ",
-      "ゴブリン"
+      "かざきりツバメ",
+      "たいこゴリラ",
+      "くもくじら船長"
     ]
   },
   {
     "id": 10,
     "name": "ちきゅうのはて",
-    "emoji": "🌍",
+    "icon": "art/worlds/earth.png",
     "color": "#2E7D32",
     "bg": "linear-gradient(160deg,#DCEDC8 0%,#388E3C 100%)",
     "stages": [
@@ -190,9 +190,9 @@
       56
     ],
     "enemies": [
-      "ガイコツ",
-      "ゴーレム",
-      "キノコ"
+      "いわよろいアルマジロ",
+      "ようがんイグアナ",
+      "だいちのゾウ王"
     ]
   }
 ]

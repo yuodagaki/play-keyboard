@@ -13,8 +13,7 @@ export function isMuted() { return _muted; }
 export function toggleMute() {
   _muted = !_muted;
   localStorage.setItem('kba-mute', _muted ? '1' : '0');
-  if (_muted) stopBgm();
-  else startBgm(_currentBgm);
+  updatePlayback();
   return _muted;
 }
 
@@ -149,12 +148,12 @@ const SE_MAP = {
 };
 
 export function playSound(name) {
-  if (_muted) return;
+  if (_muted || document.hidden) return;
   SE_MAP[name]?.();
 }
 
 export function playCombo(count) {
-  if (_muted) return;
+  if (_muted || document.hidden) return;
   const c = ctx();
   const osc = c.createOscillator();
   const gain = c.createGain();
@@ -184,10 +183,12 @@ const BGM_BATTLE = [
 let _bgmTimer = null;
 let _currentBgm = null;
 
+const scheduledNotes = new Set();
+
 function scheduleBgm(notes, bpm, startTime) {
   const beatSec = 60 / bpm;
   let t = startTime;
-  const nodes = [];
+
   for (const [freq, beats] of notes) {
     const dur = beats * beatSec;
     if (freq > 0) {
@@ -202,30 +203,52 @@ function scheduleBgm(notes, bpm, startTime) {
       gain.gain.linearRampToValueAtTime(0, t + dur);
       osc.start(t);
       osc.stop(t + dur);
-      nodes.push(osc);
+      scheduledNotes.add(osc);
+      osc.onended = () => scheduledNotes.delete(osc);
     }
     t += dur;
   }
-  return { nodes, endTime: t };
+  return t;
 }
 
 function loopBgm(notes, bpm) {
-  const { endTime } = scheduleBgm(notes, bpm, ctx().currentTime);
-  const loopMs = (endTime - ctx().currentTime - 0.1) * 1000;
+  const endTime = scheduleBgm(notes, bpm, ctx().currentTime);
+  const loopMs = (endTime - ctx().currentTime) * 1000;
   _bgmTimer = setTimeout(() => loopBgm(notes, bpm), Math.max(loopMs, 100));
 }
 
+function silenceBgm() {
+  clearTimeout(_bgmTimer);
+  _bgmTimer = null;
+  for (const note of scheduledNotes) {
+    note.disconnect();
+    note.stop();
+  }
+  scheduledNotes.clear();
+}
+
+function updatePlayback() {
+  silenceBgm();
+  if (_muted || document.hidden || !_currentBgm) return;
+  if (_currentBgm === 'battle') loopBgm(BGM_BATTLE, 140);
+  else loopBgm(BGM_TITLE, 80);
+}
+
 export function startBgm(name) {
-  if (_muted) return;
   if (_currentBgm === name) return;
-  stopBgm();
   _currentBgm = name;
-  const map = { title: [BGM_TITLE, 80], battle: [BGM_BATTLE, 140] };
-  const [notes, bpm] = map[name] ?? [BGM_TITLE, 80];
-  loopBgm(notes, bpm);
+  updatePlayback();
 }
 
 export function stopBgm() {
-  if (_bgmTimer) { clearTimeout(_bgmTimer); _bgmTimer = null; }
   _currentBgm = null;
+  silenceBgm();
 }
+
+document.addEventListener('visibilitychange', updatePlayback);
+window.addEventListener('pagehide', silenceBgm);
+window.addEventListener('storage', event => {
+  if (event.key !== 'kba-mute') return;
+  _muted = event.newValue === '1';
+  updatePlayback();
+});

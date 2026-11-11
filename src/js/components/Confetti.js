@@ -7,9 +7,8 @@ export function Confetti() {
     const left  = Math.random() * 100;
     const delay = Math.random() * 1.5;
     const dur   = 2 + Math.random() * 1.5;
-    const size  = 8 + Math.random() * 12;
+    const size  = 4 + 2 * Math.floor(Math.random() * 4);
     const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-    const shape = Math.random() > 0.5 ? '50%' : '2px';
     return html`
       <div key=${i} style=${{
         position: 'absolute',
@@ -18,8 +17,8 @@ export function Confetti() {
         width: size,
         height: size,
         background: color,
-        borderRadius: shape,
-        animation: `confetti-fall ${dur}s ease-in forwards`,
+
+        animation: `confetti-fall ${dur}s steps(36) forwards`,
         animationDelay: `${delay}s`,
         opacity: 0,
       }} />

@@ -1,26 +1,38 @@
+import { PixelText } from '../components/PixelText.js';
+import { JourneyScene, journeys } from '../components/JourneySprites.js';
+import { MistShelter } from '../components/MistSprites.js';
+import { IslandSprite } from '../components/IslandSprites.js';
+import { CaveSprite } from '../components/CaveSprites.js';
+import { LittleKnight } from '../components/LittleKnight.js';
+import { ForestBoar } from '../components/ForestSprites.js';
 import { html } from 'https://esm.sh/htm/react';
 import { useState, useEffect } from 'https://esm.sh/react';
-import { StickFigure } from '../components/StickFigure.js';
 import { TutorialOverlay } from '../components/TutorialOverlay.js';
 import { getWorlds, getStages } from '../data/loader.js';
-import { startBgm, playSound } from '../utils/sound.js';
+import { startBgm, stopBgm, playSound } from '../utils/sound.js';
+
+function MapStars({ stars }) {
+  return [1, 2, 3].map(n => html`
+    <img key=${n} class=${'pixel-icon map-star' + (n > stars ? ' unearned' : '')}
+      src="art/shop/star.png" alt=${n <= stars ? '★' : '☆'} />
+  `);
+}
 
 function StageNode({ stage, status, stars, onClick }) {
   const btnClass = `stage-node__btn stage-node__btn--${status}`;
-  const label = status === 'locked' ? '🔒' : stage.id;
+  const label = status === 'locked' ? html`<img class="pixel-icon" src="art/shop/lock.png" alt="" />` :
+    String(stage.id).split('').map((digit, index) => html`
+      <span key=${index} class="stage-digit" aria-hidden="true"
+        style=${{ backgroundPositionX: (-12 * Number(digit)) + 'px' }} />
+    `);
 
   return html`
     <div class="stage-node" onClick=${status !== 'locked' ? onClick : undefined}>
-      <button class=${btnClass} disabled=${status === 'locked'}>
+      <button class=${btnClass} aria-label=${`ステージ ${stage.id}`} disabled=${status === 'locked'}>
         ${label}
       </button>
       <div class="stage-node__stars">
-        ${status === 'cleared' && [1,2,3].map(n => html`
-          <span key=${n} style=${{ fontSize:'12px' }}>${n <= stars ? '⭐' : '☆'}</span>
-        `)}
-      </div>
-      <div class="stage-node__id">
-        ${status !== 'locked' ? `S${stage.id}` : ''}
+        ${status === 'cleared' && html`<${MapStars} stars=${stars} />`}
       </div>
     </div>
   `;
@@ -38,10 +50,21 @@ function WorldSection({ world, stages, slot, onStageClick }) {
       <div class="world-section__label">
         <div class="world-section__line" style=${{ background: world.color }} />
         <div class="world-section__name" style=${{ background: world.color }}>
-          ${world.emoji} ${world.name}
+          <img class="pixel-icon world-marker" src=${world.icon} alt="" /> ${world.name}
         </div>
         <div class="world-section__line" style=${{ background: world.color }} />
       </div>
+      ${journeys[world.id] && html`<${JourneyScene} world=${journeys[world.id]} />`}
+      ${world.id === 4 && html`<${MistShelter} />`}
+      ${world.id === 3 && html`
+        <div class="island-trail island-scene island-ring"><i class="island-petal" aria-hidden="true" /><${IslandSprite} kind="pair" /></div>
+      `}
+      ${world.id === 2 && html`
+        <div class="cave-trail cave-mine"><${CaveSprite} kind="chief" scene="map" /></div>
+      `}
+      ${world.id === 1 && html`
+        <div class="forest-trail"><${ForestBoar} boss=${true} sleeping=${true} /></div>
+      `}
       <div class="world-section__stages" style=${{ gap: 0 }}>
         <div class="world-section__path" style=${{ background: world.color, opacity: 0.25 }} />
         ${stages.map(stage => html`
@@ -70,23 +93,23 @@ function StagePopup({ stage, world, slot, onChallenge, onClose }) {
 
   return html`
     <div class="stage-popup-overlay" onClick=${onClose}>
-      <div class="stage-popup" onClick=${e => e.stopPropagation()}>
-        <div class="stage-popup__title">${world.emoji} ステージ ${stage.id}</div>
+      <div class="stage-popup" role="dialog" aria-modal="true" aria-labelledby="stage-popup-title" onClick=${e => e.stopPropagation()}>
+        <div class="stage-popup__title" id="stage-popup-title"><img class="pixel-icon world-marker" src=${world.icon} alt="" /> ステージ ${stage.id}</div>
         <div class="stage-popup__info">${phaseLabel[stage.phase] ?? stage.phase}</div>
         <div class="stage-popup__info">
           てき: ${stage.enemyCount}たい・さいだいHP ${stage.enemyMaxHP}
         </div>
-        <div class="stage-popup__coins">💰 クリア報酬: ${stage.coinReward}コイン</div>
+        <div class="stage-popup__coins"><img class="pixel-icon" src="art/shop/coin.png" alt="コイン" /> クリア報酬: ${stage.coinReward}コイン</div>
         ${status === 'cleared' && html`
           <div class="stage-popup__stars">
-            ${[1,2,3].map(n => html`<span key=${n}>${n <= stars ? '⭐' : '☆'}</span>`)}
+            <${MapStars} stars=${stars} />
           </div>
         `}
         <div class="stage-popup__btns">
-          <button class="btn-ghost" onClick=${onClose}>
+          <button class="stage-action" onClick=${onClose}>
             もどる <span class="kbd">Esc</span>
           </button>
-          <button class="btn-primary" onClick=${onChallenge}>
+          <button class="stage-action stage-action--challenge" onClick=${onChallenge}>
             ${status === 'cleared' ? 'もう一度！' : 'ちょうせん！'} <span class="kbd">Enter</span>
           </button>
         </div>
@@ -108,7 +131,7 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless,
     });
   }, []);
 
-  useEffect(() => { startBgm('title'); }, []);
+  useEffect(() => { startBgm('title'); return stopBgm; }, []);
 
   useEffect(() => {
     const handler = (e) => {
@@ -123,6 +146,8 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless,
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [selectedStage, onOpenShop]);
+
+  const endlessUnlocked = slot.ownedSpecials?.includes('endless');
 
   const stagesFor = (world) => stages.filter(s => world.stages.includes(s.id));
 
@@ -141,34 +166,27 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless,
       <!-- ヘッダー -->
       <div class="header">
         <div style=${{ display:'flex', alignItems:'center', gap:'12px' }}>
-          <svg width="44" height="52" viewBox="0 0 120 160" style=${{ overflow:'visible' }}>
-            <${StickFigure} weapon=${slot.weapon} armor=${slot.armor} pose="idle" color="white" />
-          </svg>
+          <${LittleKnight} weapon=${slot.weapon} armor=${slot.armor} />
           <div>
             <div style=${{ fontSize:'13px', color:'rgba(255,255,255,0.65)', fontWeight:'700' }}>${slot.name}</div>
             <div style=${{ fontSize:'15px', color:'white', fontWeight:'900' }}>
-              ⚔️ ${{ wooden:'木の剣', iron:'鉄の剣', flame:'炎の剣', thunder:'かみなりの剣', ice:'こおりの剣', dragon:'りゅうの剣', legendary:'でんせつの剣' }[slot.weapon] ?? slot.weapon}
-              🛡️ ${{ hat:'ぼうし', helmet:'かぶと', cape:'マント', armor:'よろい', robe:'まほうのローブ', shield:'せいなるたて', divine:'しんせいのよろい' }[slot.armor] ?? slot.armor}
+              ⚔️ ${{ wooden:'木の剣', iron:'鉄の剣', flame:'炎の剣', thunder:'かみなりの剣', ice:'こおりの剣', dragon:'りゅうの剣', legendary:'でんせつの剣', lightsaber:'ライトセイバー', magnum:'マグナム' }[slot.weapon] ?? slot.weapon}
+              🛡️ ${{ hat:'たびびとのふく', helmet:'きのよろい', cape:'くさりかたびら', armor:'てつのたて', robe:'まほうのローブ', shield:'せいなるたて', divine:'しんせいのよろい', vest:'ぼうだんチョッキ', radiant:'ひかりのよろい' }[slot.armor] ?? slot.armor}
             </div>
           </div>
         </div>
 
         <div style=${{ display:'flex', alignItems:'center', gap:'12px', marginLeft:'auto' }}>
           <div style=${{ fontSize:'20px', fontWeight:'900', color:'#FFD700' }}>
-            💰 ${slot.coins}
+            <img class="pixel-icon" src="art/shop/coin.png" alt="コイン" /> ${slot.coins}
           </div>
-          <button class="btn-secondary" onClick=${onOpenShop}>
-            🛒 ショップ <span class="kbd">S</span>
+          <button class="pixel-button" onClick=${onOpenShop}>
+            <img src="art/ui/stall.png" alt="" /> ショップ <span class="kbd">S</span>
           </button>
-          ${slot.ownedSpecials?.includes('endless') ? html`
-            <button class="btn-secondary" style=${{ background:'#1A237E', borderColor:'#5C6BC0' }} onClick=${onOpenEndless}>
-              ⚔️ エンドレス
-            </button>
-          ` : html`
-            <button class="btn-ghost" style=${{ opacity:0.5, cursor:'default' }} title="ショップで購入できるよ！">
-              🔒 エンドレス
-            </button>
-          `}
+          <button class="pixel-button" disabled=${!endlessUnlocked}
+            title=${endlessUnlocked ? undefined : 'ショップで購入できるよ！'} onClick=${onOpenEndless}>
+            <img src=${endlessUnlocked ? 'art/shop/endless.png' : 'art/shop/lock.png'} alt="" /> エンドレス
+          </button>
         </div>
       </div>
 
@@ -185,16 +203,16 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless,
         `)}
 
         <!-- エンドレス記録バッジ -->
-        ${slot.ownedSpecials?.includes('endless') && slot.endlessRecord && html`
+        ${endlessUnlocked && slot.endlessRecord && html`
           <div class="endless-record-badge">
-            <div style=${{ fontSize:'32px' }}>🏆</div>
+            <img class="record-trophy" src="art/ui/trophy.png" alt="" />
             <div>
-              <div class="endless-record-badge__title">エンドレス さいこうきろく</div>
+              <div class="endless-record-badge__title"><${PixelText} color="#885323">エンドレス さいこうきろく<//></div>
               <div class="endless-record-badge__stats">
-                <span>ループ ${slot.endlessRecord.maxLoop}</span>
-                <span>Lv.${slot.endlessRecord.maxLevel}</span>
-                <span>雑魚 ${slot.endlessRecord.totalMobs}たい</span>
-                <span>ボス ${slot.endlessRecord.totalBosses}たい</span>
+                <${PixelText}>${`ループ ${slot.endlessRecord.maxLoop}`}<//>
+                <${PixelText}>${`Lv.${slot.endlessRecord.maxLevel}`}<//>
+                <${PixelText}>${`雑魚 ${slot.endlessRecord.totalMobs}たい`}<//>
+                <${PixelText}>${`ボス ${slot.endlessRecord.totalBosses}たい`}<//>
               </div>
             </div>
           </div>

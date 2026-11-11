@@ -1,6 +1,6 @@
 import { html } from 'https://esm.sh/htm/react';
 import { useState } from 'https://esm.sh/react';
-import { HandSVG, KEY_FINGER, FINGER_COLOR } from './HandSVG.js';
+import { HandGuide, KEY_FINGER, FINGER_COLOR } from './HandGuide.js';
 
 const KB_ROWS = [
   ['Q','W','E','R','T','Y','U','I','O','P','-'],
@@ -61,7 +61,7 @@ export function KeyboardGuide({ nextChar, availableKeys, flashError }) {
       </button>
 
       ${visible && html`
-        <${HandSVG}
+        <${HandGuide}
           activeFingers=${activeFinger}
           pressedFinger=${null}
           flashError=${flashError}

@@ -1,6 +1,11 @@
+import { JourneyAnimal, journeyEncounter } from '../components/JourneySprites.js';
+import { MistSprite, mistEnemy, mistNames } from '../components/MistSprites.js';
+import { IslandSprite, islandNames, islandEnemy } from '../components/IslandSprites.js';
+import { CaveSprite, caveNames } from '../components/CaveSprites.js';
+import { LittleKnight, useKnightReaction } from '../components/LittleKnight.js';
+import { ForestBoar } from '../components/ForestSprites.js';
 import { html } from 'https://esm.sh/htm/react';
 import { useState, useEffect, useRef } from 'https://esm.sh/react';
-import { StickFigure } from '../components/StickFigure.js';
 import { EnemySVG } from '../components/EnemySVG.js';
 import { KeyboardGuide } from '../components/KeyboardGuide.js';
 import { TutorialOverlay } from '../components/TutorialOverlay.js';
@@ -12,19 +17,8 @@ const ENEMY_NAMES = {
   slime: 'スライム', mushroom: 'キノコ', goblin: 'ゴブリン',
   bat: 'コウモリ', skeleton: 'ガイコツ', golem: 'ゴーレム',
 };
-const WEAPON_ATK  = { wooden:1, iron:2, flame:3, thunder:4, ice:5, dragon:6, legendary:7 };
-const ARMOR_BONUS = { hat:0.1, helmet:0.2, cape:0.3, armor:0.4, robe:0.5, shield:0.6, divine:0.7 };
-
-const ATTACK_ANIMS = [
-  { css: 'attack-lunge 0.40s ease-out',  dur: 400 },
-  { css: 'attack-spin  0.50s ease-out',  dur: 500 },
-  { css: 'attack-jump  0.55s ease-out',  dur: 550 },
-  { css: 'attack-slash 0.45s ease-out',  dur: 450 },
-  { css: 'attack-thrust 0.42s ease-out', dur: 420 },
-];
-function pickAttack() {
-  return ATTACK_ANIMS[Math.floor(Math.random() * ATTACK_ANIMS.length)];
-}
+const WEAPON_ATK  = { wooden:1, iron:2, flame:3, thunder:4, ice:5, dragon:6, legendary:7, lightsaber:8, magnum:9 };
+const ARMOR_BONUS = { hat:0.1, helmet:0.2, cape:0.3, armor:0.4, robe:0.5, shield:0.6, divine:0.7, vest:0.8, radiant:0.9 };
 
 function hpColor(hp, max) {
   const r = hp / max;
@@ -80,10 +74,9 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
   const [accuracy, setAccuracy] = useState(100);
   const [flashEnemy, setFlashEnemy] = useState(false);
   const [fallingEnemy, setFallingEnemy] = useState(false);
-  const [heroPose, setHeroPose] = useState('idle');
-  const [heroAnim, setHeroAnim] = useState('idle-bob 2.5s ease-in-out infinite');
   const [flashError, setFlashError] = useState(false);
   const [missPulse, setMissPulse] = useState(false);
+  const [reaction, reactKnight] = useKnightReaction();
   const [dmgFloats, setDmgFloats] = useState([]);
   const [done, setDone] = useState(false);
   const [showHomeGuide, setShowHomeGuide] = useState(slot.maxUnlocked === 1);
@@ -92,10 +85,6 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
 
   const atk = WEAPON_ATK[slot.weapon] ?? 1;
 
-  function resetHero() {
-    setHeroPose('idle');
-    setHeroAnim('idle-bob 2.5s ease-in-out infinite');
-  }
 
   // Load stage (and words if needed)
   useEffect(() => {
@@ -161,10 +150,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
         if (newTyped.length >= question.romaji.length) {
           // 完了状態を一時表示してから遷移（複数文字のみ遅延）
           setTyped(newTyped);
-          const atk_anim = pickAttack();
-          setHeroPose('attack');
-          setHeroAnim(atk_anim.css);
-          setTimeout(() => resetHero(), atk_anim.dur);
+          reactKnight('attack');
 
           const newEnemies = enemies.map((en, i) =>
             i === enemyIdx ? { hp: Math.max(0, en.hp - atk) } : en
@@ -185,11 +171,10 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
               setFlashEnemy(false);
               setFallingEnemy(true);
               setTyped('');
-              setHeroPose('happy');
-              setHeroAnim('hero-happy 0.6s ease-out');
+              reactKnight('happy');
               setTimeout(() => {
                 setFallingEnemy(false);
-                resetHero();
+
                 const nextIdx = enemyIdx + 1;
                 if (nextIdx >= enemies.length) {
                   setDone(true);
@@ -224,12 +209,11 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
         setAccuracy(correctKeys === 0 ? 0 : Math.round(correctKeys / newTK * 100));
         setFlashError(true);
         setMissPulse(true);
-        setHeroPose('sad');
-        setHeroAnim('hero-sad 0.35s ease-out');
+        reactKnight('sad');
         setTimeout(() => {
           setFlashError(false);
           setMissPulse(false);
-          resetHero();
+
         }, 350);
       }
     };
@@ -253,13 +237,24 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
   const isPhaseA = stage.phase === 'A';
   const showCpm = !isPhaseA;
   const nextChar = question.romaji[typed.length]?.toUpperCase() ?? '';
-  const enemyName = ENEMY_NAMES[stage.enemyType] ?? 'モンスター';
+  const forest = stage.world === 1;
+  const boss = stage.id === 6 && enemyIdx === enemies.length - 1;
+  const cave = stage.world === 2;
+  const caveKind = stage.id < 10 ? 'bat' : stage.id === 12 && enemyIdx === enemies.length - 1 ? 'chief' : 'mole';
+  const island = stage.world === 3;
+  const islandKind = islandEnemy(stage.id, enemyIdx, enemies.length);
+  const islandScene = stage.id < 16 ? 'shore' : stage.id < 19 ? 'camellia' : 'ring';
+  const mist = stage.world === 4;
+  const mistKind = mistEnemy(stage.id, enemyIdx, enemies.length);
+  const mistScene = stage.id === 22 ? 'pond' : stage.id === 23 ? 'bank' : 'grove';
+  const encounter = journeyEncounter(stage, enemyIdx);
+  const enemyName = encounter ? encounter.name : mist ? mistNames[mistKind] : island ? islandNames[islandKind] : cave ? caveNames[caveKind] : forest ? (boss ? '大イノシシ' : 'うりぼう') : ENEMY_NAMES[stage.enemyType] ?? 'モンスター';
 
   return html`
     <div class="screen battle-screen">
       <!-- ステータスバー -->
       <div class="battle-status">
-        <button class="battle-status__back" onClick=${onBack}>← もどる <span class="kbd">Esc</span></button>
+        <button class="pixel-button" onClick=${onBack}><img src="art/ui/back.png" alt="" /> もどる <span class="kbd">Esc</span></button>
         <span>ステージ ${stage.id}</span>
         <span class=${'battle-status__accuracy--' + accClass}>
           せいかく: ${accuracy}%
@@ -269,22 +264,15 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
             ⚡ ${cpm !== null ? cpm : '--'}
           </span>
         `}
-        <span style=${{ marginLeft:'auto' }}>💰 ${slot.coins}</span>
+        <span style=${{ marginLeft:'auto' }}><img class="pixel-icon" src="art/shop/coin.png" alt="コイン" /> ${slot.coins}</span>
       </div>
 
       <!-- バトルゾーン -->
-      <div class="battle-zone">
+      <div style=${encounter ? { backgroundImage: "url(art/journey/" + encounter.scene + ".png)" } : undefined} class=${encounter ? "battle-zone journey-arena arena-" + encounter.scene + " journey-stage-" + stage.id : mist ? "battle-zone mist-arena mist-" + mistScene : island ? "battle-zone island-scene island-" + islandScene : forest ? "battle-zone forest-clearing" : cave ? "battle-zone cave-arena " + (caveKind === "bat" ? "cave-pool" : "cave-mine") : "battle-zone"}>
         <!-- ヒーロー -->
         <div class="battle-hero">
-          <div class="battle-hero__label">ゆうしゃ</div>
-          <svg width="120" height="140" viewBox="0 0 120 160" style=${{ overflow:'visible' }}>
-            <${StickFigure}
-              weapon=${slot.weapon}
-              armor=${slot.armor}
-              pose=${heroPose}
-              animStyle=${{ animation: heroAnim }}
-            />
-          </svg>
+          <div class="battle-hero__label">リトルナイト</div>
+          <${LittleKnight} key=${reaction.id} weapon=${slot.weapon} armor=${slot.armor} pose=${reaction.pose} />
         </div>
 
         <div class="battle-zone__divider" />
@@ -308,7 +296,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
           </div>
 
           <div style=${{ position: 'relative', marginTop: '28px' }}>
-            <${EnemySVG} type=${stage.enemyType} flash=${flashEnemy} falling=${fallingEnemy} />
+            ${encounter ? html`<${JourneyAnimal} actor=${encounter.actor} boss=${encounter.boss} flash=${flashEnemy} falling=${fallingEnemy} />` : mist ? html`<${MistSprite} kind=${mistKind} flash=${flashEnemy} falling=${fallingEnemy} />` : island ? html`<${IslandSprite} kind=${islandKind} flash=${flashEnemy} falling=${fallingEnemy} />` : cave ? html`<${CaveSprite} kind=${caveKind} flash=${flashEnemy} falling=${fallingEnemy} />` : forest ? html`<${ForestBoar} boss=${boss} flash=${flashEnemy} falling=${fallingEnemy} />` : html`<${EnemySVG} type=${stage.enemyType} flash=${flashEnemy} falling=${fallingEnemy} />`}
             ${dmgFloats.map(f => html`
               <div key=${f.id} style=${{ position:'absolute', top:'30px', left:0, right:0, display:'flex', justifyContent:'center', pointerEvents:'none' }}>
                 <div class="dmg-float">-${f.value}</div>

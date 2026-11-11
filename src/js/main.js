@@ -30,6 +30,14 @@ function App() {
   const [screen, setScreen] = useState('title');
   const [muted, setMuted] = useState(isMuted());
 
+  useEffect(() => {
+    const syncMute = event => {
+      if (event.key === 'kba-mute') setMuted(isMuted());
+    };
+    window.addEventListener('storage', syncMute);
+    return () => window.removeEventListener('storage', syncMute);
+  }, []);
+
   const handleToggleMute = () => {
     const next = toggleMute();
     setMuted(next);
@@ -218,6 +226,7 @@ function App() {
         <${StageClearScreen}
           result=${clearResult}
           slot=${slot}
+          onOpenShop=${handleOpenShop}
           onNext=${handleClearNext}
           onWorldMap=${handleClearWorldMap}
           onRetry=${handleClearRetry}
@@ -264,11 +273,13 @@ function App() {
     }}>
       ${renderScreen()}
       <button
-        class="btn-mute"
+        class="pixel-button btn-mute"
         onClick=${handleToggleMute}
         title=${muted ? '音をオンにする' : '音をオフにする'}
         aria-label=${muted ? '音をオンにする' : '音をオフにする'}
-      >${muted ? '🔇' : '🔊'}</button>
+      >
+        <img src=${muted ? 'art/ui/sound-off.png' : 'art/ui/sound-on.png'} alt="" />
+      </button>
     </div>
   `;
 }

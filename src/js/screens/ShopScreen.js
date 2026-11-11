@@ -1,18 +1,20 @@
+import { LittleKnight } from '../components/LittleKnight.js';
 import { html } from 'https://esm.sh/htm/react';
 import { useState, useEffect } from 'https://esm.sh/react';
-import { StickFigure } from '../components/StickFigure.js';
 import { getItems } from '../data/loader.js';
 import { playSound } from '../utils/sound.js';
 
-function ItemRow({ item, owned, equipped, canAfford, onBuy, onEquip }) {
+function ItemRow({ item, owned, equipped, coins, canAfford, onBuy, onEquip }) {
   const isEquipped = equipped === item.id;
   const isOwned = owned.includes(item.id);
 
   return html`
     <div class=${'shop-item' + (isEquipped ? ' shop-item--equipped' : '')}>
+      <div class="shop-display"><img src=${'art/' + (item.atk ? 'forest/' : 'shop/') + item.id + '.png'} alt="" /></div>
       <div class="shop-item__info">
         <div class="shop-item__name">${item.name}</div>
         <div class="shop-item__desc">${item.desc}</div>
+        ${!isOwned && !canAfford && html`<div class="coin-gap">あと ${item.cost - coins} まい</div>`}
       </div>
       ${isEquipped ? html`
         <div class="shop-item__badge-equipped">そうびちゅう</div>
@@ -23,9 +25,9 @@ function ItemRow({ item, owned, equipped, canAfford, onBuy, onEquip }) {
       ` : html`
         <button
           class=${'shop-item__btn-buy shop-item__btn-buy--' + (canAfford ? 'available' : 'disabled')}
-          onClick=${canAfford ? onBuy : undefined}
+          disabled=${!canAfford} onClick=${onBuy}
         >
-          💰 ${item.cost}
+          <img class="pixel-icon" src="art/shop/coin.png" alt="コイン" /> ${item.cost}
         </button>
       `}
     </div>
@@ -85,25 +87,19 @@ export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
     <div class="screen shop-screen">
       <!-- ヘッダー -->
       <div class="header">
-        <button class="btn-ghost" style=${{ background:'white', color:'var(--color-text)', borderColor:'white', fontWeight:'900' }} onClick=${onClose}>
-          ← もどる <span class="kbd">Esc</span>
+        <button class="pixel-button" onClick=${onClose}>
+          <img src="art/ui/back.png" alt="" /> もどる <span class="kbd">Esc</span>
         </button>
-        <span style=${{ fontSize:'22px', fontWeight:'900', color:'white', marginLeft:'16px' }}>🛒 ショップ</span>
-        <span style=${{ marginLeft:'auto', fontSize:'20px', fontWeight:'900', color:'#FFD700' }}>💰 ${slot.coins}</span>
+        <span style=${{ fontSize:'22px', fontWeight:'900', color:'white', marginLeft:'16px' }}>森のどうぐ屋</span>
+        <span style=${{ marginLeft:'auto', fontSize:'20px', fontWeight:'900', color:'#FFD700' }}><img class="pixel-icon" src="art/shop/coin.png" alt="コイン" /> ${slot.coins}</span>
       </div>
 
       <div class="shop-body">
         <!-- キャラクタープレビュー -->
         <div class="shop-preview">
+          <div class="shop-counter"><img src="art/shop/merchant.png" alt="きつねの店主" /></div>
           <div class="shop-preview__label">ゆうしゃのすがた</div>
-          <svg width="130" height="150" viewBox="0 0 120 160" style=${{ overflow:'visible' }}>
-            <${StickFigure}
-              weapon=${previewWeapon}
-              armor=${previewArmor}
-              pose="idle"
-              animStyle=${{ animation: 'idle-bob 2.5s ease-in-out infinite' }}
-            />
-          </svg>
+          <${LittleKnight} weapon=${previewWeapon} armor=${previewArmor} />
         </div>
 
         <!-- アイテムリスト -->
@@ -113,11 +109,12 @@ export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
               よみこみちゅう...
             </div>
           ` : html`
-            <div class="shop-items__section-title">⚔️ ぶき</div>
+            <div class="shop-items__section-title">ぶき</div>
             ${items.weapons.map(item => html`
               <${ItemRow}
                 key=${item.id}
                 item=${item}
+                coins=${slot.coins}
                 owned=${slot.ownedWeapons}
                 equipped=${slot.weapon}
                 canAfford=${slot.coins >= item.cost}
@@ -126,11 +123,12 @@ export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
               />
             `)}
 
-            <div class="shop-items__section-title" style=${{ marginTop:'24px' }}>🛡️ ぼうぐ</div>
+            <div class="shop-items__section-title" style=${{ marginTop:'24px' }}>ぼうぐ</div>
             ${items.armors.map(item => html`
               <${ItemRow}
                 key=${item.id}
                 item=${item}
+                coins=${slot.coins}
                 owned=${slot.ownedArmors}
                 equipped=${slot.armor}
                 canAfford=${slot.coins >= item.cost}
@@ -140,13 +138,14 @@ export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
             `)}
 
             ${items.specials?.length > 0 && html`
-              <div class="shop-items__section-title" style=${{ marginTop:'24px' }}>✨ とくべつ</div>
+              <div class="shop-items__section-title" style=${{ marginTop:'24px' }}>とくべつ</div>
               ${items.specials.map(item => {
                 const owned = slot.ownedSpecials?.includes(item.id);
                 return html`
                   <div key=${item.id} class=${'shop-item' + (owned ? ' shop-item--equipped' : '')}>
+                    <div class="shop-display"><img src="art/shop/endless.png" alt="" /></div>
                     <div class="shop-item__info">
-                      <div class="shop-item__name">${item.emoji} ${item.name}</div>
+                      <div class="shop-item__name">${item.name}</div>
                       <div class="shop-item__desc">${item.desc}</div>
                     </div>
                     ${owned ? html`
@@ -159,7 +158,7 @@ export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
                           showToast(`${item.name} をかった！`);
                         } : undefined}
                       >
-                        💰 ${item.cost}
+                        <img class="pixel-icon" src="art/shop/coin.png" alt="コイン" /> ${item.cost}
                       </button>
                     `}
                   </div>

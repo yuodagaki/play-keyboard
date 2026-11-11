@@ -48,33 +48,47 @@
       "atk": 7,
       "cost": 2500,
       "desc": "つよさのきわみ！こうげき +7"
+    },
+    {
+      "id": "lightsaber",
+      "name": "ライトセイバー",
+      "atk": 8,
+      "cost": 3600,
+      "desc": "ひかりのやいば！こうげき +8"
+    },
+    {
+      "id": "magnum",
+      "name": "マグナム",
+      "atk": 9,
+      "cost": 5000,
+      "desc": "ほしのだんがとびだす！こうげき +9"
     }
   ],
   "armors": [
     {
       "id": "hat",
-      "name": "ぼうし",
+      "name": "たびびとのふく",
       "coinBonus": 0.10,
       "cost": 0,
       "desc": "コイン +10%"
     },
     {
       "id": "helmet",
-      "name": "かぶと",
+      "name": "きのよろい",
       "coinBonus": 0.20,
       "cost": 80,
       "desc": "コイン +20%"
     },
     {
       "id": "cape",
-      "name": "マント",
+      "name": "くさりかたびら",
       "coinBonus": 0.30,
       "cost": 220,
       "desc": "コイン +30%"
     },
     {
       "id": "armor",
-      "name": "よろい",
+      "name": "てつのたて",
       "coinBonus": 0.40,
       "cost": 450,
       "desc": "コイン +40%"
@@ -99,6 +113,20 @@
       "coinBonus": 0.70,
       "cost": 2200,
       "desc": "コイン +70%"
+    },
+    {
+      "id": "vest",
+      "name": "ぼうだんチョッキ",
+      "coinBonus": 0.8,
+      "cost": 3200,
+      "desc": "コイン +80%"
+    },
+    {
+      "id": "radiant",
+      "name": "ひかりのよろい",
+      "coinBonus": 0.9,
+      "cost": 4500,
+      "desc": "コイン +90%"
     }
   ],
   "specials": [

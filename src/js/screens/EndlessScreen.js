@@ -1,27 +1,28 @@
 import { html } from 'https://esm.sh/htm/react';
 import { useState, useEffect, useRef } from 'https://esm.sh/react';
-import { StickFigure } from '../components/StickFigure.js';
-import { EnemySVG } from '../components/EnemySVG.js';
+import { LittleKnight, useKnightReaction } from '../components/LittleKnight.js';
+import { ForestBoar } from '../components/ForestSprites.js';
+import { CaveSprite, caveNames } from '../components/CaveSprites.js';
+import { IslandSprite, islandNames } from '../components/IslandSprites.js';
+import { MistSprite, mistNames } from '../components/MistSprites.js';
+import { JourneyAnimal, journeys, journeyNames } from '../components/JourneySprites.js';
 import { KeyboardGuide } from '../components/KeyboardGuide.js';
 import { toRomaji } from '../utils/romaji.js';
 import { getWords } from '../data/loader.js';
 import { ENDLESS } from '../data/endlessConstants.js';
 import { playSound, startBgm, stopBgm } from '../utils/sound.js';
 
-const WEAPON_ATK  = { wooden:1, iron:2, flame:3, thunder:4, ice:5, dragon:6, legendary:7 };
-const ARMOR_XP_MULT = { hat:1.0, helmet:1.1, cape:1.2, armor:1.3, robe:1.5, shield:1.6, divine:1.7 };
-const ENEMY_TYPES = ['slime', 'mushroom', 'goblin', 'bat', 'skeleton', 'golem'];
-const ENEMY_NAMES = { slime:'スライム', mushroom:'キノコ', goblin:'ゴブリン', bat:'コウモリ', skeleton:'ガイコツ', golem:'ゴーレム' };
-const ATTACK_ANIMS = [
-  { css: 'attack-lunge 0.40s ease-out',  dur: 400 },
-  { css: 'attack-spin  0.50s ease-out',  dur: 500 },
-  { css: 'attack-jump  0.55s ease-out',  dur: 550 },
-  { css: 'attack-slash 0.45s ease-out',  dur: 450 },
-  { css: 'attack-thrust 0.42s ease-out', dur: 420 },
+const WEAPON_ATK  = { wooden:1, iron:2, flame:3, thunder:4, ice:5, dragon:6, legendary:7, lightsaber:8, magnum:9 };
+const ARMOR_XP_MULT = { hat:1.0, helmet:1.1, cape:1.2, armor:1.3, robe:1.5, shield:1.6, divine:1.7, vest:1.8, radiant:1.9 };
+const encounters = [
+  { sprite: ForestBoar, mobs: ['boar'], boss: 'chief', names: { boar: 'うりぼう', chief: '大イノシシ' } },
+  { sprite: CaveSprite, mobs: ['bat', 'mole'], boss: 'chief', names: caveNames },
+  { sprite: IslandSprite, mobs: ['tanuki', 'fox'], boss: 'pair', names: islandNames },
+  { sprite: MistSprite, mobs: ['frog', 'otter'], boss: 'deer', names: mistNames },
+  ...Object.values(journeys).map(({ cast: [first, second, boss] }) => ({
+    sprite: JourneyAnimal, mobs: [first, second], boss, names: journeyNames,
+  })),
 ];
-
-function pickAttack() { return ATTACK_ANIMS[Math.floor(Math.random() * ATTACK_ANIMS.length)]; }
-function pickType()   { return ENEMY_TYPES[Math.floor(Math.random() * ENEMY_TYPES.length)]; }
 
 function mobHP(loop)   { return Math.min(9999,  Math.ceil(ENDLESS.MOB_HP_BASE  * Math.pow(ENDLESS.MOB_HP_SCALE,   loop - 1))); }
 function mobAtk(loop)  { return Math.min(999,   ENDLESS.MOB_ATK_BASE + (loop - 1) * ENDLESS.MOB_ATK_STEP); }
@@ -56,7 +57,6 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
   const [loop, setLoop] = useState(1);
   const [mobCount, setMobCount] = useState(0);
   const [isBoss, setIsBoss] = useState(false);
-  const [enemyType, setEnemyType] = useState(() => pickType());
   const [enemyHP, setEnemyHP] = useState(() => mobHP(1));
   const [enemyMaxHP, setEnemyMaxHP] = useState(() => mobHP(1));
   const [enemyAtkVal, setEnemyAtkVal] = useState(() => mobAtk(1));
@@ -80,7 +80,7 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
   const [sessionBosses, setSessionBosses] = useState(0);
 
   // Visual
-  const [heroAnim, setHeroAnim] = useState('idle');
+  const [reaction, reactKnight] = useKnightReaction();
   const [dmgFloats, setDmgFloats] = useState([]);
   const [heroDmgFloats, setHeroDmgFloats] = useState([]);
   const [flashError, setFlashError] = useState(false);
@@ -168,9 +168,7 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
           const atk = (WEAPON_ATK[slot.weapon] ?? 1) + heroAtkBonus;
           const newEnemyHP = Math.max(0, enemyHP - atk);
 
-          const animInfo = pickAttack();
-          setHeroAnim(animInfo.css);
-          setTimeout(() => setHeroAnim('idle'), animInfo.dur);
+          reactKnight('attack');
 
           const fid = Date.now();
           setDmgFloats(f => [...f, { id: fid, value: atk }]);
@@ -296,10 +294,8 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
         setIsBoss(false);
         setLoopBanner(true);
         setTimeout(() => setLoopBanner(false), 1200);
-        const type = pickType();
         const hp   = mobHP(nextLoop);
         const atk  = mobAtk(nextLoop);
-        setEnemyType(type);
         setEnemyHP(hp); setEnemyMaxHP(hp);
         setEnemyAtkVal(atk); enemyAtkRef.current = atk;
       } else {
@@ -307,18 +303,14 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
         if (nextMobCount >= ENDLESS.MOB_COUNT) {
           setMobCount(nextMobCount);
           setIsBoss(true);
-          const type = pickType();
           const hp   = bossHP(loop);
           const atk  = bossAtk(loop);
-          setEnemyType(type);
           setEnemyHP(hp); setEnemyMaxHP(hp);
           setEnemyAtkVal(atk); enemyAtkRef.current = atk;
         } else {
           setMobCount(nextMobCount);
-          const type = pickType();
           const hp   = mobHP(loop);
           const atk  = mobAtk(loop);
-          setEnemyType(type);
           setEnemyHP(hp); setEnemyMaxHP(hp);
           setEnemyAtkVal(atk); enemyAtkRef.current = atk;
         }
@@ -342,10 +334,14 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
   const hpRatio      = Math.max(0, heroHP / heroMaxHP);
   const enemyHpRatio = Math.max(0, enemyHP / enemyMaxHP);
   const xpRatio      = heroXP / ENDLESS.XP_PER_LEVEL;
-  const charRatio    = (charCount % ENDLESS.ATTACK_EVERY_N) / ENDLESS.ATTACK_EVERY_N;
+  const progress = charCount % ENDLESS.ATTACK_EVERY_N;
+  const striking = flashEnemy && progress === 0;
+  const litSegments = striking ? ENDLESS.ATTACK_EVERY_N : progress;
   const nextChar     = question.romaji[typed.length]?.toUpperCase() ?? '';
   const heroAtk      = (WEAPON_ATK[slot.weapon] ?? 1) + heroAtkBonus;
-  const enemyDisplayName = (isBoss ? '大' : '') + (ENEMY_NAMES[enemyType] ?? 'モンスター');
+  const encounter = encounters[(loop - 1) % encounters.length];
+  const actor = isBoss ? encounter.boss : encounter.mobs[mobCount % encounter.mobs.length];
+  const enemyDisplayName = encounter.names[actor];
   const mobLabel     = isBoss
     ? 'ボス！'
     : `雑魚 ${mobCount + 1} / ${ENDLESS.MOB_COUNT}`;
@@ -355,7 +351,7 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
 
       <!-- ステータスバー -->
       <div class="battle-status">
-        <button class="battle-status__back" onClick=${onBack}>← もどる <span class="kbd">Esc</span></button>
+        <button class="pixel-button" onClick=${onBack}><img src="art/ui/back.png" alt="" /> もどる <span class="kbd">Esc</span></button>
         <div class="endless-status-lv">
           Lv.${heroLevel}
           <div class="endless-status-xp-track">
@@ -363,6 +359,12 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
           </div>
         </div>
         <span style=${{ color:'rgba(255,255,255,0.7)', fontWeight:'700' }}>ループ ${loop}</span>
+        ${!isBoss && html`<div class="boss-preview">
+          <div class=${'boss-portrait' + (mobCount < ENDLESS.MOB_COUNT - 1 ? ' silhouette' : '')} aria-hidden="true">
+            <${encounter.sprite} kind=${encounter.boss} actor=${encounter.boss} boss=${true} />
+          </div>
+          つぎのボス　${mobCount < ENDLESS.MOB_COUNT - 1 ? '？？？' : encounter.names[encounter.boss]}
+        </div>`}
         <span style=${{ marginLeft:'auto', fontWeight:'900', color:'#FFD700' }}>ATK ${heroAtk} / DEF ${heroDef}</span>
       </div>
 
@@ -371,7 +373,7 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
 
         <!-- ゆうしゃ -->
         <div class="battle-hero">
-          <div class="battle-hero__label">ゆうしゃ</div>
+          <div class="battle-hero__label">リトルナイト</div>
 
           <!-- ゆうしゃHP -->
           <div class="endless-hero-hp">
@@ -388,18 +390,7 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
           </div>
 
           <div style=${{ position:'relative' }}>
-            <svg width="120" height="140" viewBox="0 0 120 160" style=${{ overflow:'visible' }}
-                class=${heroFlash ? 'endless-hero--hit' : ''}>
-              <${StickFigure}
-                weapon=${slot.weapon}
-                armor=${slot.armor}
-                pose=${heroAnim !== 'idle' ? 'attack' : 'idle'}
-                color="white"
-                animStyle=${{
-                  animation: heroAnim === 'idle' ? 'idle-bob 2.5s ease-in-out infinite' : heroAnim,
-                }}
-              />
-            </svg>
+            <div class=${heroFlash ? 'endless-hero--hit' : ''}><${LittleKnight} key=${reaction.id} weapon=${slot.weapon} armor=${slot.armor} pose=${reaction.pose} /></div>
             ${heroDmgFloats.map(f => html`
               <div key=${f.id} style=${{ position:'absolute', top:'20px', left:0, right:0, display:'flex', justifyContent:'center', pointerEvents:'none' }}>
                 <div class="hero-dmg-float">-${f.value}</div>
@@ -436,8 +427,8 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
             </div>
           </div>
 
-          <div style=${{ position:'relative', marginTop:'60px' }}>
-            <${EnemySVG} type=${enemyType} flash=${flashEnemy} falling=${fallingEnemy} boss=${isBoss} />
+          <div class="endless-opponent">
+            <${encounter.sprite} key=${actor} kind=${actor} actor=${actor} flash=${flashEnemy} falling=${fallingEnemy} boss=${isBoss} />
             ${dmgFloats.map(f => html`
               <div key=${f.id} style=${{ position:'absolute', top:'30px', left:0, right:0, display:'flex', justifyContent:'center', pointerEvents:'none' }}>
                 <div class="dmg-float">-${f.value}</div>
@@ -473,11 +464,10 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
           </div>
         `}
 
-        <!-- 10文字カウンタ -->
-        <div class="endless-char-counter">
-          <span class="endless-char-counter__label">⚔️ ${charCount % ENDLESS.ATTACK_EVERY_N}/${ENDLESS.ATTACK_EVERY_N}</span>
-          <div class="endless-char-counter__track">
-            <div class="endless-char-counter__fill" style=${{ width: `${charRatio * 100}%` }} />
+        <div class=${'endless-charge' + (striking ? ' striking' : '')}>
+          <span>${striking ? 'こうげき！' : 'あと ' + (ENDLESS.ATTACK_EVERY_N - progress) + ' 打'}</span>
+          <div class="charge-sword" aria-hidden="true">
+            ${Array.from({ length: ENDLESS.ATTACK_EVERY_N }, (_, i) => html`<i key=${i} class=${i < litSegments ? 'lit' : ''} />`)}
           </div>
         </div>
       </div>
