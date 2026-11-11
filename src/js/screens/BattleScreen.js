@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from 'https://esm.sh/react';
 import { EnemySVG } from '../components/EnemySVG.js';
 import { KeyboardGuide } from '../components/KeyboardGuide.js';
 import { TutorialOverlay } from '../components/TutorialOverlay.js';
-import { toRomaji } from '../utils/romaji.js';
+import { createRomajiQuestion, romajiGuide } from '../utils/romaji.js';
 import { getStage, getWords } from '../data/loader.js';
 import { playSound, startBgm, stopBgm } from '../utils/sound.js';
 
@@ -45,21 +45,21 @@ function calcStars(acc) {
 function pickQuestion(stage, words) {
   if (stage.phase === 'A') {
     const ch = stage.availableKeys[Math.floor(Math.random() * stage.availableKeys.length)];
-    return { text: ch, romaji: ch.toLowerCase() };
+    return createRomajiQuestion(ch);
   }
   if (['B', 'B2', 'B3'].includes(stage.phase)) {
     const set = stage.hiraganaSet;
     const ch = set[Math.floor(Math.random() * set.length)];
-    return { text: ch, romaji: toRomaji(ch) };
+    return createRomajiQuestion(ch);
   }
   if (stage.phase === 'G') {
     const list = words?.sentences?.[stage.wordDifficulty] ?? ['ねこがいる'];
     const sentence = list[Math.floor(Math.random() * list.length)];
-    return { text: sentence, romaji: toRomaji(sentence) };
+    return createRomajiQuestion(sentence);
   }
   const list = words?.[String(stage.wordLength)]?.[stage.wordDifficulty] ?? ['ねこ'];
   const word = list[Math.floor(Math.random() * list.length)];
-  return { text: word, romaji: toRomaji(word) };
+  return createRomajiQuestion(word);
 }
 
 export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onTutorialNext }) {
@@ -69,6 +69,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
   const [enemyIdx, setEnemyIdx] = useState(0);
   const [question, setQuestion] = useState(null);
   const [typed, setTyped] = useState('');
+  const guide = question ? romajiGuide(question.tokens, typed) : '';
   const [correctKeys, setCorrectKeys] = useState(0);
   const [totalKeys, setTotalKeys] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
@@ -96,11 +97,17 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
     });
   }, [stageId]);
 
-  // BGM
+  const encounter = stage && journeyEncounter(stage, enemyIdx);
+  const boss = stage?.id === 6 && enemyIdx === stage?.enemyCount - 1;
+  const caveKind = stage?.id < 10 ? 'bat' : stage?.id === 12 && enemyIdx === stage?.enemyCount - 1 ? 'chief' : 'mole';
+  const islandKind = islandEnemy(stage?.id, enemyIdx, stage?.enemyCount);
+  const mistKind = mistEnemy(stage?.id, enemyIdx, stage?.enemyCount);
+  const isBoss = boss || caveKind === 'chief' || islandKind === 'pair' || mistKind === 'deer' || encounter?.boss;
+  const battleMusic = isBoss ? 'finalBoss' : 'battle';
   useEffect(() => {
-    startBgm('battle');
-    return () => stopBgm();
-  }, []);
+    startBgm(battleMusic);
+    return stopBgm;
+  }, [battleMusic]);
 
   // Init enemies + first question
   useEffect(() => {
@@ -129,11 +136,12 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
       if (key.length !== 1 || !/[a-z;,./\-]/.test(key)) return;
 
       // 単語完了後の遷移待機中は入力を無視
-      if (typed.length >= question.romaji.length) return;
+      if (typed.length >= guide.length) return;
 
-      const targetChar = question.romaji[typed.length];
+      const newTyped = typed + key;
+      const nextGuide = romajiGuide(question.tokens, newTyped);
 
-      if (key === targetChar) {
+      if (nextGuide !== null) {
         playSound('correct');
         const newCK = correctKeys + 1;
         const newTK = totalKeys + 1;
@@ -146,8 +154,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
           setCpm(calcCpm(newCK, battleStartRef.current));
         }
 
-        const newTyped = typed + key;
-        if (newTyped.length >= question.romaji.length) {
+        if (newTyped.length === nextGuide.length) {
           // 完了状態を一時表示してから遷移（複数文字のみ遅延）
           setTyped(newTyped);
           reactKnight('attack');
@@ -161,7 +168,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
           setDmgFloats(f => [...f, { id: floatId, value: atk }]);
           setTimeout(() => setDmgFloats(f => f.filter(x => x.id !== floatId)), 700);
 
-          const completionDelay = question.romaji.length > 1 ? 220 : 0;
+          const completionDelay = nextGuide.length > 1 ? 220 : 0;
 
           if (newEnemies[enemyIdx].hp <= 0) {
             playSound('enemyDefeat');
@@ -236,18 +243,13 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
   const accClass = accuracy >= 90 ? 'good' : accuracy >= 70 ? 'ok' : 'bad';
   const isPhaseA = stage.phase === 'A';
   const showCpm = !isPhaseA;
-  const nextChar = question.romaji[typed.length]?.toUpperCase() ?? '';
+  const nextChar = guide[typed.length]?.toUpperCase() ?? '';
   const forest = stage.world === 1;
-  const boss = stage.id === 6 && enemyIdx === enemies.length - 1;
   const cave = stage.world === 2;
-  const caveKind = stage.id < 10 ? 'bat' : stage.id === 12 && enemyIdx === enemies.length - 1 ? 'chief' : 'mole';
   const island = stage.world === 3;
-  const islandKind = islandEnemy(stage.id, enemyIdx, enemies.length);
   const islandScene = stage.id < 16 ? 'shore' : stage.id < 19 ? 'camellia' : 'ring';
   const mist = stage.world === 4;
-  const mistKind = mistEnemy(stage.id, enemyIdx, enemies.length);
   const mistScene = stage.id === 22 ? 'pond' : stage.id === 23 ? 'bank' : 'grove';
-  const encounter = journeyEncounter(stage, enemyIdx);
   const enemyName = encounter ? encounter.name : mist ? mistNames[mistKind] : island ? islandNames[islandKind] : cave ? caveNames[caveKind] : forest ? (boss ? '大イノシシ' : 'うりぼう') : ENEMY_NAMES[stage.enemyType] ?? 'モンスター';
 
   return html`
@@ -313,7 +315,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
         ` : html`
           <div class="battle-question__hira">${question.text}</div>
           <div class="battle-question__hint">
-            ${question.romaji.split('').map((ch, i) => html`
+            ${guide.split('').map((ch, i) => html`
               <span
                 key=${i}
                 class=${'battle-hint__char ' + (
@@ -328,9 +330,9 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
           </div>
         `}
 
-        ${question.romaji.length > 1 && html`
+        ${guide.length > 1 && html`
           <div class="battle-progress">
-            ${question.romaji.split('').map((ch, i) => html`
+            ${guide.split('').map((ch, i) => html`
               <div key=${i} class=${'battle-progress__cell' + (i < typed.length ? ' battle-progress__cell--done' : '')}>
                 ${ch.toUpperCase()}
               </div>

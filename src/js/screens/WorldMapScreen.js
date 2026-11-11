@@ -131,7 +131,7 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless,
     });
   }, []);
 
-  useEffect(() => { startBgm('title'); return stopBgm; }, []);
+  useEffect(() => { startBgm('map'); return stopBgm; }, []);
 
   useEffect(() => {
     const handler = (e) => {
@@ -168,7 +168,7 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless,
         <div style=${{ display:'flex', alignItems:'center', gap:'12px' }}>
           <${LittleKnight} weapon=${slot.weapon} armor=${slot.armor} />
           <div>
-            <div style=${{ fontSize:'13px', color:'rgba(255,255,255,0.65)', fontWeight:'700' }}>${slot.name}</div>
+            <div style=${{ fontSize:'13px', color:'rgba(255,255,255,0.65)', fontWeight:'700' }}>いまのそうび</div>
             <div style=${{ fontSize:'15px', color:'white', fontWeight:'900' }}>
               ⚔️ ${{ wooden:'木の剣', iron:'鉄の剣', flame:'炎の剣', thunder:'かみなりの剣', ice:'こおりの剣', dragon:'りゅうの剣', legendary:'でんせつの剣', lightsaber:'ライトセイバー', magnum:'マグナム' }[slot.weapon] ?? slot.weapon}
               🛡️ ${{ hat:'たびびとのふく', helmet:'きのよろい', cape:'くさりかたびら', armor:'てつのたて', robe:'まほうのローブ', shield:'せいなるたて', divine:'しんせいのよろい', vest:'ぼうだんチョッキ', radiant:'ひかりのよろい' }[slot.armor] ?? slot.armor}

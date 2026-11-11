@@ -1096,12 +1096,39 @@
   border-right: 10px solid #674835;
 }
 .shop-counter {
+  position: relative;
   width: 150px;
   margin: 0 auto 52px;
   text-align: center;
   background: linear-gradient(to top, #8e5e45 0 18px, #edbf7d 18px 24px, #433432 24px);
   border: 6px solid #624737;
   box-shadow: 0 -8px #c47b54, 0 5px #9e7756;
+}
+.shop-counter__speech {
+  position: absolute;
+  bottom: calc(100% - 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 4px 8px;
+  font-size: 14px;
+  font-weight: 900;
+  color: #433432;
+  background: #fff1cd;
+  border: 3px solid #433432;
+  box-shadow: 2px 3px #986b4b;
+}
+.shop-counter__speech:empty { opacity: 0; }
+.shop-counter__speech::after {
+  content: "";
+  position: absolute;
+  left: 45%;
+  bottom: -8px;
+  width: 6px;
+  height: 6px;
+  background: #fff1cd;
+  border-right: 3px solid #433432;
+  border-bottom: 3px solid #433432;
 }
 .shop-counter img { width: 96px; margin: 24px 0 18px; vertical-align: bottom; image-rendering: pixelated; }
 .shop-preview__label, .shop-items__section-title {
@@ -1323,10 +1350,6 @@
 .vignette-elephant.journey-map .animal-armadillo { bottom: 10px; animation: journey-cross 3s steps(14) infinite; }
 .vignette-elephant.journey-ending .animal-armadillo { animation: journey-bump 2.6s steps(9) both; }
 :is(.animal-iguana,.animal-elephant)::after { content: ''; width: 18%; height: 18%; left: 1%; top: 38%; background-image: url('../art/journey/puff.png'); animation: journey-puff 2.5s steps(5) infinite; }
-.arena-gate .animal-rhino::after,.animal-snake::after,.journey-arena .animal-peacock::after { left: 5%; bottom: 0; padding: 0 3px; background: #ffedbd; color: #783f40; font-weight: bold; font-size: 13px; }
-.animal-rhino::after { content: 'とまれ'; }
-.animal-snake::after { content: 'しょうぶ！'; }
-.journey-arena .animal-peacock::after { content: 'いざ　しょうぶ'; left: 27%; bottom: 58%; }
 @keyframes journey-bob { 50% { transform: translateY(-3px) rotate(-2deg); } }
 @keyframes journey-glide { 50% { transform: translate(-6px,-7px) rotate(-4deg); } }
 @keyframes journey-roll { 45% { transform: rotate(-14deg); } }
@@ -1348,8 +1371,6 @@
 .journey-finale { display: grid; align-items: center; background: #eac6a1; }
 .journey-finale .journey-scene { display: grid; align-items: center; height: 100%; }
 .journey-finale .journey-company { transform: scale(2); }
-.journey-stage-45 .animal-rhino::after { content: '♛'; }
-.journey-stage-46 .animal-snake::after { content: 'こちら'; }
 .arena-crater .animal-iguana img,.vignette-elephant.journey-ending .animal-iguana img { animation: ember-glow 1.6s steps(4) infinite; }
 @keyframes ember-glow { 55% { filter: saturate(1.8) brightness(1.18); } }
 

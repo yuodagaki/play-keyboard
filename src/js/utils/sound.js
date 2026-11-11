@@ -1,8 +1,13 @@
 let _ctx = null;
 
 function ctx() {
-  if (!_ctx) _ctx = new AudioContext();
-  if (_ctx.state === 'suspended') _ctx.resume();
+  if (!_ctx) {
+    _ctx = new AudioContext();
+    _ctx.addEventListener('statechange', () => {
+      if (_ctx.state !== 'running' || _bgmTimer === null) updatePlayback();
+    });
+  }
+  if (_ctx.state === 'suspended') _ctx.resume().catch(() => {});
   return _ctx;
 }
 
@@ -168,53 +173,130 @@ export function playCombo(count) {
 
 // ─── BGM ──────────────────────────────────────────────────
 
-const BGM_TITLE = [
-  [392, 1], [440, 0.5], [392, 0.5], [330, 1], [0, 1],
-  [294, 1], [330, 0.5], [294, 0.5], [262, 2],
-];
-
-const BGM_BATTLE = [
-  [523, 0.5], [523, 0.5], [587, 0.5], [523, 0.5],
-  [494, 0.5], [523, 0.5], [0, 0.5],   [392, 0.5],
-  [440, 0.5], [440, 0.5], [494, 0.5], [440, 0.5],
-  [392, 0.5], [440, 0.5], [0, 1.0],
-];
-
 let _bgmTimer = null;
 let _currentBgm = null;
 
 const scheduledNotes = new Set();
 
-function scheduleBgm(notes, bpm, startTime) {
-  const beatSec = 60 / bpm;
-  let t = startTime;
+// 8小節の行進曲。各小節は8分音符8個分。0は休符。
+const TITLE_MELODY = [
+  [[67,2],[72,3],[71,1],[72,2]], [[76,3],[74,1],[72,2],[0,2]],
+  [[69,2],[74,3],[72,1],[74,2]], [[77,3],[76,1],[74,2],[0,2]],
+  [[67,2],[72,3],[74,1],[76,2]], [[79,2],[77,2],[76,2],[72,2]],
+  [[74,3],[71,1],[67,2],[71,2]], [[72,5],[0,3]],
+];
+const SONGS = {
+  title: {
+    bpm: 116, melody: TITLE_MELODY,
+    bass: [48,48,50,55,48,53,55,48], reply: [64,67,65,71,64,69,62,64],
+    drums: [2,6], leadVolume: 0.034,
+  },
+  map: {
+    bpm: 96,
+    melody: [
+      [[67,2],[72,2],[76,3],[0,1]], [[74,2],[72,1],[71,1],[67,4]],
+      [[65,2],[69,2],[72,3],[0,1]], [[71,3],[69,1],[67,2],[0,2]],
+      [[64,2],[67,2],[72,2],[76,2]], [[77,3],[76,1],[72,4]],
+      [[74,2],[71,2],[67,3],[0,1]], [[72,6],[0,2]],
+    ],
+    bass: [48,55,53,55,48,53,55,48], reply: [64,62,65,62,67,65,62,64],
+    drums: [6], leadVolume: 0.029,
+  },
+  shop: {
+    bpm: 108,
+    melody: [
+      [[0,1],[65,1],[69,3],[72,1],[69,2]], [[67,1],[70,1],[74,3],[0,3]],
+      [[0,1],[67,1],[70,3],[74,1],[72,2]], [[69,3],[65,1],[64,2],[0,2]],
+      [[65,1],[69,1],[72,3],[74,1],[72,2]], [[70,3],[69,1],[67,2],[0,2]],
+      [[67,1],[70,1],[72,2],[64,3],[67,1]], [[69,2],[65,4],[0,2]],
+    ],
+    bass: [41,43,43,41,50,46,48,41], reply: [60,62,62,60,65,62,64,60],
+    drums: [2,6], leadVolume: 0.027,
+  },
+  finalBoss: {
+    bpm: 156,
+    melody: [
+      [[62,1],[69,1],[74,3],[72,1],[74,2]], [[77,2],[76,1],[74,1],[69,3],[0,1]],
+      [[70,1],[74,1],[77,3],[76,1],[74,2]], [[73,2],[69,2],[76,3],[0,1]],
+      [[65,1],[69,1],[72,2],[77,3],[79,1]], [[81,3],[79,1],[77,2],[74,2]],
+      [[79,2],[77,1],[76,1],[74,2],[70,2]], [[69,1],[73,1],[76,2],[81,3],[0,1]],
+    ],
+    bass: [38,38,46,45,41,46,43,45], reply: [65,69,65,64,69,70,67,73],
+    drums: [0,2,5,6,7], leadVolume: 0.029,
+  },
+  battle: {
+    bpm: 144,
+    melody: [
+      [[64,1],[0,1],[69,2],[72,1],[71,1],[69,2]], [[67,2],[71,1],[74,1],[71,2],[0,2]],
+      [[65,1],[0,1],[69,2],[72,2],[74,2]], [[76,3],[74,1],[71,2],[68,2]],
+      [[69,1],[72,1],[76,2],[74,1],[72,1],[69,2]], [[77,2],[76,2],[72,3],[0,1]],
+      [[74,1],[72,1],[69,2],[65,2],[69,2]], [[71,2],[68,2],[64,3],[0,1]],
+    ],
+    bass: [45,43,41,40,45,41,50,40], reply: [60,62,60,59,64,60,62,59],
+    drums: [2,5,6], leadVolume: 0.025,
+  },
+};
+let pulseWave;
+let drumNoise;
 
-  for (const [freq, beats] of notes) {
-    const dur = beats * beatSec;
-    if (freq > 0) {
-      const c = ctx();
-      const osc = c.createOscillator();
-      const gain = c.createGain();
-      osc.connect(gain); gain.connect(c.destination);
-      osc.type = 'square';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.02, t);
-      gain.gain.setValueAtTime(0.02, t + dur * 0.8);
-      gain.gain.linearRampToValueAtTime(0, t + dur);
-      osc.start(t);
-      osc.stop(t + dur);
-      scheduledNotes.add(osc);
-      osc.onended = () => scheduledNotes.delete(osc);
-    }
-    t += dur;
-  }
-  return t;
+function playBgmNote(c, source, start, duration, volume) {
+  const gain = c.createGain();
+  gain.gain.setValueAtTime(0, start);
+  gain.gain.linearRampToValueAtTime(volume, start + 0.004);
+  gain.gain.setValueAtTime(volume, start + duration * 0.68);
+  gain.gain.linearRampToValueAtTime(0, start + duration);
+  source.connect(gain);
+  gain.connect(c.destination);
+  scheduledNotes.add(source);
+  source.onended = () => {
+    scheduledNotes.delete(source);
+    source.disconnect();
+    gain.disconnect();
+  };
+  source.start(start);
+  source.stop(start + duration);
 }
 
-function loopBgm(notes, bpm) {
-  const endTime = scheduleBgm(notes, bpm, ctx().currentTime);
-  const loopMs = (endTime - ctx().currentTime) * 1000;
-  _bgmTimer = setTimeout(() => loopBgm(notes, bpm), Math.max(loopMs, 100));
+function loopSong(song, start = ctx().currentTime + 0.03) {
+  const c = ctx();
+  const step = 60 / song.bpm / 2;
+  if (!pulseWave) {
+    // デューティ比25%のパルス波。細く明るい主旋律にする。
+    const real = new Float32Array(64);
+    const imag = new Float32Array(64);
+    for (let n = 1; n < real.length; n++) real[n] = Math.sin(n * Math.PI / 4) / n;
+    pulseWave = c.createPeriodicWave(real, imag);
+    drumNoise = c.createBuffer(1, Math.ceil(c.sampleRate * 0.06), c.sampleRate);
+    const samples = drumNoise.getChannelData(0);
+    for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
+  }
+  function tone(type, midi, at, length, volume) {
+    const osc = c.createOscillator();
+    if (type === 'pulse') osc.setPeriodicWave(pulseWave);
+    else osc.type = type;
+    osc.frequency.value = 440 * 2 ** ((midi - 69) / 12);
+    playBgmNote(c, osc, at, length * step, volume);
+  }
+  song.melody.forEach((bar, i) => {
+    const at = start + i * 8 * step;
+    let cursor = at;
+    for (const [pitch, length] of bar) {
+      if (pitch) tone('pulse', pitch, cursor, length * 0.88, song.leadVolume);
+      cursor += length * step;
+    }
+    for (const beat of [0, 2, 4, 6]) {
+      tone('triangle', song.bass[i] + (beat % 4 ? 7 : 0), at + beat * step, 1.45, 0.052);
+    }
+    for (const tick of song.drums) {
+      const noise = c.createBufferSource();
+      noise.buffer = drumNoise;
+      playBgmNote(c, noise, at + tick * step, 0.045, 0.014);
+    }
+    tone('square', song.reply[i], at + 6 * step, 0.8, 0.013);
+    tone('square', song.reply[i] + (i === 7 ? 3 : 2), at + 7 * step, 0.72, 0.011);
+  });
+  const end = start + song.melody.length * 8 * step;
+  _bgmTimer = setTimeout(() => loopSong(song, Math.max(end, c.currentTime)), (end - c.currentTime - 0.1) * 1000);
 }
 
 function silenceBgm() {
@@ -230,8 +312,7 @@ function silenceBgm() {
 function updatePlayback() {
   silenceBgm();
   if (_muted || document.hidden || !_currentBgm) return;
-  if (_currentBgm === 'battle') loopBgm(BGM_BATTLE, 140);
-  else loopBgm(BGM_TITLE, 80);
+  if (ctx().state === 'running') loopSong(SONGS[_currentBgm]);
 }
 
 export function startBgm(name) {
@@ -245,6 +326,12 @@ export function stopBgm() {
   silenceBgm();
 }
 
+function resumeOnInput() {
+  if (!_muted && !document.hidden && _currentBgm && _ctx?.state === 'suspended') ctx();
+}
+
+window.addEventListener('click', resumeOnInput, true);
+window.addEventListener('keydown', resumeOnInput, true);
 document.addEventListener('visibilitychange', updatePlayback);
 window.addEventListener('pagehide', silenceBgm);
 window.addEventListener('storage', event => {

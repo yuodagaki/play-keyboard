@@ -7,7 +7,7 @@ import { IslandSprite, islandNames } from '../components/IslandSprites.js';
 import { MistSprite, mistNames } from '../components/MistSprites.js';
 import { JourneyAnimal, journeys, journeyNames } from '../components/JourneySprites.js';
 import { KeyboardGuide } from '../components/KeyboardGuide.js';
-import { toRomaji } from '../utils/romaji.js';
+import { createRomajiQuestion, romajiGuide } from '../utils/romaji.js';
 import { getWords } from '../data/loader.js';
 import { ENDLESS } from '../data/endlessConstants.js';
 import { playSound, startBgm, stopBgm } from '../utils/sound.js';
@@ -45,13 +45,14 @@ function pickQuestion(words, heroLevel) {
   else                      { poolA = words.sentences.normal; poolB = words.sentences.hard; }
   const pool = Math.random() < 0.5 ? poolA : poolB;
   const word = pool[Math.floor(Math.random() * pool.length)];
-  return { text: word, romaji: toRomaji(word) };
+  return createRomajiQuestion(word);
 }
 
 export function EndlessScreen({ slot, onGameOver, onBack }) {
   const [words, setWords] = useState(null);
   const [question, setQuestion] = useState(null);
   const [typed, setTyped] = useState('');
+  const guide = question ? romajiGuide(question.tokens, typed) : '';
 
   // Enemy
   const [loop, setLoop] = useState(1);
@@ -104,9 +105,13 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
       setWords(w);
       setQuestion(pickQuestion(w, 1));
     });
-    startBgm('battle');
-    return () => { gameDoneRef.current = true; clearTimer(); stopBgm(); };
+    return () => { gameDoneRef.current = true; clearTimer(); };
   }, []);
+
+  useEffect(() => {
+    startBgm(isBoss ? 'finalBoss' : 'battle');
+    return stopBgm;
+  }, [isBoss]);
 
   // Game over when HP hits 0
   useEffect(() => {
@@ -152,13 +157,13 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
       if (e.key === 'Escape') { onBack(); return; }
       const key = e.key.toLowerCase();
       if (key.length !== 1 || !/[a-z;,./\-]/.test(key)) return;
-      if (typed.length >= question.romaji.length) return;
+      if (typed.length >= guide.length) return;
 
-      const targetChar = question.romaji[typed.length];
+      const newTyped = typed + key;
+      const nextGuide = romajiGuide(question.tokens, newTyped);
 
-      if (key === targetChar) {
+      if (nextGuide !== null) {
         playSound('correct');
-        const newTyped    = typed + key;
         const newCharCount = charCount + 1;
         setCharCount(newCharCount);
         startTimer();
@@ -186,7 +191,7 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
           }
         }
 
-        if (newTyped.length >= question.romaji.length) {
+        if (newTyped.length === nextGuide.length) {
           setTyped(newTyped);
           setTimeout(() => {
             setTyped('');
@@ -337,7 +342,7 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
   const progress = charCount % ENDLESS.ATTACK_EVERY_N;
   const striking = flashEnemy && progress === 0;
   const litSegments = striking ? ENDLESS.ATTACK_EVERY_N : progress;
-  const nextChar     = question.romaji[typed.length]?.toUpperCase() ?? '';
+  const nextChar     = guide[typed.length]?.toUpperCase() ?? '';
   const heroAtk      = (WEAPON_ATK[slot.weapon] ?? 1) + heroAtkBonus;
   const encounter = encounters[(loop - 1) % encounters.length];
   const actor = isBoss ? encounter.boss : encounter.mobs[mobCount % encounter.mobs.length];
@@ -442,7 +447,7 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
       <div class=${'battle-question' + (flashError ? ' battle-question--miss' : '')}>
         <div class="battle-question__hira">${question.text}</div>
         <div class="battle-question__hint">
-          ${question.romaji.split('').map((ch, i) => html`
+          ${guide.split('').map((ch, i) => html`
             <span key=${i} style=${{
               color: i < typed.length ? '#5BB8FF'
                    : i === typed.length ? '#455A64'
@@ -454,9 +459,9 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
           `)}
         </div>
 
-        ${question.romaji.length > 1 && html`
+        ${guide.length > 1 && html`
           <div class="battle-progress">
-            ${question.romaji.split('').map((ch, i) => html`
+            ${guide.split('').map((ch, i) => html`
               <div key=${i} class=${'battle-progress__cell' + (i < typed.length ? ' battle-progress__cell--done' : '')}>
                 ${ch.toUpperCase()}
               </div>

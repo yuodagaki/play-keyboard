@@ -31,50 +31,51 @@ const ROMAJI_MAP = {
 // 拗音の最長一致のためキーを長い順に並べたリスト
 const SORTED_KEYS = Object.keys(ROMAJI_MAP).sort((a, b) => b.length - a.length);
 
-export function toRomaji(text) {
-  if (!text) return '';
-  if (!/[぀-ゟ]/.test(text)) return text.toLowerCase();
+const ALTERNATIVES = {
+  'し':['si'], 'ち':['ti'], 'つ':['tu'], 'ふ':['hu'], 'じ':['zi'],
+  'しゃ':['sya'], 'しゅ':['syu'], 'しょ':['syo'],
+  'ちゃ':['tya','cya'], 'ちゅ':['tyu','cyu'], 'ちょ':['tyo','cyo'],
+  'じゃ':['zya','jya'], 'じゅ':['zyu','jyu'], 'じょ':['zyo','jyo'],
+};
 
-  let result = '';
-  let i = 0;
-  while (i < text.length) {
-    // 促音（っ）
-    if (text[i] === 'っ') {
-      const next = text[i + 1];
-      if (next) {
-        const nextRomaji = toRomaji(next);
-        result += nextRomaji[0];
-      }
-      i++;
-      continue;
+export function createRomajiQuestion(text) {
+  const tokens = [];
+  for (let i = 0; i < text.length;) {
+    const doubled = text[i] === 'っ';
+    if (doubled && ++i === text.length) break;
+    const kana = SORTED_KEYS.find(k => text.startsWith(k, i)) ?? text[i];
+    i += kana.length;
+    const standard = ROMAJI_MAP[kana] ?? kana.toLowerCase();
+    let choices = [standard, ...(ALTERNATIVES[kana] ?? [])];
+    if (kana === 'ん') {
+      const next = text[i];
+      if (!next) choices = ['n'];
+      else if ('あいうえおやゆよ'.includes(next)) choices = ['nn'];
+      else choices = ['n', 'nn'];
     }
-    // 「ん」— 次が na/ni/nu/ne/no 行なら nn
-    if (text[i] === 'ん') {
-      const next = text[i + 1];
-      if (next && /[なにぬねの]/.test(next)) {
-        result += 'nn';
-      } else {
-        result += 'n';
-      }
-      i++;
-      continue;
-    }
-    // 長い順に最長一致
-    let matched = false;
-    for (const key of SORTED_KEYS) {
-      if (text.startsWith(key, i)) {
-        result += ROMAJI_MAP[key];
-        i += key.length;
-        matched = true;
-        break;
-      }
-    }
-    if (!matched) {
-      result += text[i];
-      i++;
-    }
+    tokens.push(doubled ? choices.map(s => s[0] + s) : choices);
   }
-  return result;
+  return { text, tokens };
+}
+
+// 各かなの候補を順に照合し、入力に合うお手本を返す。不一致なら null。
+export function romajiGuide(tokens, typed) {
+  function match(index, offset) {
+    if (index === tokens.length) return offset >= typed.length ? '' : null;
+    const remaining = typed.slice(offset);
+    for (const choice of tokens[index]) {
+      if (!remaining.startsWith(choice) && !choice.startsWith(remaining)) continue;
+      // 「ん」の短い候補で後続が合わなければ、NN として照合し直す。
+      const suffix = match(index + 1, offset + choice.length);
+      if (suffix !== null) return choice + suffix;
+    }
+    return null;
+  }
+  return match(0, 0);
+}
+
+export function toRomaji(text) {
+  return romajiGuide(createRomajiQuestion(text).tokens, '');
 }
 
 export function isHiragana(text) {

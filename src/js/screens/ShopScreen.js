@@ -1,10 +1,10 @@
 import { LittleKnight } from '../components/LittleKnight.js';
 import { html } from 'https://esm.sh/htm/react';
-import { useState, useEffect } from 'https://esm.sh/react';
+import { useState, useEffect, useRef } from 'https://esm.sh/react';
 import { getItems } from '../data/loader.js';
-import { playSound } from '../utils/sound.js';
+import { playSound, startBgm, stopBgm } from '../utils/sound.js';
 
-function ItemRow({ item, owned, equipped, coins, canAfford, onBuy, onEquip }) {
+function ItemRow({ item, owned, equipped, coins, canAfford, onShortfall, onBuy, onEquip }) {
   const isEquipped = equipped === item.id;
   const isOwned = owned.includes(item.id);
 
@@ -25,7 +25,7 @@ function ItemRow({ item, owned, equipped, coins, canAfford, onBuy, onEquip }) {
       ` : html`
         <button
           class=${'shop-item__btn-buy shop-item__btn-buy--' + (canAfford ? 'available' : 'disabled')}
-          disabled=${!canAfford} onClick=${onBuy}
+          onClick=${canAfford ? onBuy : onShortfall}
         >
           <img class="pixel-icon" src="art/shop/coin.png" alt="コイン" /> ${item.cost}
         </button>
@@ -38,7 +38,17 @@ export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
   const [items, setItems] = useState(null);
   const [previewWeapon, setPreviewWeapon] = useState(slot.weapon);
   const [previewArmor, setPreviewArmor] = useState(slot.armor);
+  const [foxSpeaking, setFoxSpeaking] = useState(false);
+  const speechTimer = useRef(null);
   const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    startBgm('shop');
+    return () => {
+      clearTimeout(speechTimer.current);
+      stopBgm();
+    };
+  }, []);
 
   useEffect(() => {
     getItems().then(setItems);
@@ -51,6 +61,12 @@ export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
+
+  const showShortfall = () => {
+    clearTimeout(speechTimer.current);
+    setFoxSpeaking(true);
+    speechTimer.current = setTimeout(() => setFoxSpeaking(false), 2400);
+  };
 
   const showToast = (msg) => {
     setToast(msg);
@@ -97,7 +113,10 @@ export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
       <div class="shop-body">
         <!-- キャラクタープレビュー -->
         <div class="shop-preview">
-          <div class="shop-counter"><img src="art/shop/merchant.png" alt="きつねの店主" /></div>
+          <div class="shop-counter">
+            <img src="art/shop/merchant.png" alt="きつねの店主" />
+            <span role="status" class="shop-counter__speech">${foxSpeaking ? 'おかねがたりないよー' : ''}</span>
+          </div>
           <div class="shop-preview__label">ゆうしゃのすがた</div>
           <${LittleKnight} weapon=${previewWeapon} armor=${previewArmor} />
         </div>
@@ -117,6 +136,7 @@ export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
                 coins=${slot.coins}
                 owned=${slot.ownedWeapons}
                 equipped=${slot.weapon}
+                onShortfall=${showShortfall}
                 canAfford=${slot.coins >= item.cost}
                 onBuy=${() => handleBuyWeapon(item)}
                 onEquip=${() => handleEquipWeapon(item)}
@@ -131,6 +151,7 @@ export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
                 coins=${slot.coins}
                 owned=${slot.ownedArmors}
                 equipped=${slot.armor}
+                onShortfall=${showShortfall}
                 canAfford=${slot.coins >= item.cost}
                 onBuy=${() => handleBuyArmor(item)}
                 onEquip=${() => handleEquipArmor(item)}

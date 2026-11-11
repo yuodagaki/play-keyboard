@@ -55,7 +55,9 @@ export function JourneyScene({ world, children }) {
       ${ending && html`<${JourneyAnimal} actor=${second} />`}
       <${JourneyAnimal} actor=${boss} boss=${true} />
       ${children}
-      <span class="journey-prop" aria-hidden="true">${boss === 'peacock' ? (ending ? 'ぼうけんのそら' : 'ようこそ') : ''}</span>
+      ${(boss !== 'peacock' || ending) && html`
+        <span class="journey-prop" aria-hidden="true">${boss === 'peacock' ? 'ぼうけんのそら' : ''}</span>
+      `}
     </div>
   </div>`;
 }
