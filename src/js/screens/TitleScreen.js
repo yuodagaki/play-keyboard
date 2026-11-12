@@ -103,8 +103,8 @@ export function TitleScreen({ onSelectSlot }) {
       </div>
 
       <p class="title-save-note">
-        このゲームのセーブデータはぜんぶみんなのところにほぞんされるよ
-        <small>ブラウザに自動で保存されます</small>
+        <${PixelText} color="#fff6da">このゲームのセーブデータはぜんぶみんなのところにほぞんされるよ<//>
+        <small><${PixelText} color="#c6d0bd">保護者の方へ　ブラウザに自動で保存されます<//></small>
       </p>
 
       <!-- セーブスロット選択 -->

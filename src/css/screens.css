@@ -27,7 +27,8 @@
   font-size: 18px;
   line-height: 1.3;
 }
-.title-save-note small { display: block; font-size: 14px; }
+.title-save-note canvas { display: block; margin: 0 auto; image-rendering: pixelated; }
+.title-save-note small { display: block; zoom: 0.875; }
 .title-buttons .pixel-button { padding: 8px 24px; font-size: 23px; }
 .title-screen .save-slot-card, .title-screen .confirm-dialog { border-radius: 0; box-shadow: 4px 4px #302b32; }
 
