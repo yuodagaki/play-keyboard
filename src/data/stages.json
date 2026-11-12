@@ -181,7 +181,10 @@
     "enemyType": "mushroom",
     "enemyCount": 5,
     "enemyMaxHP": 4,
-    "coinReward": 26
+    "coinReward": 26,
+    "practiceWords": [
+      "ち"
+    ]
   },
   {
     "id": 17,
@@ -426,7 +429,11 @@
     "enemyType": "slime",
     "enemyCount": 8,
     "enemyMaxHP": 5,
-    "coinReward": 50
+    "coinReward": 50,
+    "practiceWords": [
+      "ちず",
+      "みち"
+    ]
   },
   {
     "id": 32,
@@ -470,7 +477,11 @@
     "enemyType": "goblin",
     "enemyCount": 8,
     "enemyMaxHP": 8,
-    "coinReward": 70
+    "coinReward": 70,
+    "practiceWords": [
+      "さんぽ",
+      "ほんや"
+    ]
   },
   {
     "id": 36,
@@ -514,7 +525,11 @@
     "enemyType": "skeleton",
     "enemyCount": 8,
     "enemyMaxHP": 12,
-    "coinReward": 90
+    "coinReward": 90,
+    "practiceWords": [
+      "かいもの",
+      "おかね"
+    ]
   },
   {
     "id": 40,
@@ -558,7 +573,11 @@
     "enemyType": "golem",
     "enemyCount": 8,
     "enemyMaxHP": 16,
-    "coinReward": 120
+    "coinReward": 120,
+    "practiceWords": [
+      "ちずをひらく",
+      "みちをさがす"
+    ]
   },
   {
     "id": 44,
@@ -601,7 +620,11 @@
     "enemyType": "slime",
     "enemyCount": 10,
     "enemyMaxHP": 20,
-    "coinReward": 180
+    "coinReward": 180,
+    "practiceWords": [
+      "ちずをみよう",
+      "みちをきく"
+    ]
   },
   {
     "id": 48,
@@ -611,7 +634,11 @@
     "enemyType": "mushroom",
     "enemyCount": 10,
     "enemyMaxHP": 20,
-    "coinReward": 180
+    "coinReward": 180,
+    "practiceWords": [
+      "そらをみよう",
+      "くもをさがす"
+    ]
   },
   {
     "id": 49,
@@ -621,7 +648,11 @@
     "enemyType": "bat",
     "enemyCount": 10,
     "enemyMaxHP": 20,
-    "coinReward": 190
+    "coinReward": 190,
+    "practiceWords": [
+      "これをください",
+      "おつりをもらう"
+    ]
   },
   {
     "id": 50,
@@ -631,7 +662,11 @@
     "enemyType": "bat",
     "enemyCount": 10,
     "enemyMaxHP": 20,
-    "coinReward": 190
+    "coinReward": 190,
+    "practiceWords": [
+      "ほんやにいこう",
+      "みんなでえらぶ"
+    ]
   },
   {
     "id": 51,
@@ -641,7 +676,11 @@
     "enemyType": "goblin",
     "enemyCount": 10,
     "enemyMaxHP": 20,
-    "coinReward": 200
+    "coinReward": 200,
+    "practiceWords": [
+      "いっしょにいこう",
+      "みんなでしゅっぱつ"
+    ]
   },
   {
     "id": 52,
@@ -651,7 +690,11 @@
     "enemyType": "skeleton",
     "enemyCount": 10,
     "enemyMaxHP": 20,
-    "coinReward": 190
+    "coinReward": 190,
+    "practiceWords": [
+      "みちをたどる",
+      "やまにのぼる"
+    ]
   },
   {
     "id": 53,
@@ -661,7 +704,11 @@
     "enemyType": "mushroom",
     "enemyCount": 10,
     "enemyMaxHP": 20,
-    "coinReward": 190
+    "coinReward": 190,
+    "practiceWords": [
+      "いしをひろう",
+      "みずをくもう"
+    ]
   },
   {
     "id": 54,
@@ -671,7 +718,11 @@
     "enemyType": "skeleton",
     "enemyCount": 10,
     "enemyMaxHP": 20,
-    "coinReward": 200
+    "coinReward": 200,
+    "practiceWords": [
+      "あしあとをさがす",
+      "どうくつにはいる"
+    ]
   },
   {
     "id": 55,
@@ -681,7 +732,11 @@
     "enemyType": "golem",
     "enemyCount": 10,
     "enemyMaxHP": 20,
-    "coinReward": 200
+    "coinReward": 200,
+    "practiceWords": [
+      "みんなでやすもう",
+      "みずをわけよう"
+    ]
   },
   {
     "id": 56,
@@ -691,6 +746,10 @@
     "enemyType": "golem",
     "enemyCount": 10,
     "enemyMaxHP": 20,
-    "coinReward": 220
+    "coinReward": 220,
+    "practiceWords": [
+      "ちずをひろげよう",
+      "いっしょにすすもう"
+    ]
   }
 ]

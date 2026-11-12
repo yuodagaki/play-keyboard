@@ -43,7 +43,8 @@ function calcStars(acc) {
   return 0;
 }
 
-function pickQuestion(stage, words) {
+function pickQuestion(stage, words, practiceQueue) {
+  if (practiceQueue.length) return createRomajiQuestion(practiceQueue.shift());
   if (stage.phase === 'A') {
     const ch = stage.availableKeys[Math.floor(Math.random() * stage.availableKeys.length)];
     return createRomajiQuestion(ch);
@@ -83,6 +84,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
   const [done, setDone] = useState(false);
   const [showHomeGuide, setShowHomeGuide] = useState(slot.maxUnlocked === 1);
   const [cpm, setCpm] = useState(null);
+  const practiceQueue = useRef([]);
   const battleStartRef = useRef(null);
 
   const atk = WEAPON_ATK[slot.weapon] ?? 1;
@@ -114,9 +116,10 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
   useEffect(() => {
     if (!stage) return;
     if (['C', 'D', 'E', 'F', 'G'].includes(stage.phase) && !words) return;
+    practiceQueue.current = [...(stage.practiceWords ?? [])];
     setEnemies(Array.from({ length: stage.enemyCount }, () => ({ hp: stage.enemyMaxHP })));
     setEnemyIdx(0);
-    setQuestion(pickQuestion(stage, words));
+    setQuestion(pickQuestion(stage, words, practiceQueue.current));
     setTyped('');
     setCorrectKeys(0);
     setTotalKeys(0);
@@ -193,7 +196,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
                   onClear({ stageId, stars, coinReward: stage.coinReward, bonusCoins, accuracy: finalAcc, cpm: finalCpm, misses: newTK - newCK });
                 } else {
                   setEnemyIdx(nextIdx);
-                  setQuestion(pickQuestion(stage, words));
+                  setQuestion(pickQuestion(stage, words, practiceQueue.current));
                 }
               }, 520);
             }, 150);
@@ -203,7 +206,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
             setTimeout(() => setFlashEnemy(false), 180);
             setTimeout(() => {
               setTyped('');
-              setQuestion(pickQuestion(stage, words));
+              setQuestion(pickQuestion(stage, words, practiceQueue.current));
             }, completionDelay);
           }
         } else {
