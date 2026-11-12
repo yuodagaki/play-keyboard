@@ -1452,3 +1452,6 @@
   .practice-effect { background-position-x: -144px; animation: practice-still .5s step-end forwards; }
   @keyframes practice-still { to { opacity: 0; } }
 }
+
+.map-boss-hint { text-align: right; padding: 3px 12px 0; }
+.map-boss-hint canvas { image-rendering: pixelated; }

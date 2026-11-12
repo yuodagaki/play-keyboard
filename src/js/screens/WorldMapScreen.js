@@ -48,6 +48,10 @@ function StageNode({ stage, status, stars, portraits, onClick }) {
 }
 
 function WorldSection({ world, stages, slot, onStageClick }) {
+  const currentIndex = world.stages.indexOf(slot.maxUnlocked);
+  const bossStage = world.stages.at(-1);
+  const showBossHint = currentIndex >= 0 && !(slot.progress?.[bossStage]?.stars > 0);
+  const remaining = world.stages.length - currentIndex - 1;
   const stageStatus = (stageId) => {
     if (stageId > slot.maxUnlocked) return 'locked';
     if (stageId === slot.maxUnlocked) return 'current';
@@ -80,13 +84,14 @@ function WorldSection({ world, stages, slot, onStageClick }) {
           <${StageNode}
             key=${stage.id}
             stage=${stage}
-            portraits=${stage.id === world.stages.at(-1) && bossPortraits(world.id)}
+            portraits=${stage.id === bossStage && bossPortraits(world.id)}
             status=${stageStatus(stage.id)}
             stars=${slot.progress?.[stage.id]?.stars ?? 0}
             onClick=${() => onStageClick(stage, world)}
           />
         `)}
       </div>
+      ${showBossHint && html`<div class="map-boss-hint"><${PixelText}>${remaining ? 'ボスまで あと ' + remaining + ' ステージ' : 'ボスに ちょうせん！'}<//></div>`}
     </div>
   `;
 }

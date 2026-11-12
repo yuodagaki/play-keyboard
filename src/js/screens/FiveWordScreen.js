@@ -16,7 +16,7 @@ export function FiveWordScreen({ record, onFinish, onBack }) {
   const [result, setResult] = useState(null);
 
   function begin() {
-    const initial = { index: 0, typed: '', start: null, miss: false };
+    const initial = { index: 0, typed: '', start: null, miss: false, misses: 0 };
     run.current = initial;
     setView(initial);
     setResult(null);
@@ -34,18 +34,18 @@ export function FiveWordScreen({ record, onFinish, onBack }) {
       let next;
       if (guide === null) {
         playSound('miss');
-        next = { ...current, start, miss: true };
+        next = { ...current, start, miss: true, misses: current.misses + 1 };
       } else if (typed === guide && current.index === questions.length - 1) {
         run.current = null;
         const elapsed = Math.round(now - start);
-        setResult({ elapsed, previous: record?.lastMs, best: Math.min(record?.bestMs ?? elapsed, elapsed) });
+        setResult({ elapsed, perfect: current.misses === 0, previous: record?.lastMs, best: Math.min(record?.bestMs ?? elapsed, elapsed) });
         onFinish(elapsed);
         playSound('stageClear');
         return;
       } else {
         playSound('correct');
         const complete = typed === guide;
-        next = { index: current.index + Number(complete), typed: complete ? '' : typed, start, miss: false };
+        next = { ...current, index: current.index + Number(complete), typed: complete ? '' : typed, start, miss: false };
       }
       run.current = next;
       setView(next);
@@ -61,6 +61,7 @@ export function FiveWordScreen({ record, onFinish, onBack }) {
     <div class="five-word-panel">
       <h1><${PixelText} scale=${2}>おなじ5もんチャレンジ<//></h1>
       ${result ? html`
+        ${result.perfect && html`<p><${PixelText} color="#875324">5もんぜんぶ ミスなし！<//></p>`}
         <p>今回　${seconds(result.elapsed)}</p>
         <p>${result.previous == null ? 'はじめてのきろく！' : 'まえのきろく　' + seconds(result.previous)}</p>
         <p>じこベスト　${seconds(result.best)}</p>
