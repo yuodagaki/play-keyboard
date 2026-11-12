@@ -331,7 +331,7 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
 
   if (!question || !words) {
     return html`
-      <div class="screen endless-screen" style=${{ alignItems:'center', justifyContent:'center' }}>
+      <div class="screen endless-loading" style=${{ alignItems:'center', justifyContent:'center' }}>
         <div style=${{ fontSize:'24px', color:'rgba(255,255,255,0.7)' }}>よみこみちゅう...</div>
       </div>
     `;
@@ -353,7 +353,7 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
     : `雑魚 ${mobCount + 1} / ${ENDLESS.MOB_COUNT}`;
 
   return html`
-    <div class="screen endless-screen">
+    <div class="screen battle-screen endless-screen">
 
       <!-- ステータスバー -->
       <div class="battle-status">

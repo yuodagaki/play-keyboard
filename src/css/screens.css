@@ -797,7 +797,7 @@
 /* ════════════════════════════════════
    エンドレスモード
 ════════════════════════════════════ */
-.endless-screen {
+.endless-loading {
   image-rendering: pixelated;
   background: #303963 url('../art/endless/arena.png') center / cover no-repeat;
 }
@@ -1455,6 +1455,7 @@
 }
 .journey-finale .journey-scene { background-size: cover; }
 .endless-screen .battle-zone, .endless-gameover-screen.result-screen {
+  image-rendering: pixelated;
   background: #303963 url('../art/endless/arena.png') center / cover no-repeat;
 }
 .battle-zone :is(.battle-hero__label, .battle-enemy__label, .battle-enemy__hp-header, .endless-hero-hp__header, .endless-charge) {
