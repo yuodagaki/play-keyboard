@@ -1439,3 +1439,7 @@
 .shop-wish[aria-pressed="true"] { background: #ffda75; }
 .result-wish { display: flex; align-items: center; justify-content: center; gap: 6px; }
 .result-wish img { width: 32px; height: 32px; object-fit: contain; }
+
+.five-word-screen { display: flex; flex-direction: column; background: #fbf5e4; }
+.five-word-panel { flex: 1; display: grid; align-content: center; justify-items: center; gap: 10px; color: #46363b; }
+.five-word-panel p { margin: 0; font-size: 22px; font-weight: bold; }

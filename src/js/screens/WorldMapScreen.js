@@ -128,7 +128,7 @@ function StagePopup({ stage, world, slot, onChallenge, onClose }) {
   `;
 }
 
-export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless, tutorialStep, onTutorialNext }) {
+export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless, onFiveWords, tutorialStep, onTutorialNext }) {
   const [worlds, setWorlds] = useState([]);
   const [stages, setStages] = useState([]);
   const [selectedStage, setSelectedStage] = useState(null);
@@ -190,6 +190,7 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless,
           <div style=${{ fontSize:'20px', fontWeight:'900', color:'#FFD700' }}>
             <img class="pixel-icon" src="art/shop/coin.png" alt="コイン" /> ${slot.coins}
           </div>
+          <button class="pixel-button" onClick=${onFiveWords}>おなじ5もんチャレンジ</button>
           <button class="pixel-button" onClick=${onOpenShop}>
             <img src="art/ui/stall.png" alt="" /> ショップ <span class="kbd">S</span>
           </button>

@@ -1,3 +1,4 @@
+import { FiveWordScreen } from './screens/FiveWordScreen.js';
 import { html } from 'https://esm.sh/htm/react';
 import { useState, useEffect } from 'https://esm.sh/react';
 import { createRoot } from 'https://esm.sh/react-dom/client';
@@ -190,11 +191,21 @@ function App() {
     if (screen === 'title') {
       return html`<${TitleScreen} onSelectSlot=${handleSelectSlot} />`;
     }
+    if (screen === 'fivewords' && slot) {
+      const record = slot.fiveWordsV1;
+      const finish = lastMs => {
+        const updated = { ...slot, fiveWordsV1: { lastMs, bestMs: Math.min(record?.bestMs ?? lastMs, lastMs) } };
+        saveSlot(updated);
+        setSlot(updated);
+      };
+      return html`<${FiveWordScreen} record=${record} onFinish=${finish} onBack=${handleBattleBack} />`;
+    }
     if (screen === 'worldmap' && slot) {
       return html`
         <${WorldMapScreen}
           slot=${slot}
           onSelectStage=${handleSelectStage}
+          onFiveWords=${() => setScreen('fivewords')}
           onOpenShop=${handleOpenShop}
           onOpenEndless=${handleOpenEndless}
           tutorialStep=${tutorialStep}
