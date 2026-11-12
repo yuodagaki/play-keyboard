@@ -1,3 +1,4 @@
+import { RomajiGuide } from '../components/RomajiGuide.js';
 import { html } from 'https://esm.sh/htm/react';
 import { useState, useEffect, useRef } from 'https://esm.sh/react';
 import { LittleKnight, useKnightReaction } from '../components/LittleKnight.js';
@@ -446,28 +447,8 @@ export function EndlessScreen({ slot, onGameOver, onBack }) {
       <!-- 出題エリア -->
       <div class=${'battle-question' + (flashError ? ' battle-question--miss' : '')}>
         <div class="battle-question__hira">${question.text}</div>
-        <div class="battle-question__hint">
-          ${guide.split('').map((ch, i) => html`
-            <span key=${i} style=${{
-              color: i < typed.length ? '#5BB8FF'
-                   : i === typed.length ? '#455A64'
-                   : '#90A4AE',
-              fontWeight: i === typed.length ? '900' : '700',
-            }}>
-              ${ch.toUpperCase()}
-            </span>
-          `)}
-        </div>
+        <${RomajiGuide} guide=${guide} typed=${typed} />
 
-        ${guide.length > 1 && html`
-          <div class="battle-progress">
-            ${guide.split('').map((ch, i) => html`
-              <div key=${i} class=${'battle-progress__cell' + (i < typed.length ? ' battle-progress__cell--done' : '')}>
-                ${ch.toUpperCase()}
-              </div>
-            `)}
-          </div>
-        `}
 
         <div class=${'endless-charge' + (striking ? ' striking' : '')}>
           <span>${striking ? 'こうげき！' : 'あと ' + (ENDLESS.ATTACK_EVERY_N - progress) + ' 打'}</span>

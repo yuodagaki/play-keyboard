@@ -1,3 +1,4 @@
+import { RomajiGuide } from '../components/RomajiGuide.js';
 import { JourneyAnimal, journeyEncounter } from '../components/JourneySprites.js';
 import { MistSprite, mistEnemy, mistNames } from '../components/MistSprites.js';
 import { IslandSprite, islandNames, islandEnemy } from '../components/IslandSprites.js';
@@ -189,7 +190,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
                   const stars = calcStars(finalAcc);
                   const bonusCoins = Math.floor(stage.coinReward * ARMOR_BONUS[slot.armor]);
                   const finalCpm = calcCpm(newCK, battleStartRef.current) ?? 0;
-                  onClear({ stageId, stars, coinReward: stage.coinReward, bonusCoins, accuracy: finalAcc, cpm: finalCpm });
+                  onClear({ stageId, stars, coinReward: stage.coinReward, bonusCoins, accuracy: finalAcc, cpm: finalCpm, misses: newTK - newCK });
                 } else {
                   setEnemyIdx(nextIdx);
                   setQuestion(pickQuestion(stage, words));
@@ -314,30 +315,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
           <div class="battle-question__alpha">${question.text.toUpperCase()}</div>
         ` : html`
           <div class="battle-question__hira">${question.text}</div>
-          <div class="battle-question__hint">
-            ${guide.split('').map((ch, i) => html`
-              <span
-                key=${i}
-                class=${'battle-hint__char ' + (
-                  i < typed.length   ? 'battle-hint__char--done'
-                : i === typed.length ? 'battle-hint__char--next'
-                :                      'battle-hint__char--pending'
-                )}
-              >
-                ${ch.toUpperCase()}
-              </span>
-            `)}
-          </div>
-        `}
-
-        ${guide.length > 1 && html`
-          <div class="battle-progress">
-            ${guide.split('').map((ch, i) => html`
-              <div key=${i} class=${'battle-progress__cell' + (i < typed.length ? ' battle-progress__cell--done' : '')}>
-                ${ch.toUpperCase()}
-              </div>
-            `)}
-          </div>
+          <${RomajiGuide} guide=${guide} typed=${typed} />
         `}
 
         <!-- てき残数ドット -->

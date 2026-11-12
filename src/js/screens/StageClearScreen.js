@@ -21,6 +21,14 @@ function cpmRank(cpm) {
   return           { rank: 'D', label: 'ゆっくり',                  color: '#90A4AE' };
 }
 
+function growthMessage({ previous, misses, accuracy, cpm }) {
+  if (!previous) return 'はじめてのきろく！';
+  if (misses < previous.misses) return 'まえより ミスが ' + (previous.misses - misses) + 'かい へった！';
+  if (accuracy > previous.accuracy) return 'せいかくさが ' + (accuracy - previous.accuracy) + 'ポイント あがった！';
+  if (previous.cpm > 0 && cpm > previous.cpm) return '1ぷんに ' + (cpm - previous.cpm) + 'かい おおく うてた！';
+  return 'まえのせいかくさ ' + previous.accuracy + '%';
+}
+
 function StarRow({ stars }) {
   return html`<div class="result-stars" role="img" aria-label=${'星 ' + stars + ' / 3'}>
     ${[1, 2, 3].map(n => html`<img key=${n} class=${n <= stars ? 'earned' : 'unearned'}
@@ -99,6 +107,7 @@ export function StageClearScreen({ result, slot, onOpenShop, onNext, onWorldMap,
     return html`<div class="screen fail-screen result-screen"><div class="result-panel">
       <h1><${PixelText} scale=${2}>もう少し！<//></h1>
       <div><${PixelText}>${'せいかくさ ' + accuracy + '%'}<//></div>
+      <div><${PixelText}>${growthMessage(result)}<//></div>
       <div><${PixelText}>せいかく50%いじょうでクリアだよ！<//></div>
       <${LittleKnight} weapon=${slot.weapon} armor=${slot.armor} pose="sad" />
       <div class="result-actions">
@@ -116,6 +125,7 @@ export function StageClearScreen({ result, slot, onOpenShop, onNext, onWorldMap,
         <div><${PixelText}>${'ステージ ' + stageId}<//></div>
         <div><${PixelText}>${'せいかくさ ' + accuracy + '% で ほし ' + stars + 'こ！'}<//></div>
         <${StarRow} stars=${stars} />
+        <div><${PixelText}>${growthMessage(result)}<//></div>
         <div class="result-cards">
           <div class="result-card">
             <div><${PixelText}>コイン獲得<//></div>
