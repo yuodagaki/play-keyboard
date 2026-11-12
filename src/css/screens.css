@@ -41,62 +41,36 @@
   gap: 24px;
 }
 
+.save-slot-card, .title-screen .confirm-dialog {
+  border: 16px solid transparent;
+  border-image: url('../art/ui/stage-window.png') 8 fill / 16px stretch;
+  image-rendering: pixelated;
+}
 .save-slot-card {
   width: 280px;
-  background: white;
-  border-radius: var(--radius-xl);
-  padding: 24px 20px;
-  cursor: pointer;
-  border: 3px solid transparent;
-  transition: border-color 0.15s, transform 0.15s;
-  position: relative;
-}
-
-.save-slot-card:hover { transform: translateY(-4px); border-color: var(--color-secondary); }
-.save-slot-card--empty { background: rgba(255,255,255,0.08); border: 3px dashed rgba(255,255,255,0.3); cursor: pointer; }
-.save-slot-card--empty:hover { border-color: var(--color-primary); }
-
-.save-slot-card__label {
-  font-size: 16px;
-  color: var(--color-muted);
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.save-slot-card__stage {
-  font-size: 22px;
-  font-weight: 900;
-  color: var(--color-text);
-}
-
-.save-slot-card__meta {
-  font-size: 14px;
-  color: var(--color-muted);
-  margin-top: 6px;
-}
-
-.save-slot-card__delete {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #FFEBEE;
-  color: var(--color-error);
-  font-size: 14px;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+}
+.save-slot-card__select {
+  display: flex;
+  width: 100%;
+  flex: 1;
+  min-height: 236px;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: none;
+  gap: 6px;
+  border: 0;
+  background: transparent;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s;
 }
-
-.save-slot-card:hover .save-slot-card__delete { opacity: 1; }
-
-
+.save-slot-card__select:hover, .save-slot-card__select:focus-visible { background: #bf883324; }
+.save-slot-card__select .knight { width: 80px; }
+.save-slot-card canvas, .confirm-dialog canvas { vertical-align: middle; }
+.save-slot-star { width: 48px; margin: 12px; }
+.save-slot-card .save-delete { min-width: 76px; }
 
 /* ════════════════════════════════════
    ワールドマップ画面

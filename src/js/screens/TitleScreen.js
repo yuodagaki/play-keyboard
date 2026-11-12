@@ -1,3 +1,5 @@
+import { PixelText } from '../components/PixelText.js';
+import { ResultButton } from '../components/ResultButton.js';
 import { html } from 'https://esm.sh/htm/react';
 import { useState, useEffect } from 'https://esm.sh/react';
 import { LittleKnight } from '../components/LittleKnight.js';
@@ -11,25 +13,22 @@ function formatDate(iso) {
 }
 
 function SlotCard({ slot, index, onSelect, onDelete }) {
-  if (!slot) {
-    return html`
-      <div class="save-slot-card save-slot-card--empty" onClick=${onSelect}>
-        <div style=${{ position:'absolute', top:'8px', right:'10px', fontSize:'11px', color:'rgba(255,255,255,0.4)', fontFamily:'monospace', fontWeight:'700' }}>${index + 1}</div>
-        <div style=${{ textAlign:'center', color:'rgba(255,255,255,0.5)', fontSize:'32px', marginBottom:'8px' }}>＋</div>
-        <div style=${{ textAlign:'center', color:'rgba(255,255,255,0.5)', fontSize:'16px', fontWeight:'700' }}>あたらしくはじめる</div>
-      </div>
-    `;
-  }
   return html`
-    <div class="save-slot-card" onClick=${onSelect}>
-      <div style=${{ position:'absolute', top:'8px', right:'36px', fontSize:'11px', color:'var(--color-muted)', fontFamily:'monospace', fontWeight:'700' }}>${index + 1}</div>
-      <div class="save-slot-card__label">ファイル ${index + 1}</div>
-      <div class="save-slot-card__stage">ステージ ${slot.maxUnlocked}</div>
-      <div class="save-slot-card__meta">
-        <div><img class="pixel-icon" src="art/shop/coin.png" alt="" /> ${slot.coins} コイン</div>
-        <div>さいごにあそんだ日　${formatDate(slot.lastPlayedAt)}</div>
-      </div>
-      <button class="save-slot-card__delete" onClick=${(e) => { e.stopPropagation(); onDelete(); }}>✕</button>
+    <div class="save-slot-card">
+      <button class="save-slot-card__select" onClick=${onSelect}>
+        <${PixelText} color="#795433">${'ファイル ' + (index + 1)}<//>
+        ${slot ? html`
+          <${LittleKnight} weapon=${slot.weapon} armor=${slot.armor} />
+          <${PixelText} scale=${2}>${'ステージ ' + slot.maxUnlocked}<//>
+          <span><img class="pixel-icon" src="art/shop/coin.png" alt="" /> <${PixelText}>${slot.coins + ' コイン'}<//></span>
+          <${PixelText}>さいごにあそんだ日<//>
+          <${PixelText}>${formatDate(slot.lastPlayedAt)}<//>
+        ` : html`
+          <img class="save-slot-star" src="art/shop/star.png" alt="" />
+          <${PixelText}>あたらしくはじめる<//>
+        `}
+      </button>
+      ${slot && html`<button class="stage-action save-delete" aria-label=${'ファイル ' + (index + 1) + ' をけす'} onClick=${onDelete}><${PixelText} color="#852f29">けす<//></button>`}
     </div>
   `;
 }
@@ -105,8 +104,8 @@ export function TitleScreen({ onSelectSlot }) {
 
       <!-- セーブスロット選択 -->
       ${showSlots && html`
-        <div class="save-slots">
-          <div class="save-slots__title">ファイルをえらんでね</div>
+        <div class="save-slots" inert=${confirmDelete ? true : undefined}>
+          <div class="save-slots__title"><${PixelText} scale=${2} color="#fff1cd">ファイルをえらんでね<//></div>
           <div class="save-slots__list">
             ${displaySlots.map((slot, idx) => html`
               <${SlotCard}
@@ -118,26 +117,19 @@ export function TitleScreen({ onSelectSlot }) {
               />
             `)}
           </div>
-          <button class="pixel-button" onClick=${() => setShowSlots(false)}>
-            <img src="art/ui/back.png" alt="" /> もどる <span class="kbd">Esc</span>
-          </button>
+          <${ResultButton} label="もどる" shortcut="Esc" icon="back" onClick=${() => setShowSlots(false)} />
         </div>
       `}
 
       <!-- 削除確認ダイアログ -->
       ${confirmDelete && html`
         <div class="confirm-overlay">
-          <div class="confirm-dialog">
-            <div class="confirm-dialog__title">ほんとうにけす？</div>
-            <div class="confirm-dialog__sub">このデータはもとにもどせません</div>
+          <div class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-title">
+            <div id="delete-title" class="confirm-dialog__title"><${PixelText} scale=${2}>${'ファイル ' + (slots.findIndex(slot => slot.id === confirmDelete) + 1) + ' をけす？'}<//></div>
+            <div class="confirm-dialog__sub"><${PixelText}>このデータはもとにもどせません<//></div>
             <div class="confirm-dialog__btns">
-              <button class="btn-ghost" onClick=${() => setConfirmDelete(null)}>
-                やめる <span class="kbd">Esc</span>
-              </button>
-              <button class="btn-primary" style=${{ background:'#FF5252', boxShadow:'0 4px 0 #C62828' }}
-                onClick=${() => handleDelete(confirmDelete)}>
-                けす <span class="kbd">D</span>
-              </button>
+              <button class="stage-action" autoFocus onClick=${() => setConfirmDelete(null)}><${PixelText}>やめる<//> <kbd><${PixelText}>Esc<//></kbd></button>
+              <button class="stage-action save-delete" onClick=${() => handleDelete(confirmDelete)}><${PixelText} color="#852f29">けす<//> <kbd><${PixelText}>D<//></kbd></button>
             </div>
           </div>
         </div>
