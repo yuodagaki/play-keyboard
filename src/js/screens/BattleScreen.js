@@ -43,6 +43,12 @@ function calcStars(acc) {
   return 0;
 }
 
+const wordEffects = {
+  ちずをひらく: 'map',
+  ちずをみよう: 'map',
+  みずをくもう: 'water',
+};
+
 function pickQuestion(stage, words, practiceQueue) {
   if (practiceQueue.length) return createRomajiQuestion(practiceQueue.shift());
   if (stage.phase === 'A') {
@@ -69,6 +75,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
   const [words, setWords] = useState(null);
   const [enemies, setEnemies] = useState([]);
   const [enemyIdx, setEnemyIdx] = useState(0);
+  const [wordEffect, setWordEffect] = useState(null);
   const [question, setQuestion] = useState(null);
   const [typed, setTyped] = useState('');
   const guide = question ? romajiGuide(question.tokens, typed) : '';
@@ -162,6 +169,8 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
           // 完了状態を一時表示してから遷移（複数文字のみ遅延）
           setTyped(newTyped);
           reactKnight('attack');
+          const effect = wordEffects[question.text];
+          if (effect) setWordEffect({ kind: effect, id: newCK });
 
           const newEnemies = enemies.map((en, i) =>
             i === enemyIdx ? { hp: Math.max(0, en.hp - atk) } : en
@@ -277,6 +286,9 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
       <div style=${encounter ? { backgroundImage: "url(art/journey/" + encounter.scene + ".png)" } : undefined} class=${encounter ? "battle-zone journey-arena arena-" + encounter.scene + " journey-stage-" + stage.id : mist ? "battle-zone mist-arena mist-" + mistScene : island ? "battle-zone island-scene island-" + islandScene : forest ? "battle-zone forest-clearing" : cave ? "battle-zone cave-arena " + (caveKind === "bat" ? "cave-pool" : "cave-mine") : "battle-zone"}>
         <!-- ヒーロー -->
         <div class="battle-hero">
+          ${wordEffect && html`<span key=${wordEffect.id} aria-hidden="true"
+            class=${'practice-effect practice-effect--' + wordEffect.kind}
+            onAnimationEnd=${() => setWordEffect(current => current === wordEffect ? null : current)} />`}
           <div class="battle-hero__label">リトルナイト</div>
           <${LittleKnight} key=${reaction.id} weapon=${slot.weapon} armor=${slot.armor} pose=${reaction.pose} />
         </div>

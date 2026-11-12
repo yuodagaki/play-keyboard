@@ -1433,3 +1433,22 @@
 .five-word-screen { display: flex; flex-direction: column; background: #fbf5e4; }
 .five-word-panel { flex: 1; display: grid; align-content: center; justify-items: center; gap: 10px; color: #46363b; }
 .five-word-panel p { margin: 0; font-size: 22px; font-weight: bold; }
+
+.practice-effect {
+  position: absolute;
+  left: calc(50% - 92px);
+  width: 48px;
+  height: 48px;
+  background-size: 192px 48px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+  animation: practice-frames .5s steps(4, end) forwards;
+}
+.practice-effect--map { bottom: 78px; background-image: url('../art/practice/map.png'); }
+.practice-effect--water { bottom: 18px; background-image: url('../art/practice/water.png'); }
+@keyframes practice-frames { to { background-position-x: -192px; } }
+@media (prefers-reduced-motion: reduce) {
+  .practice-effect { background-position-x: -144px; animation: practice-still .5s step-end forwards; }
+  @keyframes practice-still { to { opacity: 0; } }
+}
