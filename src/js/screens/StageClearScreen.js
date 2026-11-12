@@ -90,7 +90,7 @@ export function StageClearScreen({ result, slot, onOpenShop, onNext, onWorldMap,
   if (isFail) {
     return html`<div class="screen fail-screen result-screen"><div class="result-panel">
       <h1><${PixelText} scale=${2}>もう少し！<//></h1>
-      <div><${PixelText}>${'せいかく: ' + accuracy + '%'}<//></div>
+      <div><${PixelText}>${'せいかくさ ' + accuracy + '%'}<//></div>
       <div><${PixelText}>せいかく50%いじょうでクリアだよ！<//></div>
       <${LittleKnight} weapon=${slot.weapon} armor=${slot.armor} pose="sad" />
       <div class="result-actions">
@@ -106,8 +106,8 @@ export function StageClearScreen({ result, slot, onOpenShop, onNext, onWorldMap,
       <div class="result-panel">
         <h1><${PixelText} scale=${3} color="#66422c">ステージクリア！<//></h1>
         <div><${PixelText}>${'ステージ ' + stageId}<//></div>
+        <div><${PixelText}>${'せいかくさ ' + accuracy + '% で ほし ' + stars + 'こ！'}<//></div>
         <${StarRow} stars=${stars} />
-        <div><${PixelText}>${'せいかく: ' + accuracy + '%'}<//></div>
         <div class="result-cards">
           <div class="result-card">
             <div><${PixelText}>コイン獲得<//></div>
@@ -115,8 +115,9 @@ export function StageClearScreen({ result, slot, onOpenShop, onNext, onWorldMap,
             ${bonusCoins > 0 && html`<div><${PixelText}>${'ボーナス +' + bonusCoins + '（' + ARMOR_BONUS_PCT[slot.armor] + '%）'}<//></div>`}
           </div>
           ${rankInfo && html`<div class="result-card">
-            <div><${PixelText}>タイピング速度<//></div>
-            <div><${PixelText} scale=${2}>${cpm + ' CPM'}<//></div>
+            <div><${PixelText}>1ぷんに<//></div>
+            <div><${PixelText} scale=${2}>${cpm + 'かい'}<//></div>
+            <div><${PixelText}>うてたよ！<//></div>
             <div><${PixelText}>${rankInfo.rank + ' ' + rankInfo.label}<//></div>
             ${isNewCpmRecord && html`<div><${PixelText} color="#885225">じこベスト！<//></div>`}
           </div>`}
