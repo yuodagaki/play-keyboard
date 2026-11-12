@@ -9,7 +9,7 @@
 .title-logo { position: absolute; top: 52px; width: 100%; text-align: center; }
 .title-logo__text { margin: 0; line-height: 0; }
 .title-logo__text img { width: 780px; max-width: 88%; image-rendering: pixelated; }
-.title-logo__sub { margin-top: 18px; font-size: 20px; font-weight: 900; color: #344e4e; }
+.title-logo__sub { text-shadow: 0 1px 2px #fff7d2, 0 0 5px #fff7d2; margin-top: 18px; font-size: 20px; font-weight: 900; color: #344e4e; }
 .title-hero { position: absolute; bottom: 170px; left: 50%; transform: translateX(-50%); }
 .title-hero .knight { width: 208px; }
 .title-buttons { position: absolute; bottom: 66px; width: 100%; text-align: center; }
@@ -92,7 +92,7 @@
    ワールドマップ画面
 ════════════════════════════════════ */
 .worldmap-screen {
-  background: linear-gradient(170deg, #E8F5E9 0%, #C8E6C9 100%);
+  background: url('../art/worlds/map-backdrop.png') center / cover no-repeat #e7dab5;
 }
 
 .worldmap-body {
@@ -798,7 +798,8 @@
    エンドレスモード
 ════════════════════════════════════ */
 .endless-screen {
-  background: linear-gradient(160deg, #1A237E 0%, #283593 60%, #1565C0 100%);
+  image-rendering: pixelated;
+  background: #303963 url('../art/endless/arena.png') center / cover no-repeat;
 }
 
 /* ヒーローHP */
@@ -1013,17 +1014,12 @@
 }
 .knight { width: 120px; aspect-ratio: 1; }
 .knight img, .boar img { position: absolute; }
-.knight-coat { width: 51%; left: 16%; bottom: 3%; }
-.knight-outfit { width: 34%; left: 27%; bottom: 13%; }
-.knight-outfit--hat { width: 50%; left: 16%; bottom: 10%; }
-.knight-outfit--helmet, .knight-outfit--cape { width: 52%; left: 15%; bottom: 9%; }
-.knight-shield { width: 30%; left: 9%; bottom: 13%; }
-.knight-helm { width: 56%; left: 12%; bottom: 30%; animation: helm-nod 1.8s steps(2) infinite; }
-.knight-blade { width: 28%; left: 50%; bottom: 20%; transform: rotate(26deg); transform-origin: 50% 85%; }
+.knight-body { width: 90%; left: -4%; bottom: 2%; }
+.knight--idle { animation: helm-nod 1.8s steps(2) infinite; }
+.knight-blade { height: 56%; width: 40%; object-fit: contain; left: 49%; bottom: 37%; transform: rotate(26deg); transform-origin: 50% 85%; }
 .header .knight { width: 48px; }
 .knight--attack { animation: knight-strike .36s steps(5) both; }
 .knight--attack .knight-blade { animation: blade-cut .36s steps(6) both; }
-.knight--attack .knight-helm { animation: helm-slip .36s steps(3) both; }
 .knight--happy { animation: knight-hop .55s steps(4); }
 .knight--sad { transform: rotate(-7deg); }
 .boar { width: 110px; aspect-ratio: 2 / 1.35; animation: helm-nod 1.7s steps(2) infinite; }
@@ -1038,8 +1034,7 @@
   animation: nose-bubble 2.8s steps(4) infinite; transform-origin: bottom right;
 }
 .forest-clearing, .forest-trail {
-  background: url('../art/forest/grove.png') repeat-x left bottom / 126px 84px,
-    linear-gradient(#f6f7da, #dcf0d7 70%, #bad5a5);
+  background: #bdd59c url('../art/forest/grove.png') center / cover no-repeat;
   image-rendering: pixelated;
 }
 .forest-trail { display: flex; justify-content: flex-end; align-items: flex-end; padding-right: 4%; margin-bottom: 6px; border-bottom: 5px solid #75925f; }
@@ -1049,7 +1044,6 @@
 @keyframes helm-nod { 50% { transform: translateY(-2px); } }
 @keyframes knight-strike { 20% { transform: translateX(-4px); } 48% { transform: translateX(16px); } }
 @keyframes blade-cut { 22% { transform: rotate(-52deg); } 53%, 72% { transform: rotate(87deg); } }
-@keyframes helm-slip { 55% { transform: rotate(10deg) translateY(2px); } }
 @keyframes knight-hop { 45% { transform: translateY(-9px); } }
 @keyframes boar-tumble { to { transform: translateX(12px) rotate(15deg); opacity: 0; } }
 @keyframes nose-bubble { 0%, 100% { transform: scale(.35); } 78% { transform: scale(1.3); } 83%, 94% { opacity: 0; } }
@@ -1073,17 +1067,16 @@
 }
 .shop-preview {
   justify-content: center;
-  background: repeating-linear-gradient(0deg, #d5ad76 0 36px, #cfa36b 36px 39px, #b99166 39px 42px);
+  background: url('../art/shop/interior.png') left center / cover no-repeat #b68b64;
   border-right: 10px solid #674835;
 }
 .shop-counter {
   position: relative;
-  width: 150px;
-  margin: 0 auto 52px;
-  text-align: center;
-  background: linear-gradient(to top, #8e5e45 0 18px, #edbf7d 18px 24px, #433432 24px);
-  border: 6px solid #624737;
-  box-shadow: 0 -8px #c47b54, 0 5px #9e7756;
+  width: min(170px, 100%);
+  aspect-ratio: 1;
+  margin: 0 auto 36px;
+  background: url(../art/shop/counter.png) center / contain no-repeat;
+  image-rendering: pixelated;
 }
 .shop-counter__speech {
   position: absolute;
@@ -1111,7 +1104,7 @@
   border-right: 3px solid #433432;
   border-bottom: 3px solid #433432;
 }
-.shop-counter img { width: 96px; margin: 24px 0 18px; vertical-align: bottom; image-rendering: pixelated; }
+.shop-counter img { position: absolute; width: 42%; bottom: 31%; left: 29%; image-rendering: pixelated; }
 .shop-preview__label, .shop-items__section-title {
   color: #fff1cd;
   background: #5d4036;
@@ -1124,7 +1117,7 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-content: start;
   gap: 14px 10px;
-  background: repeating-linear-gradient(90deg, #aa7853 0 78px, #996a4c 78px 82px);
+  background: url('../art/shop/interior.png') center / cover no-repeat #996a4c;
 }
 .shop-items__section-title { grid-column: 1 / -1; justify-self: start; margin: 6px 0 0; }
 .shop-item {
@@ -1413,8 +1406,7 @@
 .endless-opponent .cave-chief { width: 148px; }
 .endless-opponent .mist-deer img { width: 180px; }
 .endless-opponent .journey-boss img { width: 160px; }
-.knight-outfit--vest,.knight-outfit--radiant { width: 54%; left: 15%; bottom: 10%; }
-.knight .knight-magnum { width: 42%; left: 53%; bottom: 22%; transform: none; }
+.knight .knight-magnum { width: 41%; height: auto; left: 61%; bottom: 40%; transform: none; }
 .knight--attack .knight-magnum { animation: magnum-kick .36s steps(4) both; }
 @keyframes magnum-kick { 30% { transform: translateX(-3px) rotate(-12deg); } }
 
@@ -1430,7 +1422,7 @@
 .result-wish { display: flex; align-items: center; justify-content: center; gap: 6px; }
 .result-wish img { width: 32px; height: 32px; object-fit: contain; }
 
-.five-word-screen { display: flex; flex-direction: column; background: #fbf5e4; }
+.five-word-screen { display: flex; flex-direction: column; background: linear-gradient(#fff5dcda, #fff5dcda), url('../art/practice/camp.png') center / cover; }
 .five-word-panel { flex: 1; display: grid; align-content: center; justify-items: center; gap: 10px; color: #46363b; }
 .five-word-panel p { margin: 0; font-size: 22px; font-weight: bold; }
 
@@ -1455,3 +1447,17 @@
 
 .map-boss-hint { text-align: right; padding: 3px 12px 0; }
 .map-boss-hint canvas { image-rendering: pixelated; }
+
+/* Keep panoramic scenery in proportion in shallow map strips and tall finales. */
+:is(.forest-trail, .cave-trail, .island-trail, .mist-shelter, .journey-map) {
+  background-size: cover;
+  background-position: center 62%;
+}
+.journey-finale .journey-scene { background-size: cover; }
+.endless-screen .battle-zone, .endless-gameover-screen.result-screen {
+  background: #303963 url('../art/endless/arena.png') center / cover no-repeat;
+}
+.battle-zone :is(.battle-hero__label, .battle-enemy__label, .battle-enemy__hp-header, .endless-hero-hp__header, .endless-charge) {
+  color: #fff5de;
+  text-shadow: 1px 1px #302936, -1px -1px #302936, 1px -1px #302936, -1px 1px #302936;
+}

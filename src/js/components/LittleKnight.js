@@ -1,21 +1,15 @@
 import { html } from 'https://esm.sh/htm/react';
 import { useEffect, useRef, useState } from 'https://esm.sh/react';
 
-const art = name => 'art/forest/' + name + '.png';
+const outfits = new Set(['hat', 'helmet', 'cape', 'armor', 'robe', 'shield', 'divine', 'vest', 'radiant']);
 
-const armorHue = { hat: 0, helmet: 25, cape: 215, armor: 170, robe: 270, shield: 80, divine: 45 };
-
-export function LittleKnight({ weapon, armor, pose = 'idle' }) {
+export function LittleKnight({ weapon = 'wooden', armor, pose = 'idle' }) {
+  const outfit = outfits.has(armor) ? armor : 'hat';
   return html`
     <span class=${'knight knight--' + pose} role="img" aria-label="リトルナイト">
-      <img class="knight-coat" src=${art('coat')} alt=""
-        style=${{ filter: 'hue-rotate(' + (armorHue[armor] ?? 0) + 'deg)' }} />
-      ${['hat', 'helmet', 'cape', 'robe', 'divine', 'vest', 'radiant'].includes(armor) && html`
-        <img class=${`knight-outfit knight-outfit--${armor}`} src=${'art/shop/' + armor + '.png'} alt="" />
-      `}
-      <img class="knight-helm" src=${art('helm')} alt="" />
-      ${['armor', 'shield'].includes(armor) && html`<img class="knight-shield" src=${`art/shop/${armor}.png`} alt="" />`}
-      <img class=${weapon === 'magnum' ? 'knight-blade knight-magnum' : 'knight-blade'} src=${art(weapon)} alt="" />
+      <img class="knight-body" src=${'art/knight/' + outfit + '.png'} alt="" />
+      <img class=${weapon === 'magnum' ? 'knight-blade knight-magnum' : 'knight-blade'}
+        src=${'art/forest/' + weapon + '.png'} alt="" />
     </span>
   `;
 }
