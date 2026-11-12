@@ -153,12 +153,26 @@
 }
 
 .stage-node {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: 1;
 }
+
+.world-section__stages { padding-top: 30px; }
+.world-section__path { top: calc(50% + 15px); }
+.stage-boss-preview {
+  position: absolute;
+  bottom: 100%;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  height: 30px;
+}
+.stage-boss-preview img { max-width: 38px; max-height: 28px; image-rendering: pixelated; }
+.stage-boss-preview.silhouette img { filter: brightness(0); }
 
 .stage-node__btn {
   width: 64px;

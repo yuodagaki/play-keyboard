@@ -18,7 +18,13 @@ function MapStars({ stars }) {
   `);
 }
 
-function StageNode({ stage, status, stars, onClick }) {
+function bossPortraits(worldId) {
+  const journey = journeys[worldId];
+  if (journey) return ['journey/' + journey.cast[2]];
+  return { 1: ['forest/chief'], 2: ['cave/chief'], 3: ['island/yokozuna', 'island/master'], 4: ['mist/deer'] }[worldId];
+}
+
+function StageNode({ stage, status, stars, portraits, onClick }) {
   const btnClass = `stage-node__btn stage-node__btn--${status}`;
   const label = status === 'locked' ? html`<img class="pixel-icon" src="art/shop/lock.png" alt="" />` :
     String(stage.id).split('').map((digit, index) => html`
@@ -28,7 +34,10 @@ function StageNode({ stage, status, stars, onClick }) {
 
   return html`
     <div class="stage-node" onClick=${status !== 'locked' ? onClick : undefined}>
-      <button class=${btnClass} aria-label=${`ステージ ${stage.id}`} disabled=${status === 'locked'}>
+      ${portraits && html`<span class=${'stage-boss-preview' + (stars > 0 ? '' : ' silhouette')} aria-hidden="true">
+        ${portraits.map(path => html`<img key=${path} src=${'art/' + path + '.png'} alt="" />`)}
+      </span>`}
+      <button class=${btnClass} aria-label=${`ステージ ${stage.id}${portraits ? ' ボス戦' : ''}`} disabled=${status === 'locked'}>
         ${label}
       </button>
       <div class="stage-node__stars">
@@ -71,6 +80,7 @@ function WorldSection({ world, stages, slot, onStageClick }) {
           <${StageNode}
             key=${stage.id}
             stage=${stage}
+            portraits=${stage.id === world.stages.at(-1) && bossPortraits(world.id)}
             status=${stageStatus(stage.id)}
             stars=${slot.progress?.[stage.id]?.stars ?? 0}
             onClick=${() => onStageClick(stage, world)}
