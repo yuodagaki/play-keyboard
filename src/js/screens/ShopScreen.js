@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'https://esm.sh/react';
 import { getItems } from '../data/loader.js';
 import { playSound, startBgm, stopBgm } from '../utils/sound.js';
 
-function ItemRow({ item, owned, equipped, coins, canAfford, onShortfall, onBuy, onEquip }) {
+function ItemRow({ item, owned, equipped, coins, canAfford, wished, onWish, onShortfall, onBuy, onEquip }) {
   const isEquipped = equipped === item.id;
   const isOwned = owned.includes(item.id);
 
@@ -23,6 +23,9 @@ function ItemRow({ item, owned, equipped, coins, canAfford, onShortfall, onBuy, 
           そうびする
         </button>
       ` : html`
+        <button class="shop-wish" aria-pressed=${wished} onClick=${() => onWish(item.id)}>
+          ${wished ? '★ ほしいものからはずす' : '☆ ほしいものにする'}
+        </button>
         <button
           class=${'shop-item__btn-buy shop-item__btn-buy--' + (canAfford ? 'available' : 'disabled')}
           onClick=${canAfford ? onBuy : onShortfall}
@@ -34,7 +37,7 @@ function ItemRow({ item, owned, equipped, coins, canAfford, onShortfall, onBuy, 
   `;
 }
 
-export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
+export function ShopScreen({ slot, onWish, onBuy, onEquip, onBuySpecial, onClose }) {
   const [items, setItems] = useState(null);
   const [previewWeapon, setPreviewWeapon] = useState(slot.weapon);
   const [previewArmor, setPreviewArmor] = useState(slot.armor);
@@ -136,6 +139,8 @@ export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
                 coins=${slot.coins}
                 owned=${slot.ownedWeapons}
                 equipped=${slot.weapon}
+                wished=${slot.wishItemId === item.id}
+                onWish=${onWish}
                 onShortfall=${showShortfall}
                 canAfford=${slot.coins >= item.cost}
                 onBuy=${() => handleBuyWeapon(item)}
@@ -151,6 +156,8 @@ export function ShopScreen({ slot, onBuy, onEquip, onBuySpecial, onClose }) {
                 coins=${slot.coins}
                 owned=${slot.ownedArmors}
                 equipped=${slot.armor}
+                wished=${slot.wishItemId === item.id}
+                onWish=${onWish}
                 onShortfall=${showShortfall}
                 canAfford=${slot.coins >= item.cost}
                 onBuy=${() => handleBuyArmor(item)}

@@ -1,3 +1,4 @@
+import { getItems } from '../data/loader.js';
 import { ResultButton } from '../components/ResultButton.js';
 import { PixelText } from '../components/PixelText.js';
 import { JourneyScene, journeys } from '../components/JourneySprites.js';
@@ -34,6 +35,13 @@ export function StageClearScreen({ result, slot, onOpenShop, onNext, onWorldMap,
   const isFail = stars === 0;
   const isNewCpmRecord = cpm > 0 && cpm > prevBestCpm;
   const rankInfo = cpm > 0 ? cpmRank(cpm) : null;
+
+  const [catalog, setCatalog] = useState(null);
+  useEffect(() => {
+    if (slot.wishItemId) getItems().then(setCatalog);
+  }, [slot.wishItemId]);
+  const wish = catalog && [...catalog.weapons, ...catalog.armors].find(item => item.id === slot.wishItemId);
+  const canBuyWish = wish && slot.coins >= wish.cost;
 
   const [displayCoins, setDisplayCoins] = useState(0);
 
@@ -122,6 +130,10 @@ export function StageClearScreen({ result, slot, onOpenShop, onNext, onWorldMap,
             ${isNewCpmRecord && html`<div><${PixelText} color="#885225">じこベスト！<//></div>`}
           </div>`}
         </div>
+        ${wish && html`<div class="result-wish">
+          <img src=${'art/' + (wish.atk ? 'forest/' : 'shop/') + wish.id + '.png'} alt="" />
+          <${PixelText}>${wish.name + (canBuyWish ? ' が かえるよ！' : ' まで あと ' + (wish.cost - slot.coins) + 'まい')}<//>
+        </div>`}
         <!-- ヒーロー -->
         ${journey ? html`<${JourneyScene} world=${journey}><${LittleKnight} weapon=${slot.weapon} armor=${slot.armor} pose="happy" /><//>` : stageId === 25 ? html`<${MistShelter}><${LittleKnight} weapon=${slot.weapon} armor=${slot.armor} pose="happy" /></${MistShelter}>` : html`<div class=${stageId === 21 ? "island-farewell island-scene island-ring" : stageId === 12 ? "cave-farewell cave-mine" : ""} style=${{ marginBottom:'24px' }}>
           <${LittleKnight} weapon=${slot.weapon} armor=${slot.armor} pose="happy" />
@@ -131,8 +143,8 @@ export function StageClearScreen({ result, slot, onOpenShop, onNext, onWorldMap,
 
         <div class="result-actions">
           <${ResultButton} label="マップへもどる" icon="back" shortcut="M" onClick=${onWorldMap} />
-          <${ResultButton} label="どうぐ屋へ" icon="stall" shortcut="S" onClick=${onOpenShop} />
-          <${ResultButton} label="つぎへすすむ" shortcut="N" primary onClick=${onNext} />
+          <${ResultButton} label="どうぐ屋へ" icon="stall" primary=${canBuyWish} shortcut="S" onClick=${onOpenShop} />
+          <${ResultButton} label="つぎへすすむ" shortcut="N" primary=${!canBuyWish} onClick=${onNext} />
         </div>
       </div>
     </div>

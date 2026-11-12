@@ -1450,3 +1450,15 @@
 .knight .knight-magnum { width: 42%; left: 53%; bottom: 22%; transform: none; }
 .knight--attack .knight-magnum { animation: magnum-kick .36s steps(4) both; }
 @keyframes magnum-kick { 30% { transform: translateX(-3px) rotate(-12deg); } }
+
+.shop-wish {
+  background: #fff2cd;
+  border: 2px solid #795a42;
+  color: #513e34;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.shop-wish[aria-pressed="true"] { background: #ffda75; }
+.result-wish { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.result-wish img { width: 32px; height: 32px; object-fit: contain; }

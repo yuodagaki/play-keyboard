@@ -142,6 +142,12 @@ function App() {
   const handleEndlessRetry    = () => setScreen('endless');
   const handleEndlessWorldMap = () => setScreen('worldmap');
 
+  const handleWish = (id) => {
+    const newSlot = { ...slot, wishItemId: slot.wishItemId === id ? null : id };
+    setSlot(newSlot);
+    saveSlot(newSlot);
+  };
+
   const handleBuy = (type, item) => {
     const newSlot = type === 'weapon'
       ? {
@@ -156,6 +162,7 @@ function App() {
           armor: item.id,
           ownedArmors: [...(slot.ownedArmors ?? []), item.id],
         };
+    if (newSlot.wishItemId === item.id) newSlot.wishItemId = null;
     setSlot(newSlot);
     saveSlot(newSlot);
   };
@@ -237,6 +244,7 @@ function App() {
       return html`
         <${ShopScreen}
           slot=${slot}
+          onWish=${handleWish}
           onBuy=${handleBuy}
           onEquip=${handleEquip}
           onBuySpecial=${handleBuySpecial}
