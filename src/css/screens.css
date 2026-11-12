@@ -13,6 +13,21 @@
 .title-hero { position: absolute; bottom: 170px; left: 50%; transform: translateX(-50%); }
 .title-hero .knight { width: 208px; }
 .title-buttons { position: absolute; bottom: 66px; width: 100%; text-align: center; }
+.title-save-note {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 3px 14px;
+  text-align: center;
+  white-space: nowrap;
+  color: #fff6da;
+  background: #324c42;
+  font-size: 18px;
+  line-height: 1.3;
+}
+.title-save-note small { display: block; font-size: 14px; }
 .title-buttons .pixel-button { padding: 8px 24px; font-size: 23px; }
 .title-screen .save-slot-card, .title-screen .confirm-dialog { border-radius: 0; box-shadow: 4px 4px #302b32; }
 

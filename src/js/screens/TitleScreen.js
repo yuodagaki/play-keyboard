@@ -102,6 +102,11 @@ export function TitleScreen({ onSelectSlot }) {
         </button>
       </div>
 
+      <p class="title-save-note">
+        このゲームのセーブデータはぜんぶみんなのところにほぞんされるよ
+        <small>ブラウザに自動で保存されます</small>
+      </p>
+
       <!-- セーブスロット選択 -->
       ${showSlots && html`
         <div class="save-slots" inert=${confirmDelete ? true : undefined}>
