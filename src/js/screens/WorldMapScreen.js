@@ -159,6 +159,9 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless,
 
   const endlessUnlocked = slot.ownedSpecials?.includes('endless');
 
+  const nextStage = stages.find(stage => stage.id === slot.maxUnlocked);
+  const nextWorld = nextStage && worlds.find(world => world.id === nextStage.world);
+
   const stagesFor = (world) => stages.filter(s => world.stages.includes(s.id));
 
   const handleStageClick = (stage, world) => {
@@ -203,6 +206,9 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless,
 
       <!-- ワールド一覧 -->
       <div class="worldmap-body">
+        ${nextWorld && html`<button class="stage-action stage-action--challenge" onClick=${() => handleStageClick(nextStage, nextWorld)}>
+          <${PixelText}>${'つづきから　ステージ ' + nextStage.id}<//>
+        </button>`}
         ${worlds.map(world => html`
           <${WorldSection}
             key=${world.id}

@@ -41,7 +41,7 @@ export function ShopScreen({ slot, onWish, onBuy, onEquip, onBuySpecial, onClose
   const [items, setItems] = useState(null);
   const [previewWeapon, setPreviewWeapon] = useState(slot.weapon);
   const [previewArmor, setPreviewArmor] = useState(slot.armor);
-  const [foxSpeaking, setFoxSpeaking] = useState(false);
+  const [foxMessage, setFoxMessage] = useState('');
   const speechTimer = useRef(null);
   const [toast, setToast] = useState(null);
 
@@ -65,29 +65,26 @@ export function ShopScreen({ slot, onWish, onBuy, onEquip, onBuySpecial, onClose
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  const showShortfall = () => {
+  const say = (message) => {
     clearTimeout(speechTimer.current);
-    setFoxSpeaking(true);
-    speechTimer.current = setTimeout(() => setFoxSpeaking(false), 2400);
+    setFoxMessage(message);
+    speechTimer.current = setTimeout(() => setFoxMessage(''), 2400);
   };
+
+  const showShortfall = () => say('おかねがたりないよー');
 
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(null), 1800);
   };
 
-  const handleBuyWeapon = (item) => {
+  const buyEquipment = (type, item) => {
     playSound('uiClick');
-    onBuy('weapon', item);
+    onBuy(type, item);
     showToast(`${item.name} をかった！`);
-    setPreviewWeapon(item.id);
-  };
-
-  const handleBuyArmor = (item) => {
-    playSound('uiClick');
-    onBuy('armor', item);
-    showToast(`${item.name} をかった！`);
-    setPreviewArmor(item.id);
+    if (slot.wishItemId === item.id) say('ついに かえたね！');
+    if (type === 'weapon') setPreviewWeapon(item.id);
+    else setPreviewArmor(item.id);
   };
 
   const handleEquipWeapon = (item) => {
@@ -118,7 +115,7 @@ export function ShopScreen({ slot, onWish, onBuy, onEquip, onBuySpecial, onClose
         <div class="shop-preview">
           <div class="shop-counter">
             <img src="art/shop/merchant.png" alt="きつねの店主" />
-            <span role="status" class="shop-counter__speech">${foxSpeaking ? 'おかねがたりないよー' : ''}</span>
+            <span role="status" class="shop-counter__speech">${foxMessage}</span>
           </div>
           <div class="shop-preview__label">ゆうしゃのすがた</div>
           <${LittleKnight} weapon=${previewWeapon} armor=${previewArmor} />
@@ -143,7 +140,7 @@ export function ShopScreen({ slot, onWish, onBuy, onEquip, onBuySpecial, onClose
                 onWish=${onWish}
                 onShortfall=${showShortfall}
                 canAfford=${slot.coins >= item.cost}
-                onBuy=${() => handleBuyWeapon(item)}
+                onBuy=${() => buyEquipment('weapon', item)}
                 onEquip=${() => handleEquipWeapon(item)}
               />
             `)}
@@ -160,7 +157,7 @@ export function ShopScreen({ slot, onWish, onBuy, onEquip, onBuySpecial, onClose
                 onWish=${onWish}
                 onShortfall=${showShortfall}
                 canAfford=${slot.coins >= item.cost}
-                onBuy=${() => handleBuyArmor(item)}
+                onBuy=${() => buyEquipment('armor', item)}
                 onEquip=${() => handleEquipArmor(item)}
               />
             `)}
