@@ -1029,8 +1029,8 @@
 .boar--hit { filter: brightness(1.6); }
 .boar--fall { animation: boar-tumble .45s steps(5) forwards; }
 .boar-bubble {
-  position: absolute; left: -7%; bottom: 38%; width: 14%; aspect-ratio: 1;
-  border: 2px solid #688f9a; background: #d9f5ef; border-radius: 45%;
+  position: absolute; left: -7%; bottom: 24%; width: 14%; aspect-ratio: 1;
+  background: url(../art/forest/breath.png) center / contain no-repeat;
   animation: nose-bubble 2.8s steps(4) infinite; transform-origin: bottom right;
 }
 .forest-clearing, .forest-trail {
@@ -1196,7 +1196,7 @@
 .cave-sprite { position: relative; display: inline-block; width: 100px; vertical-align: bottom; image-rendering: pixelated; }
 .cave-body { display: block; width: 100%; }
 .cave-chief { width: 172px; }
-.cave-cap { position: absolute; top: 0; left: 0; width: 100%; }
+.cave-cap { position: absolute; top: -7%; left: 6%; width: 40%; }
 .cave-cart { position: absolute; width: 102%; left: -1%; bottom: -12%; }
 .cave-bat { margin-bottom: 22px; }
 .cave-bat .cave-body { animation: cave-flight .8s steps(3) infinite alternate; }
@@ -1210,7 +1210,7 @@
 .cave-fall { animation: boar-tumble .45s steps(5) forwards; }
 .cave-trail { display: flex; justify-content: flex-end; padding: 4px 10% 4px 0; margin-bottom: 6px; }
 .cave-map { width: 76px; }
-.cave-ore { position: absolute; left: 0; bottom: 17%; width: 22%; height: 21%; background: #5be0ec; border: 3px solid #2f799d; box-shadow: inset 4px 3px #cffaff; animation: cave-polish 1.4s steps(3) infinite alternate; }
+.cave-ore { position: absolute; left: 0; bottom: 17%; width: 22%; height: 21%; background: url(../art/cave/ore.png) center / contain no-repeat; animation: cave-polish 1.4s steps(3) infinite alternate; }
 .cave-farewell { display: flex; align-items: flex-end; justify-content: center; gap: 18px; overflow: hidden; }
 .cave-exit { width: 85px; margin-bottom: 9px; animation: cave-depart 3.2s steps(30) both; }
 .cave-exit .cave-cap { animation: cave-tip .9s steps(4) .3s both; }
@@ -1239,7 +1239,7 @@
 .island-trail { margin-bottom: 6px; }
 .island-trail img,.island-farewell .island-party img { width: 84px; }
 .island-petal,.island-farewell .knight::after {
-  width: 9px; height: 6px; background: #ec7582; box-shadow: 3px -3px #ffc9bc; position: absolute;
+  width: 12px; height: 10px; background: url(../art/island/petal.png) center / contain no-repeat; position: absolute;
 }
 .island-trail .island-petal { z-index: 1; left: 50%; top: 8%; animation: island-catch 2.2s steps(9) infinite; }
 .island-farewell .knight::after { content: ''; left: 41%; top: 33%; animation: island-gift 1.4s steps(9) both; }
@@ -1302,7 +1302,7 @@
 .journey-prop { left: 95px; bottom: 26px; width: 30px; height: 23px; }
 .journey-animal::after { position: absolute; }
 .arena-meteor::before { content: ''; position: absolute; width: 12px; height: 3px; background: #ffdfa1; box-shadow: 4px -2px #aeb2cd; animation: journey-meteor 2.8s steps(18) infinite; }
-.vignette-owl .journey-prop { left: 181px; bottom: 12px; background-image: url('../art/journey/fairy.png'); animation: journey-glide 1.6s steps(4) infinite; }
+.vignette-owl .journey-prop { left: 94px; bottom: 28px; width: 29px; height: 27px; background-image: url('../art/journey/fairy.png'); animation: journey-glide 1.6s steps(4) infinite; }
 .vignette-owl.journey-ending .animal-owl { animation: owl-guide 3s steps(10) infinite; }
 .vignette-owl.journey-ending .journey-prop { background-image: url('../art/journey/puff.png'); left: 119px; bottom: 37px; animation: journey-puff 3s steps(5) infinite; }
 .vignette-turtle.journey-map .animal-mouse { left: 73px; animation: journey-tug 1.7s steps(4) infinite; }
@@ -1310,7 +1310,7 @@
 .vignette-turtle .journey-prop { background-image: url('../art/journey/book.png'); left: 142px; width: 60px; height: 47px; bottom: 2px; }
 .vignette-turtle.journey-ending .journey-prop { left: 45px; }
 .vignette-turtle.journey-ending .knight-blade,.vignette-elephant.journey-ending .knight-blade { transform: rotate(-30deg); }
-.vignette-lion.journey-map .journey-prop { left: 42px; bottom: 22px; background-image: url('../art/journey/helmet.png'); animation: journey-salute 2s steps(6) infinite; }
+.vignette-lion.journey-map .journey-prop { left: 39px; bottom: 25px; background-image: url('../art/journey/helmet.png'); animation: journey-salute 2s steps(6) infinite; }
 .vignette-lion.journey-ending .knight { animation: journey-march 3s steps(15) both; }
 .vignette-lion.journey-ending .journey-prop,.animal-cat::after { background: #ffdb75; width: 4px; height: 4px; box-shadow: -12px 6px #fff4bd,14px -8px gold,20px 4px #fff4bd; animation: journey-glide 1s steps(4) infinite; }
 .animal-cat::after { content: ''; right: 16%; top: 12%; }
