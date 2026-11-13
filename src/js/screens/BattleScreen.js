@@ -11,6 +11,7 @@ import { EnemySVG } from '../components/EnemySVG.js';
 import { KeyboardGuide } from '../components/KeyboardGuide.js';
 import { TutorialOverlay } from '../components/TutorialOverlay.js';
 import { createRomajiQuestion, romajiGuide } from '../utils/romaji.js';
+import { stageQuestionPool } from '../data/stageQuestions.js';
 import { getStage, getWords } from '../data/loader.js';
 import { playSound, startBgm, stopBgm } from '../utils/sound.js';
 
@@ -51,21 +52,7 @@ const wordEffects = {
 
 function pickQuestion(stage, words, practiceQueue) {
   if (practiceQueue.length) return createRomajiQuestion(practiceQueue.shift());
-  if (stage.phase === 'A') {
-    const ch = stage.availableKeys[Math.floor(Math.random() * stage.availableKeys.length)];
-    return createRomajiQuestion(ch);
-  }
-  if (['B', 'B2', 'B3'].includes(stage.phase)) {
-    const set = stage.hiraganaSet;
-    const ch = set[Math.floor(Math.random() * set.length)];
-    return createRomajiQuestion(ch);
-  }
-  if (stage.phase === 'G') {
-    const list = words?.sentences?.[stage.wordDifficulty] ?? ['ねこがいる'];
-    const sentence = list[Math.floor(Math.random() * list.length)];
-    return createRomajiQuestion(sentence);
-  }
-  const list = words?.[String(stage.wordLength)]?.[stage.wordDifficulty] ?? ['ねこ'];
+  const list = stageQuestionPool(stage, words);
   const word = list[Math.floor(Math.random() * list.length)];
   return createRomajiQuestion(word);
 }
@@ -314,7 +301,7 @@ export function BattleScreen({ stageId, slot, onClear, onBack, tutorialStep, onT
           </div>
 
           <div style=${{ position: 'relative', marginTop: '28px' }}>
-            ${encounter ? html`<${JourneyAnimal} actor=${encounter.actor} boss=${encounter.boss} flash=${flashEnemy} falling=${fallingEnemy} />` : mist ? html`<${MistSprite} kind=${mistKind} flash=${flashEnemy} falling=${fallingEnemy} />` : island ? html`<${IslandSprite} kind=${islandKind} flash=${flashEnemy} falling=${fallingEnemy} />` : cave ? html`<${CaveSprite} kind=${caveKind} flash=${flashEnemy} falling=${fallingEnemy} />` : forest ? html`<${ForestBoar} boss=${boss} flash=${flashEnemy} falling=${fallingEnemy} />` : html`<${EnemySVG} type=${stage.enemyType} flash=${flashEnemy} falling=${fallingEnemy} />`}
+            ${encounter ? html`<${JourneyAnimal} actor=${encounter.actor} boss=${encounter.boss} flash=${flashEnemy} falling=${fallingEnemy} />` : mist ? html`<${MistSprite} kind=${mistKind} flash=${flashEnemy} falling=${fallingEnemy} />` : island ? html`<${IslandSprite} kind=${islandKind} flash=${flashEnemy} falling=${fallingEnemy} />` : cave ? html`<${CaveSprite} kind=${caveKind} flash=${flashEnemy} falling=${fallingEnemy} />` : forest ? html`<${ForestBoar} boss=${boss} entrance=${boss} flash=${flashEnemy} falling=${fallingEnemy} />` : html`<${EnemySVG} type=${stage.enemyType} flash=${flashEnemy} falling=${fallingEnemy} />`}
             ${dmgFloats.map(f => html`
               <div key=${f.id} style=${{ position:'absolute', top:'30px', left:0, right:0, display:'flex', justifyContent:'center', pointerEvents:'none' }}>
                 <div class="dmg-float">-${f.value}</div>

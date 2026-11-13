@@ -1,10 +1,10 @@
-import { LittleKnight } from '../components/LittleKnight.js';
+import { LittleKnight, useKnightReaction } from '../components/LittleKnight.js';
 import { html } from 'https://esm.sh/htm/react';
 import { useState, useEffect, useRef } from 'https://esm.sh/react';
 import { getItems } from '../data/loader.js';
 import { playSound, startBgm, stopBgm } from '../utils/sound.js';
 
-function ItemRow({ item, owned, equipped, coins, canAfford, wished, onWish, onShortfall, onBuy, onEquip }) {
+function ItemRow({ item, onTry, owned, equipped, coins, canAfford, wished, onWish, onShortfall, onBuy, onEquip }) {
   const isEquipped = equipped === item.id;
   const isOwned = owned.includes(item.id);
 
@@ -16,6 +16,7 @@ function ItemRow({ item, owned, equipped, coins, canAfford, wished, onWish, onSh
         <div class="shop-item__desc">${item.desc}</div>
         ${!isOwned && !canAfford && html`<div class="coin-gap">あと ${item.cost - coins} まい</div>`}
       </div>
+      ${onTry && html`<button class="shop-wish" aria-label=${item.name + 'をためしぶり'} onClick=${onTry}>ためしぶり</button>`}
       ${isEquipped ? html`
         <div class="shop-item__badge-equipped">そうびちゅう</div>
       ` : isOwned ? html`
@@ -41,6 +42,7 @@ export function ShopScreen({ slot, onWish, onBuy, onEquip, onBuySpecial, onClose
   const [items, setItems] = useState(null);
   const [previewWeapon, setPreviewWeapon] = useState(slot.weapon);
   const [previewArmor, setPreviewArmor] = useState(slot.armor);
+  const [reaction, react] = useKnightReaction();
   const [foxMessage, setFoxMessage] = useState('');
   const speechTimer = useRef(null);
   const [toast, setToast] = useState(null);
@@ -118,7 +120,9 @@ export function ShopScreen({ slot, onWish, onBuy, onEquip, onBuySpecial, onClose
             <span role="status" class="shop-counter__speech">${foxMessage}</span>
           </div>
           <div class="shop-preview__label">ゆうしゃのすがた</div>
-          <${LittleKnight} weapon=${previewWeapon} armor=${previewArmor} />
+          <div key=${reaction.id} class=${'shop-swing shop-swing--' + previewWeapon + (reaction.pose === 'attack' ? ' swinging' : '')}>
+            <${LittleKnight} weapon=${previewWeapon} armor=${previewArmor} pose=${reaction.pose} />
+          </div>
         </div>
 
         <!-- アイテムリスト -->
@@ -135,6 +139,7 @@ export function ShopScreen({ slot, onWish, onBuy, onEquip, onBuySpecial, onClose
                 item=${item}
                 coins=${slot.coins}
                 owned=${slot.ownedWeapons}
+                onTry=${() => { setPreviewWeapon(item.id); react('attack'); }}
                 equipped=${slot.weapon}
                 wished=${slot.wishItemId === item.id}
                 onWish=${onWish}

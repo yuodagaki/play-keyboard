@@ -1024,7 +1024,10 @@
 .knight--sad { transform: rotate(-7deg); }
 .boar { width: 110px; aspect-ratio: 2 / 1.35; animation: helm-nod 1.7s steps(2) infinite; }
 .boar--boss { width: 220px; }
-.boar-body { width: 100%; bottom: 0; left: 0; }
+.boar-body { position: absolute; width: 100%; bottom: 0; left: 0; }
+.boar .boar-body img { position: static; display: block; width: 100%; }
+.boar-eyelid { position: absolute; left: 19%; top: 42%; width: 8%; height: 8%; background: #986349; border-bottom: 1px solid #382831; animation: boar-peek 4s steps(1) infinite; }
+@keyframes boar-peek { 75%,92% { opacity: 0; } 96% { opacity: 1; } }
 .boar-shield { width: 46%; right: 1%; bottom: 18%; transform: rotate(9deg); }
 .boar--hit { filter: brightness(1.6); }
 .boar--fall { animation: boar-tumble .45s steps(5) forwards; }
@@ -1461,4 +1464,34 @@
 .battle-zone :is(.battle-hero__label, .battle-enemy__label, .battle-enemy__hp-header, .endless-hero-hp__header, .endless-charge) {
   color: #fff5de;
   text-shadow: 1px 1px #302936, -1px -1px #302936, 1px -1px #302936, -1px 1px #302936;
+}
+
+.stage-popup__sample { margin: 8px 0; color: #50413c; }
+.stage-popup__sample strong { color: #302e53; }
+.shop-swing { position: relative; line-height: 0; }
+.shop-swing--flame { --trail: #ff7b31; }
+.shop-swing--thunder { --trail: #ffe554; }
+.shop-swing.swinging:is(.shop-swing--flame,.shop-swing--thunder)::after {
+  content: ''; position: absolute; right: -4%; top: 12%; width: 47%; height: 63%;
+  background: var(--trail); pointer-events: none;
+  clip-path: polygon(8% 0,50% 19%,82% 51%,93% 80%,66% 100%,73% 69%,54% 40%);
+  animation: swing-trail .36s steps(5) both;
+}
+.shop-swing--thunder.swinging::after { clip-path: polygon(68% 0,97% 0,70% 36%,93% 36%,21% 100%,46% 53%,25% 53%); }
+@keyframes swing-trail { 0%,25%,100% { opacity: 0; } 40%,75% { opacity: .95; } }
+.boar-scrape {
+  position: absolute; left: 19%; bottom: 0; width: 17%; height: 13%;
+  background: url('../art/journey/puff.png') center / contain no-repeat;
+  filter: sepia(.85); opacity: 0; animation: hoof-dust .68s steps(5) both;
+}
+.boar-scrape--sleep { animation: sleeping-hoof-dust 4s steps(5) infinite; }
+.boar--sleep .boar-body { transform-origin: 30% bottom; animation: sleeping-scrape 4s steps(4) infinite; }
+.boar--boss:has(.boar-scrape:not(.boar-scrape--sleep)) .boar-body { transform-origin: 30% bottom; animation: arrival-scrape .68s steps(4); }
+@keyframes hoof-dust { 35% { opacity: .8; } 100% { transform: translate(55%,-30%); opacity: 0; } }
+@keyframes sleeping-hoof-dust { 0%,76%,100% { opacity: 0; } 85% { opacity: .8; } 98% { transform: translate(55%,-30%); } }
+@keyframes sleeping-scrape { 78%,90% { transform: rotate(-3deg); } 85% { transform: translateX(-2px) rotate(2deg); } }
+@keyframes arrival-scrape { 24%,62% { transform: rotate(-3deg); } 42% { transform: translateX(-2px) rotate(2deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .boar .boar-body, .boar-eyelid, .boar-scrape, .shop-swing.swinging::after { animation: none !important; }
+  .shop-swing.swinging::after { display: none; }
 }

@@ -8,7 +8,8 @@ import { ForestBoar } from '../components/ForestSprites.js';
 import { html } from 'https://esm.sh/htm/react';
 import { useState, useEffect } from 'https://esm.sh/react';
 import { TutorialOverlay } from '../components/TutorialOverlay.js';
-import { getWorlds, getStages } from '../data/loader.js';
+import { stageQuestionPool } from '../data/stageQuestions.js';
+import { getWorlds, getStages, getWords } from '../data/loader.js';
 import { startBgm, stopBgm, playSound } from '../utils/sound.js';
 
 function MapStars({ stars }) {
@@ -96,14 +97,14 @@ function WorldSection({ world, stages, slot, onStageClick }) {
   `;
 }
 
-function StagePopup({ stage, world, slot, onChallenge, onClose }) {
+function StagePopup({ stage, world, words, slot, onChallenge, onClose }) {
   if (!stage) return null;
   const status = stage.id > slot.maxUnlocked ? 'locked'
                : stage.id === slot.maxUnlocked ? 'current' : 'cleared';
   const stars = slot.progress?.[stage.id]?.stars ?? 0;
   const phaseLabel = {
     A:'アルファベット', B:'ひらがな（清音）', B2:'ひらがな（濁音）', B3:'ようおん',
-    C:'たんご２文字', D:'たんご３文字', E:'たんご４文字', F:'たんご５文字',
+    C:'たんご２文字', D:'たんご３文字', E:'たんご４文字', F:'たんご５文字', G:'みじかいぶん',
   };
 
   return html`
@@ -114,6 +115,7 @@ function StagePopup({ stage, world, slot, onChallenge, onClose }) {
         <div class="stage-popup__info">
           てき: ${stage.enemyCount}たい・さいだいHP ${stage.enemyMaxHP}
         </div>
+        <div class="stage-popup__sample">れんしゅうの みほん　<strong>${stageQuestionPool(stage, words)[0]}</strong></div>
         <div class="stage-popup__coins"><img class="pixel-icon" src="art/shop/coin.png" alt="コイン" /> クリア報酬: ${stage.coinReward}コイン</div>
         ${status === 'cleared' && html`
           <div class="stage-popup__stars">
@@ -135,13 +137,15 @@ function StagePopup({ stage, world, slot, onChallenge, onClose }) {
 
 export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless, onFiveWords, tutorialStep, onTutorialNext }) {
   const [worlds, setWorlds] = useState([]);
+  const [words, setWords] = useState(null);
   const [stages, setStages] = useState([]);
   const [selectedStage, setSelectedStage] = useState(null);
   const [selectedWorld, setSelectedWorld] = useState(null);
 
   useEffect(() => {
-    Promise.all([getWorlds(), getStages()]).then(([w, s]) => {
+    Promise.all([getWorlds(), getStages(), getWords()]).then(([w, s, dictionary]) => {
       setWorlds(w);
+      setWords(dictionary);
       setStages(s);
     });
   }, []);
@@ -245,7 +249,7 @@ export function WorldMapScreen({ slot, onSelectStage, onOpenShop, onOpenEndless,
       ${selectedStage && html`
         <${StagePopup}
           stage=${selectedStage}
-          world=${selectedWorld}
+          world=${selectedWorld} words=${words}
           slot=${slot}
           onChallenge=${handleChallenge}
           onClose=${() => { setSelectedStage(null); setSelectedWorld(null); }}
